@@ -1,0 +1,11 @@
+7) Scope description
+To initiate the whole project (regardless of whether it is a master’s thesis or a research project) we expect you to write a scope description. This will help all parties involved to reach a consensus on the what and how of your project. 
+This document should be rather short (1-2 pages) but as the title says provides the scope for all your later steps. It will also help you to overcome writer’s block and the much feared blank page syndrome.
+The scope description should address
+A (working) title
+research project 1 / research project 2 / thesis (or a combination thereof)
+A problem (best formulated as a question)
+Why is this a relevant / challenging problem ? (Not only for the supervisor but also for the community?)
+Why are you the one to solve it? (past experience, …)
+How do you think you will solve it? In what direction will you look for a solution
+A rough plan (worm's eye perspective)

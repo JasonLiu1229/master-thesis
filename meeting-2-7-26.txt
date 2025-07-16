@@ -1,0 +1,15 @@
+auto generated test -> no context because it is auto generated test code
+check other studies
+
+mutlu: -> scope description
+
+research on clustering, dataset, and llm
+
+explain why things are done and why not? check other papers and see what can be done for us and what not.
+
+group studies -> readability
+
+check other studies for readability -> maybe not possible
+
+langchain or langgraph tool for cost metrics
+
