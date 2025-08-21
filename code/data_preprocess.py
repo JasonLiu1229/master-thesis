@@ -43,11 +43,23 @@ def tokenize(data: dict):
     return tokens
 
 
-def preprocess(data: list):
+def preprocess(dataset):
     """
     Preprocess the data for training.
 
     Args:
-        data (list): List of dictionaries containing the data to preprocess. So each dictionary should have 'prompt' and 'response' keys.
+        dataset (Dataset): Hugging Face Dataset object.
+    Returns:
+        Dataset: Preprocessed dataset with tokenized inputs.
     """
-    return [tokenize(item) for item in data]
+    from datasets import Dataset
+
+    if not isinstance(dataset, Dataset):
+        raise ValueError("Input must be a Hugging Face Dataset object.")
+
+    tokenized_data = dataset.map(
+        tokenize,
+        batched=False,
+    )
+
+    return tokenized_data
