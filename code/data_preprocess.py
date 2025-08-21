@@ -13,7 +13,7 @@ def format(data: dict) -> str:
         "prompt" in data and "response" in data
     ), "Data must contain prompt and response keys."
 
-    return f"You are a java identifier renamer. \n \
+    return f"You are a java identifier renamer for auto generated java unit test code. \n \
         ### Obfuscated Java code: {data['prompt']} \n \
         ### Output Java code: {data['response']}"
 
