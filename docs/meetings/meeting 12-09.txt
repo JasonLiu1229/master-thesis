@@ -1,0 +1,38 @@
+planning part needs to be tweaked
+
+waterfall is not good - incremental planning or iterative 
+	- small by small
+	- make assumptions to check if it fits the planning
+
+Replicate Arno works
+	- Test arno works, or make a sort of benchmark
+
+Make my own increments
+	- planning steps carefully 
+	- make a more thorough planning
+	- make a rough planning
+
+---------------------------------------------------------------
+
+Fine tuning models:
+	- store code as graph
+	- matching the dataset with embeddings store and with existing method
+	- Using similarity of other methods to match with our code to make unit test case
+
+GraphcodeBERT: to generate semantic embeddings
+GNN: to generate structural embeddings
+
+semantic embeddings - what the method means
+structural embeddings - how the method looks like
+	- these are stored in embeddings store
+
+Training phase to make embeddings store 
+and then we can use this store with matching algo to generate new unit test for new source code
+
+Prompt template and then generate a prompt 
+	- different prompts for different LLM 
+	- might be relevant for prompt engineering
+
+----------------------------------------------------------------
+
+Weekly meetings during school days
