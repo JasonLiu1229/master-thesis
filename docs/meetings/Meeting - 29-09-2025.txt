@@ -1,0 +1,25 @@
+Meeting - 29-09-2025
+
+Questions:
+
+- Master thesis document format or standard
+	- IEEE format as standard
+	- After writing it and feedback, rewrite
+	- Not many technical details, just enough for completeness
+	- More technical needs to be in appendix
+
+- LORE master thesis what to do? extra info
+	- monthly meetings (5 to 6 weeks)
+	- two students that present work
+		- scope description or current progress
+
+- Packaging problems Arno
+	- might be delayed coz of this
+
+- Weekly meeting date
+	- Every Friday 3 pm
+
+- Research about open ai key
+	- How it works
+	- Make solution based on API
+		- If use custom and make a simple API to make it easy to access
