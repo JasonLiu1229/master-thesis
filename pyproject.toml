@@ -16,7 +16,8 @@ dependencies = [
     "transformers (>=4.55.2,<5.0.0)",
     "datasets (>=4.0.0,<5.0.0)",
     "accelerate (>=1.10.0,<2.0.0)",
-    "bitsandbytes (>=0.47.0,<0.48.0)"
+    "bitsandbytes (>=0.47.0,<0.48.0)",
+    "python-dotenv (>=1.1.1,<2.0.0)"
 ]
 
 [tool.poetry]
