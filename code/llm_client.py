@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 
 class LLMClient:
-    def __init__(self, api_key, base_url="https://api.openai.com/v1"):
+    def __init__(self, api_key, base_url="https://api.openai.com/v1/chat/completions"):
         self.api_key = api_key
         self.base_url = base_url
 
@@ -31,7 +31,10 @@ if __name__ == "__main__":
     client = LLMClient(API_KEY, API_URL)
 
     reply = client.chat(
-        "gpt-4o-mini", [{"role": "user", "content": "Give me the time of today."}]
+        "gpt-4o-mini", [
+            {"role": "user", "content": "Give me the time of today."},
+            {"role": "system", "content": "You are a helpful assistant"}
+            ]
     )
 
     print(reply)

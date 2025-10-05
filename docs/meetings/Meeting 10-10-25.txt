@@ -1,3 +1,5 @@
 Meeting 10-10-25
 
 What to do with replication package, Edited some files to make it work?
+
+GPT no access to gpt key, because different payed feature
