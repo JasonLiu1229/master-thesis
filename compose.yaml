@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  t1:
+    build:
+      context: .
+      dockerfile: docker/t1.Dockerfile
+    # Mount your repo so containers see your latest code/config
+    volumes:
+      - ./:/app
+      - ./data:/data
+      - ./benchmark_out:/benchmark_out
+    working_dir: /app
+
+  t2:
+    build:
+      context: .
+      dockerfile: docker/t2.Dockerfile
+    volumes:
+      - ./:/app
+      - ./data:/data
+      - ./benchmark_out:/benchmark_out
+    working_dir: /app
+
+# this is not done yet, copied from gpt still needs to be fixed
