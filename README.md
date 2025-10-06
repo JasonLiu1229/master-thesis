@@ -16,3 +16,7 @@ These are the keys that needs to be specified in your `.env` file:
     API_KEY=blablabla
     API_URL=https://api.example.com
 ```
+
+## Benchmarking
+
+Benchmarking is done using docker containers. To fully seperate each technique from interfering with each other, we setup a docker container for each technique and parse the results to a seperate file.
