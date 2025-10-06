@@ -18,4 +18,6 @@ RUN pip install -r /tmp/requirements.txt
 
 RUN pip install torch==2.4.1 torchvision==0.19.1 torchaudio==2.4.1 --index-url https://download.pytorch.org/whl/cu124
 
+# TODO: Add database files, models, and code
+
 CMD ["python", "run_t2.py", "--lp_model", "../lp_model", "--tg_model", "../tg_model", "--pretrain_model", "../pretrain_model", "--test_json", "Dataset/T2/test/test.json"]

@@ -16,4 +16,6 @@ RUN pip install fastwer==0.1.3
 COPY ../requirements/requirements_t1.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
 
+# TODO: Add database files, models, and code
+
 CMD ["python", "run_t1.py", "test"]
