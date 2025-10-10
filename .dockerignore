@@ -25,3 +25,6 @@ docker/
 # OS specific files
 .DS_Store
 Thumbs.db
+
+# Python cache files
+__pycache__/

@@ -7,10 +7,15 @@ services:
       context: .
       dockerfile: docker/t1.Dockerfile
     volumes: 
-      - ./code:/app/code
-      - ./data/t1:/data
+      - ./rep_package_previous/GGNN:/app/GGNN:ro
+      - ./rep_package_previous/code/Dataset/T1:/app/code/Dataset/T1:ro
+      - ./rep_package_previous/code/Models/T1:/app/code/Models/T1:ro
+      - ./rep_package_previous/code/Techniques/T1:/app/code/Techniques/T1:ro
+      - ./rep_package_previous/code/Techniques/__init__.py:/app/code/Techniques/__init__.py
+      - ./rep_package_previous/code/Utils:/app/code/Utils:ro
+      - ./rep_package_previous/code/run_t1.py:/app/code/run_t1.py:ro
       - ./benchmark_out:/app/benchmark_out
-    working_dir: /app
+    working_dir: /app/code
     profiles: ["t1", "benchmark"]
 
   t2:
@@ -19,10 +24,9 @@ services:
       context: .
       dockerfile: docker/t2.Dockerfile
     volumes:
-      - ./:/app
-      - ./data/t2:/data
+      - ./rep_package_previous/:/app
       - ./benchmark_out:/app/benchmark_out
-    working_dir: /app
+    working_dir: /app/code
     profiles: ["t2", "benchmark"]
   
   t3:
@@ -32,7 +36,7 @@ services:
       dockerfile: docker/t3.Dockerfile
     volumes:
       - ./:/app
-      - ./data/t3:/data
+      - ./data/t3:/Dataset/T3
       - ./benchmark_out:/app/benchmark_out
     working_dir: /app
     profiles: ["t3", "benchmark"]
