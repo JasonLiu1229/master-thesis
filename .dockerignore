@@ -1,0 +1,27 @@
+# Exclude environment files
+.env
+.env.local
+*.env
+
+# But include .env.production
+!.env.production
+
+# Ignore Docker-related files
+Dockerfile*
+.dockerignore
+docker-compose*.yaml
+compose.yaml
+docker/
+
+# ignore git-related files
+.git
+.gitignore
+.gitattributes
+
+# temporary files
+*.tmp
+*~
+
+# OS specific files
+.DS_Store
+Thumbs.db
