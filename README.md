@@ -29,7 +29,7 @@ These are the keys that needs to be specified in your `.env` file:
 - Rust (for one the tooling)
 - Java (depending on what you want, you might need to install different versions of Java)
 
-- Note: Windows might need seperate compilers to make some things work. This is needed for `pybind11` and other libraries.
+Note: Windows might need seperate compilers to make some things work. This is needed for `pybind11` and other libraries.
 
 ### Steps
 
