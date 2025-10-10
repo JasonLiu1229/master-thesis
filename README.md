@@ -28,6 +28,7 @@ These are the keys that needs to be specified in your `.env` file:
   - Version 3.7 for GNN (benchmarking)
 - Rust (for one the tooling)
 - Java (depending on what you want, you might need to install different versions of Java)
+- For benchmarking, additionally you need Arno's setup. See references for more info.
 
 Note: Windows might need seperate compilers to make some things work. This is needed for `pybind11` and other libraries.
 
@@ -38,3 +39,5 @@ Note: Windows might need seperate compilers to make some things work. This is ne
 Benchmarking is done using docker containers. To fully seperate each technique from interfering with each other, we setup a docker container for each technique and parse the results to a seperate file. So make sure docker is installed and working.
 
 #### LLM tool
+
+## References
