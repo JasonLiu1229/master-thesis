@@ -17,6 +17,23 @@ These are the keys that needs to be specified in your `.env` file:
     API_URL=https://api.example.com
 ```
 
-## Benchmarking
+## Setup steps
 
-Benchmarking is done using docker containers. To fully seperate each technique from interfering with each other, we setup a docker container for each technique and parse the results to a seperate file.
+### Prerequirements
+
+- Docker
+- Python (Optionally with Poetry)
+  - Version 3.12.4 for main software
+  - Version 3.8.4 for Refbert (benchmarking)
+  - Version 3.7 for GNN (benchmarking)
+- Rust (for one the tooling)
+
+- Note: Windows might need seperate compilers to make some things work. This is needed for `pybind11` and other libraries.
+
+### Steps
+
+#### Benchmarking
+
+Benchmarking is done using docker containers. To fully seperate each technique from interfering with each other, we setup a docker container for each technique and parse the results to a seperate file. So make sure docker is installed and working.
+
+#### LLM tool

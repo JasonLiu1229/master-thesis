@@ -22,5 +22,3 @@ services:
       - ./data/t2:/data
       - ./benchmark_out:/app/benchmark_out
     working_dir: /app
-
-# this is not done yet, copied from gpt still needs to be fixed
