@@ -38,6 +38,20 @@ Note: Windows might need seperate compilers to make some things work. This is ne
 
 Benchmarking is done using docker containers. To fully seperate each technique from interfering with each other, we setup a docker container for each technique and parse the results to a seperate file. So make sure docker is installed and working.
 
+To run the benchmarking, you need to make sure that the [replication package](https://www.dropbox.com/scl/fo/fd9hhq7ejo743297hgv26/AA82GK-zdu4689E0ZeZwGHo?rlkey=vreei6ybneqkfqjpsywli0dt0&e=1&st=ol319nja&dl=0) is downloaded. Check references for the original author for this code.
+
+Also make sure the `compose.yml` file is set correctly. The pathing for the replication can mismatch based on your download loacation and naming of the file.
+
 #### LLM tool
 
 ## References
+
+```bibtex
+@thesis{dekeersmaeker2023enhancing,
+  author       = {De Keersmaeker, Arno},
+  title        = {Enhancing Test Code Understandability with Machine Learning-Based Identifier Naming},
+  school       = {University of Antwerp},
+  year         = {2023},
+  type         = {Master's Thesis}
+}
+```

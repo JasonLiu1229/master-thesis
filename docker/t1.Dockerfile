@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential git && \
     rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+WORKDIR /app/code
 
 # Python deps needs to be fixed
 RUN python -m pip install --upgrade "pip<24" "setuptools<70" wheel
@@ -27,6 +27,12 @@ ENV JAVA_HOME=${SDKMAN_DIR}/candidates/java/current
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 RUN java -version
 
-# TODO: Add database files, models, and code
+COPY ../rep_package_previous/GGNN /app/GGNN
+COPY ../rep_package_previous/code/Dataset/T1 /app/code/Dataset/T1
+COPY ../rep_package_previous/code/Models/T1 /app/code/Models/T1
+COPY ../rep_package_previous/code/Techniques/T1 /app/code/Techniques/T1
+COPY ../rep_package_previous/code/Techniques/__init__.py /app/code/Techniques
+COPY ../rep_package_previous/code/Utils /app/code/Utils
+COPY ../rep_package_previous/code/run_t1.py /app/code/run_t1.py
 
 CMD ["python", "run_t1.py", "test"]
