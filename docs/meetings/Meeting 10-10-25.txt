@@ -1,5 +1,25 @@
 Meeting 10-10-25
 
 What to do with replication package, Edited some files to make it work?
+	- reference but do not publish 
 
 GPT no access to gpt key, because different payed feature
+	- can be asked anytime
+
+Docker setup for benchmarking
+	- it is okay
+
+Arno evaluation
+	- more than one answer for one identifier
+	- might be useful for more names to be accepted
+
+Human survey
+	- check research papers about size of surveys, how many users
+	- certain rules to make it reliable -> search these rules
+
+automated task to validate names
+	- research about it
+	- different LLM for this
+		- Github Co-pilot
+	- Use the original answer as a reference and ask if this is suitable or not based on multiple LLM to make a statistic / measurement
+

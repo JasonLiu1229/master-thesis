@@ -11,6 +11,7 @@ services:
       - ./data/t1:/data
       - ./benchmark_out:/app/benchmark_out
     working_dir: /app
+    profiles: ["t1", "benchmark"]
 
   t2:
     restart: always
@@ -22,3 +23,16 @@ services:
       - ./data/t2:/data
       - ./benchmark_out:/app/benchmark_out
     working_dir: /app
+    profiles: ["t2", "benchmark"]
+  
+  t3:
+    restart: always
+    build:
+      context: .
+      dockerfile: docker/t3.Dockerfile
+    volumes:
+      - ./:/app
+      - ./data/t3:/data
+      - ./benchmark_out:/app/benchmark_out
+    working_dir: /app
+    profiles: ["t3", "benchmark"]
