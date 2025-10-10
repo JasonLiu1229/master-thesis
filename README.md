@@ -3,7 +3,7 @@
 ## Tools
 
 In the `tools/` folder you can find several tools I made to help you with running this project.
-In case you are running this on windows, you can use the `change_java_version.ps1` to switch java versions in case needed.
+In case you are running this on Windows, you can use the `change_java_version.ps1` to switch java versions in case needed.
 In linux this is done by changing the `JAVA_HOME` variable.
 
 ## Enviroment variables
@@ -13,7 +13,7 @@ Note this project makes use of private enviroment variables. This is because we 
 These are the keys that needs to be specified in your `.env` file:
 
 ```txt
-    API_KEY=blablabla
+    API_KEY=sk-example-api-code
     API_URL=https://api.example.com
 ```
 
@@ -27,6 +27,7 @@ These are the keys that needs to be specified in your `.env` file:
   - Version 3.8.4 for Refbert (benchmarking)
   - Version 3.7 for GNN (benchmarking)
 - Rust (for one the tooling)
+- Java (depending on what you want, you might need to install different versions of Java)
 
 - Note: Windows might need seperate compilers to make some things work. This is needed for `pybind11` and other libraries.
 
