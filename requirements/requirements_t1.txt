@@ -1,10 +1,20 @@
+# Technique 1
+PyYAML==5.2
+numpy==1.17.0
+dpu-utils==0.6.1
+Levenshtein==0.12.0
 
-## Technique 1
-pyYAML == 5.2
-numpy == 1.17
-# dpu_utils with no dependencies
-azure-storage==0.36.0 #
-urllib3==1.24.3
-tensorflow-gpu == 1.15.0
+# Azure v12 SDKs compatible with py3.7
+azure-core==1.26.4
+azure-storage-blob==12.14.1
+azure-identity==1.12.0
+cryptography==41.0.7
+
+urllib3==1.26.18
 javalang==0.13.0
+
+# Protobuf runtime needed by your graph_pb2
 protobuf==3.20.3
+
+# GPU TF 1.15 (requires CUDA 10.0 + cuDNN 7.x in the base image)
+tensorflow-gpu==1.15.0

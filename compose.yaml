@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   t1:
     restart: always
@@ -24,8 +22,6 @@ services:
     build:
       dockerfile: docker/t3.Dockerfile
     volumes:
-      - ./:/app
-      - ./data/t3:/Dataset/T3
       - ./benchmark_out:/app/benchmark_out
     working_dir: /app/code
     profiles: ["t3", "benchmark"]
