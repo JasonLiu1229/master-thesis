@@ -1,5 +1,23 @@
-# T1 image (e.g., your GNN env)
-FROM python:3.8.10-slim
+FROM nvidia/cuda:13.0.1-cudnn-runtime-ubuntu24.04
+
+# ---- install Python 3.8 + pip ----
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        software-properties-common \
+        build-essential \
+        curl \
+        ca-certificates && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+        python3.8 python3.8-dev python3.8-distutils python3-pip && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN ln -sf /usr/bin/python3.8 /usr/local/bin/python && \
+    ln -sf /usr/bin/pip3 /usr/local/bin/pip
+
+# Sanity check
+RUN python --version && pip --version
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -8,15 +26,47 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 # ---- system prerequisites ----
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    bash curl zip unzip ca-certificates \
-    build-essential git \
+    bash zip unzip ca-certificates git \
  && rm -rf /var/lib/apt/lists/*
 
+USER root
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    python3.8-dev \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
 # ---- Python deps ----
-RUN python -m pip install --upgrade "pip<24" "setuptools<70" wheel
-RUN pip install pybind11==2.4.3
-RUN pip install fastwer==0.1.3
-RUN pip install dpu-utils
+RUN apt-get update && apt-get install -y --no-install-recommends python3.8-venv && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      build-essential python3.8-dev cmake ninja-build \
+    && rm -rf /var/lib/apt/lists/*
+    
+# # Create an isolated venv and use that pip
+RUN python3.8 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Make sure Python 3.8 uses its own pip
+RUN python3.8 -m ensurepip --upgrade || curl -sS https://bootstrap.pypa.io/get-pip.py | python3.8
+RUN python3.8 -m pip install --upgrade "pip<24" "setuptools<70" wheel "pybind11>=2.10,<2.12"
+
+ENV PIP_CONFIG_FILE=/dev/null
+
+# IDK WHY THIS NEEDS TO BE DIFFERENT THAN T1 BECAUSE ELSE IT KEEPS RUNNING INFINITE (SHIT PYTHON)
+WORKDIR /tmp/fastwer-build
+RUN python3.8 -m pip download fastwer==0.1.3 --no-binary :all: \
+ && tar -xzf fastwer-0.1.3.tar.gz \
+ && cd fastwer-0.1.3 \
+ && sed -i '1i #include <cstdint>' src/fastwer.hpp \
+ && sed -i '2i #include <cstdint>' src/fastwer.cpp \
+ && python3.8 -m pip install --no-build-isolation --no-use-pep517 --no-index --no-deps .
+
+# Sanity check
+RUN python3.8 -c "import fastwer; print('fastwer imported OK')"
 
 COPY ../requirements/requirements_t2.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
@@ -45,14 +95,14 @@ COPY ../rep_package_previous/pretrain_model /app/pretrain_model
 COPY ../rep_package_previous/tg_model /app/tg_model
 COPY ../rep_package_previous/code/Dataset/T2 /app/code/Dataset/T2
 COPY ../rep_package_previous/code/Models/T2 /app/code/Models/T2
-COPY ../rep_package_previous/code/Techniques/T1 /app/code/Techniques/T2
+COPY ../rep_package_previous/code/Techniques/T2 /app/code/Techniques/T2
 COPY ../rep_package_previous/code/Techniques/__init__.py /app/code/Techniques
 COPY ../rep_package_previous/code/Utils /app/code/Utils
 COPY ../rep_package_previous/code/run_t2.py /app/code/run_t2.py
 
 WORKDIR /app/code
 
-CMD ["python", "run_t2.py", \
+CMD ["python3.8", "run_t2.py", \
     "--lp_model", "../lp_model", \
     "--tg_model", "../tg_model", \
     "--pretrain_model", "../pretrain_model", \

@@ -6,7 +6,8 @@ services:
     volumes: 
       - ./benchmark_out:/app/benchmark_out
     working_dir: /app/code
-    profiles: ["t1", "benchmark"]
+    gpus: all
+    profiles: ["t1", "benchmark", "arno"]
 
   t2:
     restart: always
@@ -15,7 +16,8 @@ services:
     volumes:
       - ./benchmark_out:/app/benchmark_out
     working_dir: /app/code
-    profiles: ["t2", "benchmark"]
+    gpus: all
+    profiles: ["t2", "benchmark", "arno"]
   
   t3:
     restart: always
