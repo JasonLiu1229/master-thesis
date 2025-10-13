@@ -1,6 +1,6 @@
 services:
   t1:
-    restart: always
+    container_name: t1
     build:
       dockerfile: docker/t1.Dockerfile
     volumes: 
@@ -10,7 +10,7 @@ services:
     profiles: ["t1", "benchmark", "arno"]
 
   t2:
-    restart: always
+    container_name: t2
     build:
       dockerfile: docker/t2.Dockerfile
     volumes:
@@ -20,7 +20,7 @@ services:
     profiles: ["t2", "benchmark", "arno"]
   
   t3:
-    restart: always
+    container_name: t3
     build:
       dockerfile: docker/t3.Dockerfile
     volumes:
