@@ -86,6 +86,9 @@ COPY ../rep_package_previous/code/Techniques/__init__.py /app/code/Techniques
 COPY ../rep_package_previous/code/Utils /app/code/Utils
 COPY ../rep_package_previous/code/run_t1.py /app/code/run_t1.py
 
+COPY ../code/benchmarking/t1_executioner.py /app/code/t1_executioner.py
+COPY ../code/benchmarking/t1_parser.py /app/code/t1_parser.py
+
 WORKDIR /app/code
 
-CMD ["python3.7", "run_t1.py", "test"]
+CMD ["python3.7", "t1_executioner.py", "--run-args", "test", "--pretty", "--out", "/app/benchmark_out/t1_benchmark_results.json"]

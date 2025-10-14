@@ -42,7 +42,11 @@ To run the benchmarking, you need to make sure that the [replication package](ht
 
 Also make sure the `compose.yml` file is set correctly. The pathing for the replication can mismatch based on your download loacation and naming of the file.
 
+TODO: ADD STEPS OF THE BENCHMARKING
+
 #### LLM tool
+
+TODO
 
 ## References
 

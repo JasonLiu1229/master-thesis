@@ -43,7 +43,7 @@ def main():
     # Build the command to run the benchmark Python script directly
     cmd: List[str] = [sys.executable, "run_t1.py"]
     if args.run_args:
-        cmd.extend(args.run-args)
+        cmd.extend(args.run_args)
 
     lines = list(run_and_capture(cmd, echo=not args.no_echo))
     metrics = parse(lines)
