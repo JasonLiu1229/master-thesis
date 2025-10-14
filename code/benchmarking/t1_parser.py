@@ -53,10 +53,8 @@ def _parse_value(raw: str):
             # ensure int keys (some logs may have stringified ints)
             return {int(k): int(v) for k, v in d.items()}
         except Exception:
-            # fallthrough to raw
             pass
 
-    # fallback to raw string
     return raw
 
 def parse(lines: Iterable[str]) -> Dict[str, object]:

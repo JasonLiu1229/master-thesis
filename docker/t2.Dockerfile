@@ -102,9 +102,4 @@ COPY ../rep_package_previous/code/run_t2.py /app/code/run_t2.py
 
 WORKDIR /app/code
 
-CMD ["python3.8", "run_t2.py", \
-    "--lp_model", "../lp_model", \
-    "--tg_model", "../tg_model", \
-    "--pretrain_model", "../pretrain_model", \
-    "--test_json", "Dataset/T2/test/test.json"\
-    ]
+CMD ["python3.8", "executioner.py", "--pretty", "--out", "../benchmark_out/t2_benchmark_results.json"]
