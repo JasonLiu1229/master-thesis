@@ -100,6 +100,9 @@ COPY ../rep_package_previous/code/Techniques/__init__.py /app/code/Techniques
 COPY ../rep_package_previous/code/Utils /app/code/Utils
 COPY ../rep_package_previous/code/run_t2.py /app/code/run_t2.py
 
+COPY ../code/benchmarking/t2_executioner.py /app/code/t2_executioner.py
+COPY ../code/benchmarking/t2_parser.py /app/code/t2_parser.py
+
 WORKDIR /app/code
 
-CMD ["python3.8", "executioner.py", "--pretty", "--out", "../benchmark_out/t2_benchmark_results.json"]
+CMD ["python3.8", "t2_executioner.py", "--pretty", "--out", "../benchmark_out/t2_benchmark_results.json"]
