@@ -4,7 +4,6 @@ import json
 import subprocess
 import sys
 from typing import Iterable, List
-import os
 
 from t1_parser import parse
 
@@ -32,42 +31,22 @@ def parse_args():
         nargs=argparse.REMAINDER,
         help="Arguments passed through to run_t1.py (everything after this flag)."
     )
-    ap.add_argument("--out", default=None, help="Optional path to write parsed metrics JSON.")
-    ap.add_argument("--no-echo", action="store_true", help="Do not echo raw benchmark output.")
-    ap.add_argument("--pretty", action="store_true", help="Pretty-print JSON on stdout.")
     return ap.parse_args()
 
 def main():
     args = parse_args()
 
-    # Build the command to run the benchmark Python script directly
     cmd: List[str] = [sys.executable, "run_t1.py"]
-    if args.run_args:
-        cmd.extend(args.run_args)
+  
+    cmd.extend(args.run_args)
 
-    lines = list(run_and_capture(cmd, echo=not args.no_echo))
+    lines = list(run_and_capture(cmd, echo=False))
     metrics = parse(lines)
-
-    if args.pretty:
-        print(json.dumps(metrics, indent=2, sort_keys=True))
-    else:
-        print(json.dumps(metrics, separators=(",", ":"), sort_keys=True))
-
     
+    print(json.dumps(metrics, indent=2, sort_keys=True))
 
-    if args.out:
-        os.makedirs(os.path.dirname(args.out), exist_ok=True)
-        with open(args.out, "w", encoding="utf-8") as f:
-            json.dump(metrics, f, indent=2, sort_keys=True)
-
-        # Check if file was written successfully
-        try:
-            with open(args.out, "r", encoding="utf-8") as f:
-                json.load(f)
-            print(f"Metrics written to {args.out}")
-        except Exception as e:
-            print(f"Error: Failed to verify written JSON file: {e}", file=sys.stderr)
-            sys.exit(1)
+    with open('./out/t1_benchmark_results.json', "w", encoding="utf-8") as f:
+        json.dump(metrics, f, indent=2, sort_keys=True)
 
 if __name__ == "__main__":
     main()

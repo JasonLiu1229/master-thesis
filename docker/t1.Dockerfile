@@ -91,4 +91,4 @@ COPY ../code/benchmarking/t1_parser.py /app/code/t1_parser.py
 
 WORKDIR /app/code
 
-CMD ["python3.7", "t1_executioner.py", "--run-args", "test", "--out './benchmark_out/t1_benchmark_results.json'"]
+CMD ["python3.7", "t1_executioner.py", "--run-args", "test"]
