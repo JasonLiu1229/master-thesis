@@ -24,8 +24,7 @@ def run_and_capture(cmd: List[str], echo: bool = True) -> Iterable[str]:
             raise SystemExit(rc)
 
 def default_cmd() -> List[str]:
-    return [sys.executable,
-        "python3.8", "run_t2.py",
+    return [sys.executable, "run_t2.py",
         "--lp_model", "../lp_model",
         "--tg_model", "../tg_model",
         "--pretrain_model", "../pretrain_model",
