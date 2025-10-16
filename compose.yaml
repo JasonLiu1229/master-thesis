@@ -4,7 +4,7 @@ services:
     build:
       dockerfile: docker/t1.Dockerfile
     volumes: 
-      - ./benchmark_out:/app/benchmark_out
+      - ./benchmark_out:/app/code/benchmark_out/
     working_dir: /app/code
     gpus: all
     profiles: ["t1", "benchmark", "arno"]
@@ -14,7 +14,7 @@ services:
     build:
       dockerfile: docker/t2.Dockerfile
     volumes:
-      - ./benchmark_out:/app/benchmark_out
+      - ./benchmark_out:/app/code/benchmark_out/
     working_dir: /app/code
     gpus: all
     profiles: ["t2", "benchmark", "arno"]
@@ -24,6 +24,6 @@ services:
     build:
       dockerfile: docker/t3.Dockerfile
     volumes:
-      - ./benchmark_out:/app/benchmark_out
+      - ./benchmark_out:/app/code/benchmark_out/
     working_dir: /app/code
     profiles: ["t3", "benchmark"]

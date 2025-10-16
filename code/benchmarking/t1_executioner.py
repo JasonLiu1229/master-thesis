@@ -3,8 +3,8 @@ import argparse
 import json
 import subprocess
 import sys
-from pathlib import Path
 from typing import Iterable, List
+import os
 
 from t1_parser import parse
 
@@ -53,11 +53,21 @@ def main():
     else:
         print(json.dumps(metrics, separators=(",", ":"), sort_keys=True))
 
+    
+
     if args.out:
-        out_path = Path(args.out)
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        with out_path.open("w", encoding="utf-8") as f:
+        os.makedirs(os.path.dirname(args.out), exist_ok=True)
+        with open(args.out, "w", encoding="utf-8") as f:
             json.dump(metrics, f, indent=2, sort_keys=True)
+
+        # Check if file was written successfully
+        try:
+            with open(args.out, "r", encoding="utf-8") as f:
+                json.load(f)
+            print(f"Metrics written to {args.out}")
+        except Exception as e:
+            print(f"Error: Failed to verify written JSON file: {e}", file=sys.stderr)
+            sys.exit(1)
 
 if __name__ == "__main__":
     main()

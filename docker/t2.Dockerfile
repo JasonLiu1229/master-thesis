@@ -105,4 +105,4 @@ COPY ../code/benchmarking/t2_parser.py /app/code/t2_parser.py
 
 WORKDIR /app/code
 
-CMD ["python3.8", "t2_executioner.py", "--pretty", "--out", "../benchmark_out/t2_benchmark_results.json"]
+CMD ["python3.8", "t2_executioner.py", "--pretty", "--out", "'./benchmark_out/t2_benchmark_results.json'"]
