@@ -35,5 +35,10 @@ services:
     volumes:
       - ./out:/app/code/out/
     working_dir: /app/code
+    depends_on:
+      t1:
+        condition: service_completed_successfully
+      t2:
+        condition: service_completed_successfully
     gpus: all
-    profiles: ["benchmark"]
+    profiles: ["benchmark", "arno"]

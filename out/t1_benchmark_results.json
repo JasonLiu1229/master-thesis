@@ -7,7 +7,7 @@
   "avg_predicted_subtokens": 1.1603235888950174,
   "avg_predicted_subtokens_correct": 1.0405755395683454,
   "avg_predicted_subtokens_incorrect": 1.1927269895654882,
-  "cer": 93.60321388735854,
+  "cer": 93.60321388735841,
   "correct_ordered": 0.21296807011092725,
   "correct_unordered": 0.21296807011092725,
   "dist_expected_lengths": {
@@ -37,8 +37,8 @@
     "16": 1
   },
   "edit_distance": 5.804866090580377,
-  "execution_time_s": 133.85,
-  "f1": 0.2756007221993603,
-  "precision": 0.3030836959408389,
-  "recall": 0.26580151580151656
+  "execution_time_s": 128.54,
+  "f1": 0.2756007221993602,
+  "precision": 0.3030836959408388,
+  "recall": 0.2658015158015162
 }
