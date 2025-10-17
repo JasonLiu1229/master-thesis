@@ -7,7 +7,7 @@ services:
       - ./out:/app/code/out/
     working_dir: /app/code
     gpus: all
-    profiles: ["t1", "benchmark", "arno"]
+    profiles: ["t1", "arno", "test"]
 
   t2:
     container_name: t2
@@ -17,7 +17,7 @@ services:
       - ./out:/app/code/out/
     working_dir: /app/code
     gpus: all
-    profiles: ["t2", "benchmark", "arno"]
+    profiles: ["t2", "arno", "test"]
   
   t3:
     container_name: t3
@@ -26,4 +26,14 @@ services:
     volumes:
       - ./out:/app/code/out/
     working_dir: /app/code
-    profiles: ["t3", "benchmark"]
+    profiles: ["t3", "test"]
+
+  benchmark:
+    container_name: benchmark
+    build:
+      dockerfile: docker/benchmark.Dockerfile
+    volumes:
+      - ./out:/app/code/out/
+    working_dir: /app/code
+    gpus: all
+    profiles: ["benchmark"]
