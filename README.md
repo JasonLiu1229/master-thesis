@@ -6,6 +6,8 @@ In the `tools/` folder you can find several tools I made to help you with runnin
 In case you are running this on Windows, you can use the `change_java_version.ps1` to switch java versions in case needed.
 In linux this is done by changing the `JAVA_HOME` variable.
 
+There is also additionaly a database processing library, specifically made for `method2test`.
+
 ## Enviroment variables
 
 Note this project makes use of private enviroment variables. This is because we work with api keys and to inialize this, you need to generate one for your own model. This is only applied for the API version of this project.
@@ -16,6 +18,8 @@ These are the keys that needs to be specified in your `.env` file:
     API_KEY=sk-example-api-code
     API_URL=https://api.example.com
 ```
+
+NOTE: **DO NOT** add your enviroment variables to the repository or anywhere public. 
 
 ## Setup steps
 
