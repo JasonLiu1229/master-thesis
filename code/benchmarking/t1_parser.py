@@ -23,6 +23,7 @@ _KEY_MAP = {
     "Execution time": "execution_time_s",
 }
 
+# Note regex are made using GPT
 _LABELS_RE = re.compile(
     r"^(?P<label>"
     + "|".join(re.escape(k) for k in _KEY_MAP.keys())
@@ -35,6 +36,7 @@ _NUM_RE = re.compile(
 
 _SEC_SUFFIX_RE = re.compile(r"^(?P<num>.+?)\s*(?:seconds?|s)\s*$", re.IGNORECASE)
 
+# Note this function is made using GPT
 def _parse_value(raw: str):
     """Parse a scalar float/int, a seconds-suffixed number, or a dict literal."""
     raw = raw.strip()

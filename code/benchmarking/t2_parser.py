@@ -11,6 +11,7 @@ LABELS = {
     "edit": "edit_distance",
 }
 
+# Note regex are made using GPT
 _LABELS_RE = re.compile(
     r"^(?P<label>" + "|".join(re.escape(k) for k in LABELS.keys()) + r")\s*:\s*(?P<value>.+?)\s*$"
 )
