@@ -35,7 +35,7 @@ NOTE: **DO NOT** add your enviroment variables to the repository or anywhere pub
 - For benchmarking, additionally you need Arno's setup. See references for more info.
   - Note that database generation is not done in Docker and you need to do it yourself in case you want to replicate similar benchmarking.
 
-Note: Windows might need seperate compilers to make some things work. This is needed for `pybind11` and other libraries.
+Note: Windows might need seperate compilers to make some things work. This is needed for `pybind11` and other libraries. Additionally if using docker, some things do not have to be directly installed, like Python.
 
 ### Steps
 

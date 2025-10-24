@@ -1,0 +1,22 @@
+Review docker setup
+	- docker good
+
+How to choose pipeline / models?
+	- Trial and error based, start small and make it bigger based on observations
+		- find challenges and problems
+		- repeat
+	- Start simple
+		- RAG for later
+		- Look for models that make embeddings, maybe not - look into it more
+	- Maybe agentic pipeline - look in to this more
+		- Split responsibilities with different LLMs maybe
+		- Hard to convince the value of the need that these LLMs are good or not
+
+Should I train OpenAI model or just test it?
+	- General purpose to trained model, test it
+	- Size of model matters too, so cant be probably compared to research based model
+		- Note this down
+	- Try the family of LLM from OpenAI
+	- Using co-pilot to use other LLMs
+		- find out about how to use that
+	
