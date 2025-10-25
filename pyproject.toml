@@ -18,7 +18,8 @@ dependencies = [
     "accelerate (>=1.10.0,<2.0.0)",
     "bitsandbytes (>=0.47.0,<0.48.0)",
     "python-dotenv (>=1.1.1,<2.0.0)",
-    "fastapi (>=0.120.0,<0.121.0)"
+    "fastapi (>=0.120.0,<0.121.0)",
+    "pydantic-settings (>=2.11.0,<3.0.0)"
 ]
 
 [tool.poetry]

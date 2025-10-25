@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 
 class LLMClient:
-    def __init__(self, api_key, base_url="https://api.openai.com/v1/"):
+    def __init__(self, api_key, base_url="https://api.openai.com/v1/chat/completions"):
         self.api_key = api_key
         self.base_url = base_url
 
