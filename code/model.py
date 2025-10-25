@@ -1,6 +1,6 @@
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
-model_id = "codellama/CodeLlama-7b-Instruct-hf" 
+model_id = "codellama/CodeLlama-13b-Instruct-hf" 
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 model = AutoModelForCausalLM.from_pretrained(
     model_id,
