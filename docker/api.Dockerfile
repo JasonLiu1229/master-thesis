@@ -5,29 +5,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     bash zip unzip ca-certificates git build-essential gcc g++ \
  && rm -rf /var/lib/apt/lists/*
 
-# ---- poetry ----
-RUN curl -sSL https://install.python-poetry.org | python3 -
+# ---- Python dependencies ----
+COPY requirements/requirements_api.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+RUN rm /tmp/requirements.txt
 
-ARG POETRY_ENV
+# ---- application code ----
+WORKDIR /app
 
-ENV POETRY_ENV=${POETRY_ENV} \
-  PYTHONFAULTHANDLER=1 \
-  PYTHONUNBUFFERED=1 \
-  PYTHONHASHSEED=random \
-  PIP_NO_CACHE_DIR=off \
-  PIP_DISABLE_PIP_VERSION_CHECK=on \
-  PIP_DEFAULT_TIMEOUT=100 \
-  POETRY_NO_INTERACTION=1 \
-  POETRY_VIRTUALENVS_CREATE=false \
-  POETRY_CACHE_DIR='/var/cache/pypoetry' \
-  POETRY_HOME='/usr/local' \
-  POETRY_VERSION=2.1.1
+# still needs to be decided what files needs to be copied
+COPY code/app /app
 
-COPY ../poetry.lock ../pyproject.toml
+# ---- expose port ----
+EXPOSE 8000
 
-RUN poetry install $(test "$POETRY_ENV" == production && echo "--only=main") --no-interaction --no-ansi
-
-# ---- code ---- 
-WORKDIR /code
-
-COPY ../code/api /code/
+# ---- start server ----
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
