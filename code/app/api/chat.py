@@ -16,7 +16,6 @@ async def chat_endpoint(body: ChatRequest):
         reply_text = await ask_llm(body.user_message)
         return ChatResponse(reply=reply_text)
     except Exception as e:
-        # you can log e here
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Upstream LLM error"
