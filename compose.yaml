@@ -42,3 +42,12 @@ services:
         condition: service_completed_successfully
     gpus: all
     profiles: ["benchmark", "arno"]
+
+  api:
+    container_name: api
+    build:
+      dockerfile: docker/api.Dockerfile
+    ports:
+      - "8000:8000"
+    gpus: all
+    profiles: ["api", "full"]
