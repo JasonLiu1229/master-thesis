@@ -17,6 +17,8 @@ These are the keys that needs to be specified in your `.env` file:
 ```txt
     API_KEY=sk-example-api-code
     API_URL=https://api.example.com
+
+    SERVER_SECRET=super_secret_key
 ```
 
 NOTE: **DO NOT** add your enviroment variables to the repository or anywhere public.

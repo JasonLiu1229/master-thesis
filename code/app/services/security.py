@@ -19,10 +19,10 @@ def hash_api_key(api_key: str) -> str:
 def verify_api_key(provided_key: str, stored_hash: str) -> bool:
     assert stored_hash is not None, "No stored hash to verify against."
     assert provided_key is not None, "No provided key to verify."
-    
+
     assert isinstance(stored_hash, str), "Stored hash must be a string."
     assert isinstance(provided_key, str), "Provided key must be a string."
-    
+
     provided_hash = hash_api_key(provided_key)
     return hmac.compare_digest(provided_hash, stored_hash)
 
