@@ -23,4 +23,4 @@ COPY ../code/model.py /app
 EXPOSE 8000
 
 # ---- start server ----
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["fastapi", "run", "main.py", "--port", "8000"]
