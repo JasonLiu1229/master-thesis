@@ -17,6 +17,7 @@ WORKDIR /app
 
 # still needs to be decided what files needs to be copied
 COPY code/app /app
+COPY code/model.py /app
 
 # ---- expose port ----
 EXPOSE 8000
