@@ -5,7 +5,9 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 
 class ModelStyle(Enum):
-    LlamaInstruct = "inst" # instruction-tuned LLaMA style models, makes use of [INST] tags
+    LlamaInstruct = (
+        "inst"  # instruction-tuned LLaMA style models, makes use of [INST] tags
+    )
     Plain = "plain"
 
 

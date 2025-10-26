@@ -19,14 +19,15 @@ services:
     gpus: all
     profiles: ["t2", "arno", "test"]
   
-  t3:
-    container_name: t3
+  t3_a:
+    container_name: t3_a
     build:
       dockerfile: docker/t3_a.Dockerfile
     volumes:
       - ./out:/app/code/out/
-    working_dir: /app/code
-    profiles: ["t3_a", "test"]
+    env_file:
+      - .env
+    profiles: ["t3_a", "test", "full"]
 
   benchmark:
     container_name: benchmark
@@ -50,4 +51,6 @@ services:
     ports:
       - "8000:8000"
     gpus: all
+    env_file:
+      - .env
     profiles: ["api", "full"]

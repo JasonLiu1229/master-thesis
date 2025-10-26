@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from app.api.chat import router as chat_router
-from app.api.keygen import router as keygen_router
+from api.chat import router as chat_router
+from api.keygen import router as keygen_router
 
 app = FastAPI(
     title="LLM Chat API (Local tool)",
