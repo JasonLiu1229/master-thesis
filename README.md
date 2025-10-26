@@ -21,6 +21,18 @@ These are the keys that needs to be specified in your `.env` file:
 
 NOTE: **DO NOT** add your enviroment variables to the repository or anywhere public.
 
+## Technique information
+
+### T1 (GNN)
+
+### T2 (RefBert)
+
+### T3_a (Open source model, not fine tuned)
+
+### T3_b (Open source model, fine tuned)
+
+### T3_c (Paid model, not fine tuned)
+
 ## Setup steps
 
 ### Prerequirements
@@ -33,7 +45,8 @@ NOTE: **DO NOT** add your enviroment variables to the repository or anywhere pub
 - Rust (for one the tooling)
 - Java (depending on what you want, you might need to install different versions of Java)
 - For benchmarking, additionally you need Arno's setup. See references for more info.
-  - Note that database generation is not done in Docker and you need to do it yourself in case you want to replicate similar benchmarking.
+  - Note that database generation is not performed inside Docker; you must generate the database manually if you want to reproduce the benchmarking.
+  - Additionally, some files must be edited manually to resolve incompatibilities.
 
 Note: Windows might need seperate compilers to make some things work. This is needed for `pybind11` and other libraries. Additionally if using docker, some things do not have to be directly installed, like Python.
 

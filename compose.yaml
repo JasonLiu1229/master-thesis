@@ -22,11 +22,11 @@ services:
   t3:
     container_name: t3
     build:
-      dockerfile: docker/t3.Dockerfile
+      dockerfile: docker/t3_a.Dockerfile
     volumes:
       - ./out:/app/code/out/
     working_dir: /app/code
-    profiles: ["t3", "test"]
+    profiles: ["t3_a", "test"]
 
   benchmark:
     container_name: benchmark

@@ -7,8 +7,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # ---- Python dependencies ----
 COPY requirements/requirements_api.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
+RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
 RUN rm /tmp/requirements.txt
+
+RUN pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu128
 
 # ---- application code ----
 WORKDIR /app
