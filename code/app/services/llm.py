@@ -1,4 +1,3 @@
-from app.core.config import settings
 from app.model import LLM_Model
 
 # Load the LLM model once at startup

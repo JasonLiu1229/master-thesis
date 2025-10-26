@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter
 from app.schemas.keygen_schema import KeyGenResponse, KeyGenRequest
 from app.services.security import generate_api_key, hash_api_key
 import json
