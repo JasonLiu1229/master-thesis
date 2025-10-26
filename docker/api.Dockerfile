@@ -15,12 +15,7 @@ RUN pip3 install torch torchvision --index-url https://download.pytorch.org/whl/
 # ---- application code ----
 WORKDIR /app
 
-# still needs to be decided what files needs to be copied
 COPY ../code/app /app
 COPY ../code/model.py /app
 
-# ---- expose port ----
-EXPOSE 8000
-
-# ---- start server ----
-CMD ["fastapi", "run", "main.py", "--port", "8000"]
+CMD ["fastapi", "run", "main.py", "--host", "0.0.0.0", "--port", "80"]

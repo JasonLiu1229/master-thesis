@@ -1,8 +1,8 @@
-fastapi==0.120.0
+fastapi[standard]>=0.113.0,<0.114.0
 httpx==0.28.1
 pydantic-settings==2.11.0
 python-dotenv==1.1.1
-pydantic-core==2.41.4 
+pydantic>=2.7.0,<3.0.0
 pydantic==2.12.3
 hf-xet==1.2.0 # faster downloads from huggingface
 transformers==4.55.2 

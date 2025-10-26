@@ -18,7 +18,7 @@ async def chat_endpoint(body: ChatRequest):
         import json
 
         with open(
-            "../json_db.json", "r"
+            "json_db.json", "r"
         ) as f:  # JSON is just a toy db for API keys (not included in the git repo)
             db = json.load(f)
         if not verify_api_key(body.api_key, db.get("api_keys", [])):
