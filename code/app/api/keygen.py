@@ -1,4 +1,5 @@
 import json
+import os
 
 from fastapi import APIRouter
 from schemas.keygen_schema import KeygenRequest, KeygenResponse
@@ -15,8 +16,11 @@ async def keygen_endpoint(body: KeygenRequest):
     new_api_key = generate_api_key()
     hashed_key = hash_api_key(new_api_key)
 
-    with open("json_db.json", "r") as f:
-        db = json.load(f)
+    if os.path.exists("json_db.json"):
+        with open("json_db.json", "r") as f:
+            db = json.load(f)
+    else:
+        db = {}
 
     db.setdefault("api_keys", []).append(hashed_key)
 

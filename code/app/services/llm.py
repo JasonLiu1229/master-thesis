@@ -7,6 +7,7 @@ _llm_model = None  # singleton
 def get_model() -> LLM_Model:
     global _llm_model
     if _llm_model is None:
+        print("Loading LLM model into memory...")
         m = LLM_Model()
         m.load_model(model_id)
         _llm_model = m
