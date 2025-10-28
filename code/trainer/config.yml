@@ -1,0 +1,15 @@
+# Dataset directories
+train_dir: /train_dir
+val_dir: /val_dir
+test_dir: /test_dir
+
+output_dir: /output
+
+# Model save path
+save_model_path: /model/checkpoint.ckpt
+
+# Logs
+log_dir: /logs
+
+# Model info
+max_length: 4096

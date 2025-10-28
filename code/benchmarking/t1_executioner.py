@@ -1,4 +1,3 @@
-# executioner_t1.py (v3 - final)
 import argparse
 import json
 import subprocess

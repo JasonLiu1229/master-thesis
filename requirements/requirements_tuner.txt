@@ -1,0 +1,5 @@
+peft==0.17.0 
+transformers==4.55.2 
+hf-xet==1.2.0
+datasets==4.0.0
+pyyaml==6.0.3
