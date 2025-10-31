@@ -11,5 +11,12 @@ save_model_path: /model/checkpoint.ckpt
 # Logs
 log_dir: /logs
 
-# Model info
+# Model parameters
 max_length: 4096
+USE_QLORA: True
+
+BATCH_SIZE_PER_DEVICE: 1
+GRAD_ACCUM_STEPS: 8
+NUM_EPOCHS: 3
+LEARNING_RATE: 1e-4
+MAX_SAVE_TOTAL: 3

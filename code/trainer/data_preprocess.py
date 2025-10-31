@@ -25,6 +25,14 @@ USER_PROMPT_TEMPLATE = (
 )
 
 
+def diff_spans(original: str, modified: str) -> List[Tuple[int, int]]:
+    pass
+
+
+def spans_overlap(span1: Tuple[int, int], span2: Tuple[int, int]) -> bool:
+    pass
+
+
 def build_chat_prompt(obf_code: str) -> str:
     pass
 
