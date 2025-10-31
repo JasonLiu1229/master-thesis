@@ -3,7 +3,7 @@ import json
 import os
 from typing import Dict, List, Tuple
 
-import helper
+from helper import save_dataset_dict, load_dataset_dict
 
 import yaml
 from datasets import Dataset
@@ -25,33 +25,47 @@ USER_PROMPT_TEMPLATE = (
 )
 
 
-def diff_spans(original: str, modified: str) -> List[Tuple[int, int]]:
-    pass
+def diff_spans(obf: str, gt: str) -> List[Tuple[int, int]]:
+    """checks the difference between obfuscated code and ground truth code and a list of tuples of where to where it is located
+
+    Args:
+        obf (str): obfuscated code
+        gt (str): ground truth
+
+    Returns:
+        List[Tuple[int, int]]: list of indexes from where to where it is located (start, end)
+    """
+    sm = difflib.SequenceMatcher(a=obf, b=gt, autojunk=False)
+    spans = []
+    for tag, a0, a1, b0, b1 in sm.get_opcodes():
+        if tag in ("replace", "insert", "delete"):
+            spans.append((b0, b1))
+    return spans
 
 
 def spans_overlap(span1: Tuple[int, int], span2: Tuple[int, int]) -> bool:
-    pass
+    """check for overlap between two spans
+    Args:
+        span1 (Tuple[int, int]): first span
+        span2 (Tuple[int, int]): second span
+    Returns:
+        bool: whether they overlap
+    """
+    return not (span1[1] <= span2[0] or span2[1] <= span1[0])
 
 
 def build_chat_prompt(obf_code: str) -> str:
     pass
 
 
-def preprocess_file(input_file: str, output_file: str):
-    """Preprocess dataset file to a standard format, easier for CodeLamma model to read and understand.
-
-    The file will consist of tags to identify different sections of the code, this helps the tokenizer to better parse the input.
-
-    Args:
-        input_file (str): input jsonl file
-        output_file (str): formatted jsonl file
-    """
-    assert os.path.exists(input_file), f"Input file {input_file} does not exist."
-    assert input_file.endswith(".jsonl"), "Input file must be a .jsonl file."
-
+def preprocess_single(obf_code:str, gt_code:str, max_length:int, tokenizer: AutoTokenizer):
+    pass
 
 def preprocess(input_dir: str, output_dir: str):
     assert os.path.exists(input_dir), f"Input directory {input_dir} does not exist."
+    
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
 
 
 if __name__ == "__main__":
