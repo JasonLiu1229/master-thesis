@@ -1,12 +1,15 @@
 import difflib
 import json
 import os
-from typing import Dict, List, Tuple
-
-from helper import save_dataset_dict, load_dataset_dict
+import random
+from typing import Dict, List, Tuple, Any
 
 import yaml
-from datasets import Dataset
+from datasets import Dataset, DatasetDict
+
+from helper import load_dataset_dict, save_dataset_dict
+
+from model import LLM_Model
 from transformers import AutoTokenizer
 
 SYSTEM_INSTRUCTION = (
@@ -23,6 +26,20 @@ USER_PROMPT_TEMPLATE = (
     "```\n\n"
     "Return ONLY the improved code block, nothing else."
 )
+
+PLAIN_PROMPT_TEMPLATE = (
+    "### PROMPT: \n"
+    "Please refactor the following Java unit test by renaming identifiers to be meaningful and self-explanatory. Do NOT change logic, literals, comments, formatting, assertions, or method call structure. Only improve identifier names (methods, variables). \n\n"
+    "Obfuscated code:\n"
+    "```java\n"
+    "{obf}\n"
+    "```\n\n"
+    "Return ONLY the improved code block, nothing else.\n"
+)
+
+config = {}
+with open("config.yml", "r") as f:
+    config = yaml.safe_load(f)
 
 
 def diff_spans(obf: str, gt: str) -> List[Tuple[int, int]]:
@@ -53,20 +70,125 @@ def spans_overlap(span1: Tuple[int, int], span2: Tuple[int, int]) -> bool:
     """
     return not (span1[1] <= span2[0] or span2[1] <= span1[0])
 
-
+# for instruct models
 def build_chat_prompt(obf_code: str) -> str:
-    pass
+    user_msg = SYSTEM_INSTRUCTION + "\n\n" + USER_PROMPT_TEMPLATE.format(obf=obf_code)
 
+    prompt = (
+        "[INST] "
+        + user_msg
+        + " [/INST]\n"
+    )
 
-def preprocess_single(obf_code:str, gt_code:str, max_length:int, tokenizer: AutoTokenizer):
-    pass
+    return prompt 
 
-def preprocess(input_dir: str, output_dir: str):
-    assert os.path.exists(input_dir), f"Input directory {input_dir} does not exist."
+# for base model
+def build_prompt_plain(obf_code: str) -> str:
+    """
+    Build a plain prompt for CodeLlama base (no chat formatting).
+    """
+    prompt = PLAIN_PROMPT_TEMPLATE.format(obf=obf_code)
     
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    return prompt
+
+# Note this part of the code is partially made with the help of GPT-4, this is because i did not understand the logic behind the tokenization and label creation fully.
+def preprocess_single(
+    obf_code: str, gt_code: str, max_length: int, tokenizer: AutoTokenizer
+) -> Dict[str, Any]:
+    
+    bos = tokenizer.bos_token or "<s>"
+    eos = tokenizer.eos_token or "</s>"
+    
+    prompt = build_prompt_plain(obf_code)
+    response_prefix = "```java\n"
+    response_suffix = "\n```" + eos
+    
+    response_base = "### RESPONSE:\n"
+    
+    full_text = bos + prompt + response_base + response_prefix + gt_code + response_suffix
+    
+    changed_spans_local = diff_spans(obf_code, gt_code)
+    
+    # for later we need a supervision window (because we want loss only on code part)
+    gt_code_start = len(bos + prompt + response_base + response_prefix)
+    gt_code_end = gt_code_start + len(gt_code)
+    
+    encoder = tokenizer(
+        full_text,
+        return_offsets_mapping=True,
+        max_length=max_length,
+        truncation=True,
+        padding=False,
+    )
+    
+    input_ids = encoder["input_ids"] # This is what the model sees as input.
+    attn_mask = encoder["attention_mask"] # This is a binary mask (1 or 0) telling the model which tokens are real and which are padding.
+    offsets = encoder["offsets_mapping"] # This is the expected answer for each token in the sequence — basically a shifted copy of input_ids, except with some tokens masked to -100.
+    
+    labels = []
+    
+    # TODO: labels creation logic
+    
+    return {
+        "input_ids": input_ids,
+        "attention_mask": attn_mask,
+        "labels": labels,
+    }
 
 
-if __name__ == "__main__":
-    pass
+def preprocess(
+    input_dir: str,
+    output_dir: str,
+    llm: LLM_Model,
+    shuffle: bool = True,
+    name_suffix: str = "",
+    seed: int = 42,
+) -> Dataset | DatasetDict:
+    assert os.path.exists(input_dir), f"Input directory {input_dir} does not exist."
+    os.makedirs(output_dir, exist_ok=True)
+
+    files = [f for f in os.listdir(input_dir) if f.endswith(".jsonl")]
+    assert files, f"No .jsonl files found in {input_dir}."
+
+    if shuffle:
+        random.Random(seed).shuffle(files)
+
+    tokenizer = llm.get_tokenizer()
+    max_len = config["MAX_LENGTH"]
+
+    all_data: List[Dict[str, Any]] = []
+
+    for file in files:
+        input_path = os.path.join(input_dir, file)
+        with open(input_path, "r", encoding="utf-8") as f:
+            for line in f:
+                if not line.strip():
+                    continue
+                entry = json.loads(line)
+                obf_code = entry.get("prompt")
+                gt_code = entry.get("response")
+                if not obf_code or not gt_code:
+                    continue
+                feat = preprocess_single(obf_code, gt_code, max_len, tokenizer)
+       
+                if not all(
+                    k in feat for k in ("input_ids", "attention_mask", "labels")
+                ):
+                    continue
+                all_data.append(feat)
+
+    assert all_data, "No valid examples found after preprocessing."
+
+    ds = Dataset.from_list(all_data)
+    ds = ds.remove_columns(
+        [
+            c
+            for c in ds.column_names
+            if c not in ("input_ids", "attention_mask", "labels")
+        ]
+    )
+    ds.set_format(type="torch", columns=["input_ids", "attention_mask", "labels"])
+
+    out_dir = os.path.join(output_dir, f"preprocessed_{name_suffix}".rstrip("_"))
+    ds.save_to_disk(out_dir)
+    return ds

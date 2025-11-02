@@ -51,6 +51,12 @@ class LLM_Model:
 
     def get_model(self):
         return self.model
+    
+    def get_tokenizer(self):
+        return self.tokenizer
+    
+    def get_device(self):
+        return self.device
 
     def load_model(self, model_path):
         self.model = AutoModelForCausalLM.from_pretrained(
@@ -140,7 +146,7 @@ class LLM_Model:
 
 
 if __name__ == "__main__":
-    model_id = "codellama/CodeLlama-13b-Instruct-hf"
+    model_id = "codellama/CodeLlama-13b-hf"
 
     llm_model = LLM_Model()
     llm_model.load_model(model_id)
