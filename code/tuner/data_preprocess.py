@@ -2,12 +2,10 @@ import difflib
 import json
 import os
 import random
-from typing import Dict, List, Tuple, Any
+from typing import Any, Dict, List, Tuple
 
 import yaml
 from datasets import Dataset, DatasetDict
-
-from helper import load_dataset_dict, save_dataset_dict
 
 from model import LLM_Model
 from transformers import AutoTokenizer
@@ -70,17 +68,15 @@ def spans_overlap(span1: Tuple[int, int], span2: Tuple[int, int]) -> bool:
     """
     return not (span1[1] <= span2[0] or span2[1] <= span1[0])
 
+
 # for instruct models
 def build_chat_prompt(obf_code: str) -> str:
     user_msg = SYSTEM_INSTRUCTION + "\n\n" + USER_PROMPT_TEMPLATE.format(obf=obf_code)
 
-    prompt = (
-        "[INST] "
-        + user_msg
-        + " [/INST]\n"
-    )
+    prompt = "[INST] " + user_msg + " [/INST]\n"
 
-    return prompt 
+    return prompt
+
 
 # for base model
 def build_prompt_plain(obf_code: str) -> str:
@@ -88,31 +84,34 @@ def build_prompt_plain(obf_code: str) -> str:
     Build a plain prompt for CodeLlama base (no chat formatting).
     """
     prompt = PLAIN_PROMPT_TEMPLATE.format(obf=obf_code)
-    
+
     return prompt
+
 
 # Note this part of the code is partially made with the help of GPT-4, this is because i did not understand the logic behind the tokenization and label creation fully.
 def preprocess_single(
     obf_code: str, gt_code: str, max_length: int, tokenizer: AutoTokenizer
 ) -> Dict[str, Any]:
-    
+
     bos = tokenizer.bos_token or "<s>"
     eos = tokenizer.eos_token or "</s>"
-    
+
     prompt = build_prompt_plain(obf_code)
     response_prefix = "```java\n"
     response_suffix = "\n```" + eos
-    
+
     response_base = "### RESPONSE:\n"
-    
-    full_text = bos + prompt + response_base + response_prefix + gt_code + response_suffix
-    
+
+    full_text = (
+        bos + prompt + response_base + response_prefix + gt_code + response_suffix
+    )
+
     changed_spans_local = diff_spans(obf_code, gt_code)
-    
+
     # for later we need a supervision window (because we want loss only on code part)
     gt_code_start = len(bos + prompt + response_base + response_prefix)
     gt_code_end = gt_code_start + len(gt_code)
-    
+
     encoder = tokenizer(
         full_text,
         return_offsets_mapping=True,
@@ -120,15 +119,33 @@ def preprocess_single(
         truncation=True,
         padding=False,
     )
-    
-    input_ids = encoder["input_ids"] # This is what the model sees as input.
-    attn_mask = encoder["attention_mask"] # This is a binary mask (1 or 0) telling the model which tokens are real and which are padding.
-    offsets = encoder["offsets_mapping"] # This is the expected answer for each token in the sequence — basically a shifted copy of input_ids, except with some tokens masked to -100.
-    
-    labels = []
-    
-    # TODO: labels creation logic
-    
+
+    input_ids = encoder["input_ids"]  # This is what the model sees as input.
+    attn_mask = encoder[
+        "attention_mask"
+    ]  # This is a binary mask (1 or 0) telling the model which tokens are real and which are padding.
+    offsets = encoder[
+        "offset_mapping"
+    ]  # An offset mask (or offset mapping) is a list of pairs that record, for each token, the start and end character positions of that token in the original text string.
+
+    labels = [] # This is the expected answer for each token in the sequence — basically a shifted copy of input_ids, except with some tokens masked to -100.
+
+    # create labels (-100 for non-code parts, token ids for code parts that overlap with changed spans)
+    for (start, end), idx in zip(offsets, input_ids):
+        label_id = -100  # Default to -100 (to ignore in loss)
+
+        if start >= gt_code_start and end <= gt_code_end:
+            local_start = start - gt_code_start
+            local_end = end - gt_code_start
+
+            # keep only if label overlaps with changed spans
+            for c_start, c_end in changed_spans_local:
+                if spans_overlap((local_start, local_end), (c_start, c_end)):
+                    label_id = idx
+                    break
+
+        labels.append(label_id)
+
     return {
         "input_ids": input_ids,
         "attention_mask": attn_mask,
@@ -170,7 +187,7 @@ def preprocess(
                 if not obf_code or not gt_code:
                     continue
                 feat = preprocess_single(obf_code, gt_code, max_len, tokenizer)
-       
+
                 if not all(
                     k in feat for k in ("input_ids", "attention_mask", "labels")
                 ):
