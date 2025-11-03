@@ -54,3 +54,13 @@ services:
     env_file:
       - .env
     profiles: ["api", "full"]
+
+  tuner:
+    container_name: tuner
+    build:
+      dockerfile: docker/tuner.Dockerfile
+    volumes:
+      - ./out:/app/out/
+    working_dir: /app
+    gpus: all
+    profiles: ["tuner"]
