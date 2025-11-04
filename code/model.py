@@ -65,7 +65,7 @@ class LLM_Model:
             torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
         ).to(self.device)
 
-        self.tokenizer = AutoTokenizer.from_pretrained(model_path)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)i
 
         if self.tokenizer.pad_token_id is None:
             # fallback: use eos as pad
