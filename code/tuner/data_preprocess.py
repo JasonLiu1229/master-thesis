@@ -128,7 +128,9 @@ def preprocess_single(
         "offset_mapping"
     ]  # An offset mask (or offset mapping) is a list of pairs that record, for each token, the start and end character positions of that token in the original text string.
 
-    labels = [] # This is the expected answer for each token in the sequence — basically a shifted copy of input_ids, except with some tokens masked to -100.
+    labels = (
+        []
+    )  # This is the expected answer for each token in the sequence — basically a shifted copy of input_ids, except with some tokens masked to -100.
 
     # create labels (-100 for non-code parts, token ids for code parts that overlap with changed spans)
     for (start, end), idx in zip(offsets, input_ids):

@@ -13,10 +13,19 @@ LOG_DIR: /out/logs
 
 # Model parameters
 MAX_LENGTH: 4096
-USE_QLORA: True
 
 BATCH_SIZE_PER_DEVICE: 1
 GRAD_ACCUM_STEPS: 8
 NUM_EPOCHS: 3
 LEARNING_RATE: 1e-4
 MAX_SAVE_TOTAL: 3
+LOGGING_STEPS: 20
+EVAL_STEPS: 200
+SAVE_STEPS: 200
+SAVE_TOTAL_LIMIT: 3
+
+# QLoRA parameters (https://datawizz.ai/blog/understanding-lora-adapters-rank-and-alpha-parameters)
+USE_QLORA: True
+RANK: 16 # The rank determines the dimensionality of the low-rank decomposition. High R -> higher adaptation capacity but more memory and compute cost.
+LORA_ALPHA: 32 # is a scaling factor that controls the contribution of the LoRA adaptation to the original weights.
+LORA_DROPOUT: 0.05 # in LoRA randomly zeros out some of the activations before the low-rank adapters during training, just like regular dropout.
