@@ -12,8 +12,9 @@ SAVE_MODEL_PATH: /out/model/checkpoint.ckpt
 LOG_DIR: /out/logs
 
 # Model parameters
-MAX_LENGTH: 4096
+MODEL_ID: codellama/CodeLlama-13b-hf
 
+MAX_LENGTH: 4096
 BATCH_SIZE_PER_DEVICE: 1
 GRAD_ACCUM_STEPS: 8
 NUM_EPOCHS: 3

@@ -10,6 +10,7 @@ class ModelStyle(Enum):
     )
     Plain = "plain"
 
+_llm_model = None  # singleton
 
 class LLM_Model:
     def __init__(self, device=None):
@@ -144,15 +145,23 @@ class LLM_Model:
 
         return text
 
+def get_model(model_id) -> LLM_Model:
+    global _llm_model
+    if _llm_model is None:
+        print("Loading LLM model into memory...")
+        m = LLM_Model()
+        m.load_model(model_id)
+        _llm_model = m
+    return _llm_model
 
 if __name__ == "__main__":
     model_id = "codellama/CodeLlama-13b-hf"
 
-    llm_model = LLM_Model()
-    llm_model.load_model(model_id)
+    llm_model = get_model(model_id)
 
     prompt = (
         "Hello, this is a test prompt for the LLM model. Are you working correctly?"
     )
+    
     response = llm_model.generate(prompt)
     print(response)

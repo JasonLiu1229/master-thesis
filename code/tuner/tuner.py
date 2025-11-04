@@ -13,6 +13,8 @@ from transformers import (
     TrainingArguments,
 )
 
+from model import LLM_Model, get_model
+
 config = {}
 with open("config.yml", "r") as f:
     config = yaml.safe_load(f)
