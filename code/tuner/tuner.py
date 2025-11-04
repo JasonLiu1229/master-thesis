@@ -20,5 +20,16 @@ with open("config.yml", "r") as f:
     config = yaml.safe_load(f)
 
 
+def define_base():
+    """
+    This function will set the base function for the tune function. Where we set what model we use and how the Lora config is set.
+
+    Return:
+        - Model
+        - AutoTokenizer
+    """
+    pass
+
+
 def tune():
     pass
