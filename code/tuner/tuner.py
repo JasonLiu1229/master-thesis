@@ -3,6 +3,8 @@ import os
 import torch
 import yaml
 from datasets import DatasetDict
+
+from model import get_model, LLM_Model
 from peft import get_peft_model, LoraConfig
 from transformers import (
     AutoModelForCausalLM,
@@ -12,8 +14,6 @@ from transformers import (
     Trainer,
     TrainingArguments,
 )
-
-from model import LLM_Model, get_model
 
 config = {}
 with open("config.yml", "r") as f:

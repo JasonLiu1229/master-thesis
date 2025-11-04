@@ -7,9 +7,9 @@ from typing import Any, Dict, List, Tuple
 import yaml
 from datasets import Dataset, DatasetDict
 
-from transformers import AutoTokenizer
-
 from model import LLM_Model
+
+from transformers import AutoTokenizer
 
 SYSTEM_INSTRUCTION = (
     "You are a code refactoring assistant.\n"
