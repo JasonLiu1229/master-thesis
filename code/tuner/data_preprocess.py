@@ -70,7 +70,7 @@ def spans_overlap(span1: Tuple[int, int], span2: Tuple[int, int]) -> bool:
     return not (span1[1] <= span2[0] or span2[1] <= span1[0])
 
 
-# for instruct models
+# for instruct models (not used rn)
 def build_chat_prompt(obf_code: str) -> str:
     user_msg = SYSTEM_INSTRUCTION + "\n\n" + USER_PROMPT_TEMPLATE.format(obf=obf_code)
 
