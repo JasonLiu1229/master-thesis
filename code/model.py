@@ -1,4 +1,3 @@
-import os
 from enum import Enum
 
 import torch
@@ -32,7 +31,7 @@ class LLM_Model:
 
     @torch.inference_mode()
     def generate(
-        self, prompt, max_new_tokens=128, temperature=0.0, top_p=1.0, do_sample=False
+        self, prompt, max_new_tokens=256, temperature=0.2, top_p=0.9, do_sample=False
     ):
         assert self.model is not None, "Model not loaded."
         assert self.tokenizer is not None, "Tokenizer not loaded."
@@ -49,12 +48,12 @@ class LLM_Model:
             use_cache=True,
             pad_token_id=self.tokenizer.pad_token_id,
             eos_token_id=self.tokenizer.eos_token_id,
-            num_beams=1,
         )
-
-        text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        return self._postprocess(text, formatted_prompt)
-
+        
+        generated_ids = outputs[0][inputs["input_ids"].shape[1]:]
+        text = self.tokenizer.decode(generated_ids, skip_special_tokens=True)
+        return text.strip()
+    
     def get_model(self):
         return self.model
 
@@ -77,6 +76,14 @@ class LLM_Model:
         self.model.eval()
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)
+
+        if "qwen" in model_path.lower():
+            if self.tokenizer.eos_token is None:
+                self.tokenizer.eos_token = "<|im_end|>"
+            if self.tokenizer.pad_token is None:
+                self.tokenizer.pad_token = getattr(
+                    self.tokenizer, "unk_token", "<|extra_0|>"
+                )
 
         if self.tokenizer.pad_token_id is None:
             self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
@@ -115,6 +122,8 @@ class LLM_Model:
 
     def _infer_model_style(self, model_name: str):
         name = model_name.lower()
+        if "qwen" in name:
+            return ModelStyle.Plain
         if "codellama" in name and "instruct" in name:
             return ModelStyle.LlamaInstruct
         if "llama" in name and "instruct" in name:
@@ -122,22 +131,24 @@ class LLM_Model:
         return ModelStyle.Plain
 
     def _build_model_input(self, user_prompt: str) -> str:
+        if "qwen" in self.model_id.lower() and getattr(self.tokenizer, "chat_template", None):
+            # TODO: This needs to be changed later when we have like a tuned model, so the system knows it is a coding renaming assistant
+            messages = [
+                {"role": "system", "content": "You are a helpful coding assistant."},
+                {"role": "user", "content": user_prompt.strip()},
+            ]
+
+            return self.tokenizer.apply_chat_template(
+                messages, add_generation_prompt=True, tokenize=False
+            )
         if self.model_style == ModelStyle.LlamaInstruct:
             system_msg = "You are a helpful, honest, coding-aware assistant. Answer as clearly as possible."
             return f"[INST] <<SYS>>\n{system_msg}\n<</SYS>>\n\n{user_prompt.strip()} [/INST]"
         return user_prompt.strip()
 
     def _postprocess(self, full_decoded_text: str, full_prompt: str) -> str:
-        text = full_decoded_text
-        if text.startswith(full_prompt):
-            text = text[len(full_prompt) :]
-        text = text.lstrip()
-        for marker in ("[INST]", "</s>"):
-            idx = text.find(marker)
-            if idx != -1:
-                text = text[:idx]
-        return text
-
+        # No-op
+        return full_decoded_text
 
 def get_model(model_id) -> LLM_Model:
     global _llm_model
@@ -159,7 +170,7 @@ def update_model(model: LLM_Model):
 
 
 if __name__ == "__main__":
-    model_id = "codellama/CodeLlama-13b-hf"
+    model_id = "Qwen/Qwen2.5-Coder-7B-Instruct"
 
     llm_model = get_model(model_id)
 

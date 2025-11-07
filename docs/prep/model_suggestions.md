@@ -18,7 +18,9 @@ It also has a lightweight version of 7B parameters, making it easier for lightwe
 
 It inherits LLaMA architecture improvements. This means it includes several like optimizations made by LLaMA.
 
-It also has a high code reasoning aspect, could mean that naming tasks are easier because it reasons over it.
+It also has a high code reasoning aspect, could mean that naming tasks are easier because it reasons over it. For instance we can look at the human eval benchmarking
+
+Top 3 in huggingface ranking for Java related code (07-11-25).
 
 ### StarCoder / StarCoder2 (by BigCode)
 
@@ -38,6 +40,12 @@ It is also [fine-tunable](https://medium.com/@aastha.code/finetuning-codestral-2
 
 It supports instruction-style usage (instruct/“chat” mode) and fill-in-the-middle (FIM) code generation (prefix + suffix → fill).
 
+### Qwen2.5
+
+[Qwen2.5](https://ollama.com/library/qwen2.5-coder)
+
+Qwen2.5-Coder offers state-of-the-art open-source performance on major code benchmarks such as HumanEval, MBPP, McEval, and MdEval, providing significantly stronger semantic code understanding than other models, which makes it an excellent base model for context-aware identifier naming.
+
 ## Paid
 
 Most of these options won't be considered, because they are paid variants. But here is a list of potential models, in case you are interested.
@@ -52,12 +60,4 @@ Note: the description will be less descriptive because it is more meant to state
 
 ## Selected model (OS)
 
-The selection of CodeLlama as the foundational model for this research is motivated by three central considerations: scientific reproducibility, architectural suitability for code comprehension tasks, and practical feasibility for controlled experimentation.
-
-First, CodeLlama is fully open source, which ensures that every stage of the research pipeline—including preprocessing, fine-tuning, inference, and evaluation—can be reproduced and independently validated. This level of transparency is critical for academic work and cannot be guaranteed when using proprietary large language models that do not disclose their training data, architecture details, or model weights.
-
-Second, CodeLlama is specifically optimized for programming-related tasks. Its training corpus, tokenizer configuration, and instruction-tuned variants are designed to model the syntactic and semantic structures of source code more effectively than general-purpose language models. This specialization aligns directly with the objectives of this thesis, which focuses on improving the understandability of test code and generating or refining identifier names. The model’s strong baseline performance on established coding benchmarks provides a reliable foundation for investigating the incremental effects of fine-tuning.
-
-Finally, CodeLlama benefits from a mature ecosystem of fine-tuning frameworks, documentation, and community support. This facilitates efficient experimentation and reduces engineering overhead, allowing the research to focus on methodological rigor rather than model-integration challenges. Moreover, the availability of multiple model sizes enables controlled comparisons without altering the underlying architecture, improving the internal validity of the experimental design.
-
-For these reasons, CodeLlama represents a technically robust, scientifically transparent, and practically feasible choice for conducting research on machine learning-based improvements to test code understandability.
+Qwen2.5-Coder was chosen because it is one of the strongest open-source code-oriented language models currently available. It consistently outperforms earlier open models such as CodeLlama and StarCoder2 across major coding benchmarks, demonstrating superior semantic understanding of functions, variables, and control flow—capabilities that are essential for generating meaningful and context-aware identifier names. The model is fully open source under Apache 2.0, allowing transparent, reproducible experimentation, and it offers excellent fine-tuning support through HuggingFace, LoRA, and QLoRA pipelines. Its stability, high code-reasoning performance, and efficient training ecosystem make Qwen2.5-Coder a technically robust and scientifically credible choice for research on identifier naming and test-code understandability.

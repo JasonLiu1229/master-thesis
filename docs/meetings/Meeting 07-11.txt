@@ -1,0 +1,6 @@
+Update on status - review api
+
+Update on status - Codelamma model tuning
+	- chosen model, good enough?
+		- it is good but have some validation behind it
+	- currently still writing code

@@ -1,7 +1,7 @@
 import anyio
 from model import get_model
 
-model_id = "codellama/CodeLlama-7b-Instruct-hf"
+model_id = "Qwen/Qwen2.5-Coder-7B-Instruct"
 
 
 async def ask_llm(user_message: str) -> str:

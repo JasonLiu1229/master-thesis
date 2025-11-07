@@ -12,7 +12,7 @@ SAVE_MODEL_PATH: /out/model/checkpoint.ckpt
 LOG_DIR: /out/logs
 
 # Model parameters
-MODEL_ID: codellama/CodeLlama-13b-hf
+MODEL_ID: Qwen/Qwen2.5-Coder-7B-Instruct
 
 MAX_LENGTH: 4096
 BATCH_SIZE_PER_DEVICE: 1
