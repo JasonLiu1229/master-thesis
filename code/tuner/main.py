@@ -59,6 +59,17 @@ def argument_parser():
         action="store_true",
         help="Preprocess the dataset.",
     )
+    parser.add_argument(
+        "--tune",
+        action="store_true",
+        help="Tune the LLM model.",
+    )
+    
+    # parser.add_argument(
+    #     "--eval",
+    #     action="store_true",
+    #     help="Evaluate the tuned LLM model.",
+    # )
     return parser
 
 if __name__ == "__main__":
@@ -67,4 +78,6 @@ if __name__ == "__main__":
 
     if args.preprocess:
         _preprocess_dataset()
-    tune_model()
+    
+    if args.tune:
+        tune_model()
