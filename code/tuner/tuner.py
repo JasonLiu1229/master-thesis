@@ -14,6 +14,10 @@ from transformers import (
     TrainingArguments,
 )
 
+from model import LLM_Model
+
+_llm_model = None  
+
 config = {}
 with open("config.yml", "r") as f:
     config = yaml.safe_load(f)
@@ -26,6 +30,16 @@ def load_ds(path: str) -> DatasetDict:
     except Exception as e:
         raise RuntimeError(f"Failed to load dataset from {path}: {e}")
 
+def set_llm_model(model, model_name, tokenizer)-> LLM_Model:
+    global _llm_model
+    if _llm_model is None:
+        _llm_model = LLM_Model()
+    _llm_model.set_model(
+        model,
+        model_name,
+        tokenizer,
+    )
+    return _llm_model
 
 def define_base():
     """
@@ -35,10 +49,14 @@ def define_base():
         - Model
         - AutoTokenizer
     """
+    global _llm_model
+    if _llm_model is not None:
+        return _llm_model
+
     tokenizer = AutoTokenizer.from_pretrained(config["MODEL_NAME"], use_fast=True)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-
+    
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
@@ -81,13 +99,21 @@ def define_base():
     )
 
     model = get_peft_model(base_model, lora_config)
+    
+    _llm_model = set_llm_model(model, config["MODEL_NAME"], tokenizer)
+    
     return model, tokenizer
 
+def get_llm_model() -> LLM_Model:
+    global _llm_model
+    if _llm_model is None:
+        define_base()
+    return _llm_model
 
 def tune():
     output_dir = config["OUTPUT_DIR"]
-    train_data_path = output_dir + "/train_ds"
-    val_data_path = output_dir + "/val_ds"
+    train_data_path = output_dir + config['TRAIN_DIR']
+    val_data_path = output_dir + config['VAL_DIR']
     
     train_ds = load_ds(train_data_path)
     val_ds = load_ds(val_data_path)

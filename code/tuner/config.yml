@@ -1,9 +1,10 @@
 # Dataset directories
-TRAIN_DIR: /train_dir
-VAL_DIR: /val_dir
-TEST_DIR: /test_dir
+TRAIN_DIR: /train/
+VAL_DIR: /val/
+TEST_DIR: /test/
 
 OUTPUT_DIR: /out/data_preprocessed/
+INPUT_DIR: /in/
 
 # Model save path
 SAVE_MODEL_PATH: /out/model/
