@@ -4,14 +4,14 @@ FROM nvidia/cuda:13.0.1-cudnn-runtime-ubuntu24.04
 # ---- install Python 3.7 + pip ----
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        software-properties-common \
-        build-essential \
-        curl \
-        ca-certificates && \
+    software-properties-common \
+    build-essential \
+    curl \
+    ca-certificates && \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
-        python3.7 python3.7-dev python3.7-distutils python3-pip && \
+    python3.7 python3.7-dev python3.7-distutils python3-pip && \
     rm -rf /var/lib/apt/lists/*
 
 RUN ln -sf /usr/bin/python3.7 /usr/local/bin/python && \
@@ -28,7 +28,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # ---- system prerequisites ----
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bash zip unzip ca-certificates git \
- && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
 USER root
 ENV DEBIAN_FRONTEND=noninteractive
@@ -42,7 +42,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # ---- Python deps ----
 RUN apt-get update && apt-get install -y --no-install-recommends python3.7-venv && \
     rm -rf /var/lib/apt/lists/*
-    
+
 # # Create an isolated venv and use that pip
 RUN python3.7 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
@@ -52,11 +52,11 @@ RUN pip3 install "pybind11>=2.10,<2.12"
 
 WORKDIR /tmp/fastwer-build
 RUN pip3 download fastwer==0.1.3 --no-binary :all: \
- && tar -xzf fastwer-0.1.3.tar.gz \
- && cd fastwer-0.1.3 \
- && sed -i '1i #include <cstdint>' src/fastwer.hpp \
- && sed -i '2i #include <cstdint>' src/fastwer.cpp \
- && pip3 install --no-build-isolation .
+    && tar -xzf fastwer-0.1.3.tar.gz \
+    && cd fastwer-0.1.3 \
+    && sed -i '1i #include <cstdint>' src/fastwer.hpp \
+    && sed -i '2i #include <cstdint>' src/fastwer.cpp \
+    && pip3 install --no-build-isolation .
 
 COPY ../requirements/requirements_t1.txt /tmp/requirements.txt
 RUN pip3 install -r /tmp/requirements.txt

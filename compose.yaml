@@ -3,7 +3,7 @@ services:
     container_name: t1
     build:
       dockerfile: docker/t1.Dockerfile
-    volumes: 
+    volumes:
       - ./out:/app/code/out/
     working_dir: /app/code
     gpus: all
@@ -18,7 +18,7 @@ services:
     working_dir: /app/code
     gpus: all
     profiles: ["t2", "arno", "test"]
-  
+
   t3_a:
     container_name: t3_a
     build:
@@ -66,7 +66,6 @@ services:
     working_dir: /app
     gpus: all
     profiles: ["tuner"]
-
 
 volumes:
   hf_cache:

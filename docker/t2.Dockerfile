@@ -3,14 +3,14 @@ FROM nvidia/cuda:13.0.1-cudnn-runtime-ubuntu24.04
 # ---- install Python 3.8 + pip ----
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        software-properties-common \
-        build-essential \
-        curl \
-        ca-certificates && \
+    software-properties-common \
+    build-essential \
+    curl \
+    ca-certificates && \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
-        python3.8 python3.8-dev python3.8-distutils python3-pip && \
+    python3.8 python3.8-dev python3.8-distutils python3-pip && \
     rm -rf /var/lib/apt/lists/*
 
 RUN ln -sf /usr/bin/python3.8 /usr/local/bin/python && \
@@ -27,7 +27,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # ---- system prerequisites ----
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bash zip unzip ca-certificates git \
- && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
 USER root
 ENV DEBIAN_FRONTEND=noninteractive
@@ -43,9 +43,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3.8-venv 
     rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      build-essential python3.8-dev cmake ninja-build \
+    build-essential python3.8-dev cmake ninja-build \
     && rm -rf /var/lib/apt/lists/*
-    
+
 # # Create an isolated venv and use that pip
 RUN python3.8 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
@@ -59,11 +59,11 @@ ENV PIP_CONFIG_FILE=/dev/null
 # IDK WHY THIS NEEDS TO BE DIFFERENT THAN T1 BECAUSE ELSE IT KEEPS RUNNING INFINITE (SHIT PYTHON)
 WORKDIR /tmp/fastwer-build
 RUN python3.8 -m pip download fastwer==0.1.3 --no-binary :all: \
- && tar -xzf fastwer-0.1.3.tar.gz \
- && cd fastwer-0.1.3 \
- && sed -i '1i #include <cstdint>' src/fastwer.hpp \
- && sed -i '2i #include <cstdint>' src/fastwer.cpp \
- && python3.8 -m pip install --no-build-isolation --no-use-pep517 --no-index --no-deps .
+    && tar -xzf fastwer-0.1.3.tar.gz \
+    && cd fastwer-0.1.3 \
+    && sed -i '1i #include <cstdint>' src/fastwer.hpp \
+    && sed -i '2i #include <cstdint>' src/fastwer.cpp \
+    && python3.8 -m pip install --no-build-isolation --no-use-pep517 --no-index --no-deps .
 
 # Sanity check
 RUN python3.8 -c "import fastwer; print('fastwer imported OK')"
