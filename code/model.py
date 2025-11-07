@@ -73,13 +73,6 @@ class LLM_Model:
             torch_dtype=torch_dtype, device_map="auto", low_cpu_mem_usage=True
         )
 
-        if os.getenv("LLM_4BIT", "0") == "1":
-            load_kwargs["quantization_config"] = BitsAndBytesConfig(
-                load_in_4bit=True,
-                bnb_4bit_quant_type="nf4",
-                bnb_4bit_compute_dtype=torch_dtype,
-            )
-
         self.model = AutoModelForCausalLM.from_pretrained(model_path, **load_kwargs)
         self.model.eval()
 
@@ -151,7 +144,11 @@ def get_model(model_id) -> LLM_Model:
     if _llm_model is None:
         print("Loading LLM model into memory...")
         m = LLM_Model()
-        m.load_model(model_id)
+        try:
+            m.load_model(model_id)
+        except Exception as e:
+            print(f"Error loading model {model_id}: {e}")
+            raise
         _llm_model = m
     return _llm_model
 

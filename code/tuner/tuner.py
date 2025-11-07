@@ -44,13 +44,13 @@ def define_base():
             config["MODEL_NAME"],
             quantization_config=bnb_config,
             devide_map='auto',
-            torch_dtype=torch.bfloat16 if device == "cuda" else torch.bfloat32,
+            torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
         ).to(device)
     else:
         base_model = AutoModelForCausalLM.from_pretrained(
             config["MODEL_NAME"],
             device_map='auto',
-            torch_dtype=torch.bfloat16 if device == "cuda" else torch.bfloat32,
+            torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
         ).to(device)
     
     lora_config = LoraConfig(
