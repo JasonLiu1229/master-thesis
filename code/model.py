@@ -2,7 +2,7 @@ import os
 from enum import Enum
 
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 
 class ModelStyle(Enum):
@@ -77,10 +77,10 @@ class LLM_Model:
         self.model.eval()
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)
-        
+
         if self.tokenizer.pad_token_id is None:
             self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
-            
+
         self.model.generation_config.pad_token_id = self.tokenizer.pad_token_id
 
         self.model_id = model_path
