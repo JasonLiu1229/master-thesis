@@ -6,7 +6,7 @@ TEST_DIR: /test_dir
 OUTPUT_DIR: /out/data_preprocessed/
 
 # Model save path
-SAVE_MODEL_PATH: /out/model/checkpoint.ckpt
+SAVE_MODEL_PATH: /out/model/
 
 # Logs
 LOG_DIR: /out/logs
@@ -18,7 +18,7 @@ MAX_LENGTH: 4096
 BATCH_SIZE_PER_DEVICE: 1
 GRAD_ACCUM_STEPS: 8
 NUM_EPOCHS: 3
-LEARNING_RATE: 1e-4
+LEARNING_RATE: 0.0001
 MAX_SAVE_TOTAL: 3
 LOGGING_STEPS: 20
 EVAL_STEPS: 200
