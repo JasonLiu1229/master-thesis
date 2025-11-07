@@ -54,6 +54,8 @@ services:
     env_file:
       - .env
     profiles: ["api", "full"]
+    volumes:
+      - hf_cache:/root/.cache/huggingface/
 
   tuner:
     container_name: tuner
@@ -64,3 +66,7 @@ services:
     working_dir: /app
     gpus: all
     profiles: ["tuner"]
+
+
+volumes:
+  hf_cache:
