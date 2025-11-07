@@ -31,12 +31,12 @@ class LLM_Model:
 
     @torch.inference_mode()
     def generate(
-        self, prompt, max_new_tokens=256, temperature=0.2, top_p=0.9, do_sample=False
+        self, prompt, max_new_tokens=256, temperature=0.2, top_p=0.9, do_sample=False, sys_role: str = "You are a helpful coding assistant."
     ):
         assert self.model is not None, "Model not loaded."
         assert self.tokenizer is not None, "Tokenizer not loaded."
 
-        formatted_prompt = self._build_model_input(prompt)
+        formatted_prompt = self._build_model_input(prompt, sys_role=sys_role)
         inputs = self.tokenizer(formatted_prompt, return_tensors="pt")
 
         outputs = self.model.generate(
@@ -130,11 +130,10 @@ class LLM_Model:
             return ModelStyle.LlamaInstruct
         return ModelStyle.Plain
 
-    def _build_model_input(self, user_prompt: str) -> str:
+    def _build_model_input(self, user_prompt: str, sys_role:str = "You are a helpful coding assistant.") -> str:
         if "qwen" in self.model_id.lower() and getattr(self.tokenizer, "chat_template", None):
-            # TODO: This needs to be changed later when we have like a tuned model, so the system knows it is a coding renaming assistant
             messages = [
-                {"role": "system", "content": "You are a helpful coding assistant."},
+                {"role": "system", "content": sys_role},
                 {"role": "user", "content": user_prompt.strip()},
             ]
 
