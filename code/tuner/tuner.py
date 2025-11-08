@@ -19,6 +19,12 @@ from transformers import (
 
 logger = logging.getLogger('tuner')
 
+os.makedirs('out/logs/', exist_ok=True)
+
+if not os.path.exists('out/logs/tuner.log'):
+    with open('out/logs/tuner.log', 'w'):
+        pass
+
 logging.basicConfig(filename='out/logs/tuner.log', encoding='utf-8', level=logging.DEBUG)
 
 _llm_model = None
@@ -61,7 +67,7 @@ def define_base():
     if _llm_model is not None:
         return _llm_model
 
-    tokenizer = AutoTokenizer.from_pretrained(config["MODEL_NAME"], use_fast=True)
+    tokenizer = AutoTokenizer.from_pretrained(config["MODEL_ID"], use_fast=True)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -108,7 +114,7 @@ def define_base():
 
     model = get_peft_model(base_model, lora_config)
 
-    _llm_model = set_llm_model(model, config["MODEL_NAME"], tokenizer)
+    _llm_model = set_llm_model(model, config["MODEL_ID"], tokenizer)
 
     return model, tokenizer
 
