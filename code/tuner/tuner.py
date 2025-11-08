@@ -122,6 +122,7 @@ def define_base():
 def get_llm_model() -> LLM_Model:
     global _llm_model
     if _llm_model is None:
+        logger.info("Defining base LLM model...")
         define_base()
     return _llm_model
 
