@@ -1,8 +1,21 @@
 import argparse
 
 import yaml
+import logging
+import os
+
 from data_preprocess import preprocess
 from tuner import get_llm_model, tune
+
+logger = logging.getLogger('tuner')
+
+os.makedirs('out/logs/', exist_ok=True)
+
+if not os.path.exists('out/logs/tuner.log'):
+    with open('out/logs/tuner.log', 'w'):
+        pass
+
+logging.basicConfig(filename='out/logs/tuner.log', encoding='utf-8', level=logging.DEBUG)
 
 config = {}
 with open("config.yml", "r") as f:
@@ -13,6 +26,8 @@ def _preprocess_dataset():
     llm_model = get_llm_model()
 
     # train dataset
+    logger.info("Preprocessing training dataset...")
+    
     train_path = config["INPUT_DIR"] + config["TRAIN_DIR"]
     train_output_path = config["OUTPUT_DIR"] + config["TRAIN_DIR"]
 
@@ -26,6 +41,8 @@ def _preprocess_dataset():
     )
 
     # val dataset
+    logger.info("Preprocessing validation dataset...")
+    
     val_path = config["INPUT_DIR"] + config["VAL_DIR"]
     val_output_path = config["OUTPUT_DIR"] + config["VAL_DIR"]
 
@@ -39,6 +56,8 @@ def _preprocess_dataset():
     )
 
     # test dataset
+    logger.info("Preprocessing test dataset...")
+    
     test_path = config["INPUT_DIR"] + config["TEST_DIR"]
     test_output_path = config["OUTPUT_DIR"] + config["TEST_DIR"]
 
@@ -78,7 +97,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.preprocess:
+        logging.info("Preprocessing dataset...")
         _preprocess_dataset()
 
     if args.tune:
+        logging.info("Tuning model...")
         tune_model()

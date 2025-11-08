@@ -17,4 +17,4 @@ COPY ../code/model.py /app
 
 WORKDIR /app
 
-CMD ["python3", "main.py"]
+CMD ["python3", "main.py", "--tune", "--preprocess"]

@@ -1,8 +1,11 @@
+import logging
 import os
 
 import torch
 import yaml
 from datasets import DatasetDict
+
+from model import LLM_Model
 
 from peft import get_peft_model, LoraConfig
 from transformers import (
@@ -14,9 +17,11 @@ from transformers import (
     TrainingArguments,
 )
 
-from model import LLM_Model
+logger = logging.getLogger('tuner')
 
-_llm_model = None  
+logging.basicConfig(filename='out/logs/tuner.log', encoding='utf-8', level=logging.DEBUG)
+
+_llm_model = None
 
 config = {}
 with open("config.yml", "r") as f:
@@ -28,9 +33,11 @@ def load_ds(path: str) -> DatasetDict:
     try:
         return DatasetDict.load_from_disk(path)
     except Exception as e:
+        logger.error(f"Failed to load dataset from {path}: {e}")
         raise RuntimeError(f"Failed to load dataset from {path}: {e}")
 
-def set_llm_model(model, model_name, tokenizer)-> LLM_Model:
+
+def set_llm_model(model, model_name, tokenizer) -> LLM_Model:
     global _llm_model
     if _llm_model is None:
         _llm_model = LLM_Model()
@@ -40,6 +47,7 @@ def set_llm_model(model, model_name, tokenizer)-> LLM_Model:
         tokenizer,
     )
     return _llm_model
+
 
 def define_base():
     """
@@ -56,7 +64,7 @@ def define_base():
     tokenizer = AutoTokenizer.from_pretrained(config["MODEL_NAME"], use_fast=True)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    
+
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
@@ -99,10 +107,11 @@ def define_base():
     )
 
     model = get_peft_model(base_model, lora_config)
-    
+
     _llm_model = set_llm_model(model, config["MODEL_NAME"], tokenizer)
-    
+
     return model, tokenizer
+
 
 def get_llm_model() -> LLM_Model:
     global _llm_model
@@ -110,11 +119,12 @@ def get_llm_model() -> LLM_Model:
         define_base()
     return _llm_model
 
+
 def tune():
     output_dir = config["OUTPUT_DIR"]
-    train_data_path = output_dir + config['TRAIN_DIR']
-    val_data_path = output_dir + config['VAL_DIR']
-    
+    train_data_path = output_dir + config["TRAIN_DIR"]
+    val_data_path = output_dir + config["VAL_DIR"]
+
     train_ds = load_ds(train_data_path)
     val_ds = load_ds(val_data_path)
 
@@ -124,7 +134,7 @@ def tune():
         tokenizer=tokenizer,
         mlm=False,
     )
-    
+
     args = TrainingArguments(
         output_dir=config["SAVE_MODEL_PATH"],
         num_train_epochs=config["NUM_EPOCHS"],
@@ -144,7 +154,7 @@ def tune():
         gradient_checkpointing=True,
         report_to=["tensorboard"],
     )
-    
+
     trainer = Trainer(
         model=model,
         args=args,
@@ -153,10 +163,10 @@ def tune():
         eval_dataset=val_ds,
     )
 
-    print("Starting training...")
+    logger.info("Starting training...")
     trainer.train()
-    
-    adapter_dir = os.path.join('out/', "adapter")
+
+    adapter_dir = os.path.join("out/", "adapter")
     os.makedirs(adapter_dir, exist_ok=True)
     model.save_pretrained(adapter_dir)
     tokenizer.save_pretrained(adapter_dir)

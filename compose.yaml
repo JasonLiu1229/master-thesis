@@ -65,7 +65,7 @@ services:
       - ./out:/app/out/
     working_dir: /app
     gpus: all
-    profiles: ["tuner"]
+    profiles: ["tune"]
 
 volumes:
   hf_cache:
