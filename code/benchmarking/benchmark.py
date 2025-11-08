@@ -6,8 +6,8 @@ import json
 import csv
 import os
 
-INPUT_DIR = 'out/'
-OUTPUT_FILE = 'out/benchmark.csv'
+INPUT_DIR = 'out/benchmark/'
+OUTPUT_FILE = 'out/benchmark/benchmark.csv'
 
 def main():
     assert os.path.exists(INPUT_DIR), f"Input directory '{INPUT_DIR}' does not exist."
