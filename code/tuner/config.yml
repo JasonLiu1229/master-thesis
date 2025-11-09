@@ -4,7 +4,7 @@ VAL_DIR: /val/
 TEST_DIR: /test/
 
 OUTPUT_DIR: /out/data_preprocessed/
-INPUT_DIR: /in/
+INPUT_DIR: /in
 
 # Model save path
 SAVE_MODEL_PATH: /out/model/

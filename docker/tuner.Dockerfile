@@ -1,9 +1,7 @@
 FROM python:3.13.9-slim-bookworm
 
 # ---- system prerequisites ----
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    bash zip unzip ca-certificates git build-essential gcc g++ \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
 
 # ---- Python dependencies ----
 COPY requirements/requirements_tuner.txt /tmp/requirements.txt
@@ -14,7 +12,9 @@ RUN pip3 install torch torchvision --index-url https://download.pytorch.org/whl/
 
 COPY ../code/tuner /app
 COPY ../code/model.py /app
-COPY ../tools/java-dataset-converter-llm/dataset /app/in
+COPY ../tools/java-dataset-converter-llm/dataset/test/jsonl /app/in/test
+COPY ../tools/java-dataset-converter-llm/dataset/train/jsonl /app/in/train
+COPY ../tools/java-dataset-converter-llm/dataset/val/jsonl /app/in/val
 
 WORKDIR /app
 
