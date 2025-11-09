@@ -14,6 +14,7 @@ RUN pip3 install torch torchvision --index-url https://download.pytorch.org/whl/
 
 COPY ../code/tuner /app
 COPY ../code/model.py /app
+COPY ../tools/java-dataset-converter-llm/dataset /app/in
 
 WORKDIR /app
 

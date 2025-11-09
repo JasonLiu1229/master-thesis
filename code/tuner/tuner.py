@@ -27,7 +27,7 @@ if not os.path.exists('out/logs/tuner.log'):
 
 logging.basicConfig(filename='out/logs/tuner.log', encoding='utf-8', level=logging.DEBUG)
 
-_llm_model = None
+_llm_model: LLM_Model = None
 
 config = {}
 with open("config.yml", "r") as f:
@@ -65,7 +65,7 @@ def define_base():
     """
     global _llm_model
     if _llm_model is not None:
-        return _llm_model
+        return _llm_model.get_model(), _llm_model.get_tokenizer()
 
     tokenizer = AutoTokenizer.from_pretrained(config["MODEL_ID"], use_fast=True)
 
@@ -75,19 +75,27 @@ def define_base():
         tokenizer.pad_token = tokenizer.eos_token
 
     if config["USE_QLORA"]:
-        bnb_config = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_use_double_quant=True,
-            bnb_4bit_quant_type="nf4",
-            bnb_4bit_compute_type=torch.bfloat16,
-        )
-
-        base_model = AutoModelForCausalLM.from_pretrained(
+        if not torch.cuda.is_available():
+            logger.warning("QLoRA is enabled but CUDA is not available. Falling back to non-quantized model.")
+            base_model = AutoModelForCausalLM.from_pretrained(
             config["MODEL_ID"],
-            quantization_config=bnb_config,
-            devide_map="auto",
+            device_map="auto",
             torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
-        )
+            )
+        else:
+            bnb_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_use_double_quant=True,
+                bnb_4bit_quant_type="nf4",
+                bnb_4bit_compute_type=torch.bfloat16,
+            )
+
+            base_model = AutoModelForCausalLM.from_pretrained(
+                config["MODEL_ID"],
+                quantization_config=bnb_config,
+                device_map="auto",
+                torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
+            )
     else:
         base_model = AutoModelForCausalLM.from_pretrained(
             config["MODEL_ID"],
@@ -114,6 +122,10 @@ def define_base():
 
     model = get_peft_model(base_model, lora_config)
 
+    try:
+        model.config.use_cache = False
+    except Exception:
+        pass
     _llm_model = set_llm_model(model, config["MODEL_ID"], tokenizer)
 
     return model, tokenizer
@@ -157,7 +169,7 @@ def tune():
         eval_steps=config["EVAL_STEPS"],
         save_steps=config["EVAL_STEPS"],
         save_total_limit=config["MAX_SAVE_TOTAL"],
-        bf16=torch.cuda.is_available(),  # use bf16 if available
+        bf16=torch.cuda.is_bf16_supported(),
         gradient_checkpointing=True,
         report_to=["tensorboard"],
     )
