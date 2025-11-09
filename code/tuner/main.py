@@ -15,7 +15,13 @@ if not os.path.exists('out/logs/tuner.log'):
     with open('out/logs/tuner.log', 'w'):
         pass
 
-logging.basicConfig(filename='out/logs/tuner.log', encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(
+    format="%(asctime)s %(levelname)-8s %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    filename="out/logs/tuner.log",
+    encoding="utf-8",
+    level=logging.INFO,
+)
 
 config = {}
 with open("config.yml", "r") as f:

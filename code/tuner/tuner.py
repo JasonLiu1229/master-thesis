@@ -17,15 +17,21 @@ from transformers import (
     TrainingArguments,
 )
 
-logger = logging.getLogger('tuner')
+logger = logging.getLogger("tuner")
 
-os.makedirs('out/logs/', exist_ok=True)
+os.makedirs("out/logs/", exist_ok=True)
 
-if not os.path.exists('out/logs/tuner.log'):
-    with open('out/logs/tuner.log', 'w'):
+if not os.path.exists("out/logs/tuner.log"):
+    with open("out/logs/tuner.log", "w"):
         pass
 
-logging.basicConfig(filename='out/logs/tuner.log', encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(
+    format="%(asctime)s %(levelname)-8s %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    filename="out/logs/tuner.log",
+    encoding="utf-8",
+    level=logging.INFO,
+)
 
 _llm_model: LLM_Model = None
 
@@ -76,11 +82,13 @@ def define_base():
 
     if config["USE_QLORA"]:
         if not torch.cuda.is_available():
-            logger.warning("QLoRA is enabled but CUDA is not available. Falling back to non-quantized model.")
+            logger.warning(
+                "QLoRA is enabled but CUDA is not available. Falling back to non-quantized model."
+            )
             base_model = AutoModelForCausalLM.from_pretrained(
-            config["MODEL_ID"],
-            device_map="auto",
-            torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
+                config["MODEL_ID"],
+                device_map="auto",
+                torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
             )
         else:
             bnb_config = BitsAndBytesConfig(

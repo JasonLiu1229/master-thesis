@@ -5,3 +5,5 @@ rep_package_previous/
 */dataset/
 .env
 # benchmark_out/
+
+out/logs/*
