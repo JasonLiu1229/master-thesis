@@ -4,6 +4,7 @@ import logging
 import os
 import random
 from tqdm import tqdm
+from tqdm.contrib.logging import logging_redirect_tqdm
 from typing import Any, Dict, List, Tuple
 
 import yaml
@@ -175,27 +176,28 @@ def preprocess(
     all_data: List[Dict[str, Any]] = []
 
     logger.info(f"Preprocessing files in {input_dir}...")
-    for _, file in enumerate(tqdm(files, desc="Files")):
-        input_path = os.path.join(input_dir, file)
-        with open(input_path, "r", encoding="utf-8") as f:
-            for line in f:
-                if not line.strip():
-                    continue
-                entry = json.loads(line)
-                obf_code = entry.get("prompt")
-                gt_code = entry.get("response")
+    with logging_redirect_tqdm():
+        for _, file in enumerate(tqdm(files, desc="Files")):
+            input_path = os.path.join(input_dir, file)
+            with open(input_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    if not line.strip():
+                        continue
+                    entry = json.loads(line)
+                    obf_code = entry.get("prompt")
+                    gt_code = entry.get("response")
 
-                if not obf_code or not gt_code:
-                    continue
+                    if not obf_code or not gt_code:
+                        continue
 
-                feat = preprocess_single(obf_code, gt_code, max_len, tokenizer)
+                    feat = preprocess_single(obf_code, gt_code, max_len, tokenizer)
 
-                if not all(
-                    k in feat for k in ("input_ids", "attention_mask", "labels")
-                ):
-                    continue
+                    if not all(
+                        k in feat for k in ("input_ids", "attention_mask", "labels")
+                    ):
+                        continue
 
-                all_data.append(feat)
+                    all_data.append(feat)
 
     if not all_data:
         logging.error("No valid examples found after preprocessing.")
