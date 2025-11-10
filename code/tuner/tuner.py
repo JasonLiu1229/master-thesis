@@ -6,6 +6,7 @@ import yaml
 from datasets import DatasetDict
 
 from model import LLM_Model
+from logger import setup_logging
 
 from peft import get_peft_model, LoraConfig
 from transformers import (
@@ -17,21 +18,8 @@ from transformers import (
     TrainingArguments,
 )
 
+setup_logging("tuner")
 logger = logging.getLogger("tuner")
-
-os.makedirs("out/logs/", exist_ok=True)
-
-if not os.path.exists("out/logs/tuner.log"):
-    with open("out/logs/tuner.log", "w"):
-        pass
-
-logging.basicConfig(
-    format="%(asctime)s %(levelname)-8s %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    filename="out/logs/tuner.log",
-    encoding="utf-8",
-    level=logging.INFO,
-)
 
 _llm_model: LLM_Model = None
 

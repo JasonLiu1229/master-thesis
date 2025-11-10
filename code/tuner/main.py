@@ -6,22 +6,11 @@ import os
 
 from data_preprocess import preprocess
 from tuner import get_llm_model, tune
+from logger import setup_logging
 
-logger = logging.getLogger('tuner')
+setup_logging("tuner")
 
-os.makedirs('out/logs/', exist_ok=True)
-
-if not os.path.exists('out/logs/tuner.log'):
-    with open('out/logs/tuner.log', 'w'):
-        pass
-
-logging.basicConfig(
-    format="%(asctime)s %(levelname)-8s %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    filename="out/logs/tuner.log",
-    encoding="utf-8",
-    level=logging.INFO,
-)
+logger = logging.getLogger("tuner")
 
 config = {}
 with open("config.yml", "r") as f:
