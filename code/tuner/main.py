@@ -22,51 +22,51 @@ def _preprocess_dataset(force: bool = False):
     
     os.makedirs(config["OUTPUT_DIR"], exist_ok=True)
 
-    # # train dataset
-    # logger.info("Preprocessing training dataset...")
+    # train dataset
+    logger.info("Preprocessing training dataset...")
 
-    # train_path = os.path.join(config["INPUT_DIR"], config["TRAIN_DIR"])
-    # train_output_path = os.path.join(config["OUTPUT_DIR"], config["TRAIN_DIR"])
+    train_path = os.path.join(config["INPUT_DIR"], config["TRAIN_DIR"])
+    train_output_path = os.path.join(config["OUTPUT_DIR"], config["TRAIN_DIR"])
 
-    # if os.path.exists(
-    #     os.path.join(
-    #         train_output_path,
-    #     )
-    # ) and not force and os.listdir(train_output_path):
-    #     logger.info(
-    #         f"Preprocessed training dataset already exists at {train_output_path}/preprocessed__train. Skipping preprocessing."
-    #     )
-    # else:
-    #     preprocess(
-    #         input_dir=train_path,
-    #         output_dir=train_output_path,
-    #         llm=llm_model,
-    #         shuffle=True,
-    #         seed=42,
-    #     )
+    if os.path.exists(
+        os.path.join(
+            train_output_path,
+        )
+    ) and not force and os.listdir(train_output_path):
+        logger.info(
+            f"Preprocessed training dataset already exists at {train_output_path}/preprocessed__train. Skipping preprocessing."
+        )
+    else:
+        preprocess(
+            input_dir=train_path,
+            output_dir=train_output_path,
+            llm=llm_model,
+            shuffle=True,
+            seed=42,
+        )
 
-    # # val dataset
-    # logger.info("Preprocessing validation dataset...")
+    # val dataset
+    logger.info("Preprocessing validation dataset...")
 
-    # val_path = os.path.join(config["INPUT_DIR"], config["VAL_DIR"])
-    # val_output_path = os.path.join(config["OUTPUT_DIR"], config["VAL_DIR"])
+    val_path = os.path.join(config["INPUT_DIR"], config["VAL_DIR"])
+    val_output_path = os.path.join(config["OUTPUT_DIR"], config["VAL_DIR"])
 
-    # if os.path.exists(
-    #     os.path.join(
-    #         val_output_path,
-    #     )
-    # ) and not force and os.listdir(val_output_path):
-    #     logger.info(
-    #         f"Preprocessed validation dataset already exists at {val_output_path}/preprocessed_val. Skipping preprocessing."
-    #     )
-    # else:
-    #     preprocess(
-    #         input_dir=val_path,
-    #         output_dir=val_output_path,
-    #         llm=llm_model,
-    #         shuffle=False,
-    #         seed=42,
-    #     )
+    if os.path.exists(
+        os.path.join(
+            val_output_path,
+        )
+    ) and not force and os.listdir(val_output_path):
+        logger.info(
+            f"Preprocessed validation dataset already exists at {val_output_path}/preprocessed_val. Skipping preprocessing."
+        )
+    else:
+        preprocess(
+            input_dir=val_path,
+            output_dir=val_output_path,
+            llm=llm_model,
+            shuffle=False,
+            seed=42,
+        )
 
     # test dataset
     logger.info("Preprocessing test dataset...")
