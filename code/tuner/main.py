@@ -41,7 +41,6 @@ def _preprocess_dataset(force: bool = False):
             output_dir=train_output_path,
             llm=llm_model,
             shuffle=True,
-            name_suffix="train",
             seed=42,
         )
 
@@ -66,7 +65,6 @@ def _preprocess_dataset(force: bool = False):
             output_dir=val_output_path,
             llm=llm_model,
             shuffle=False,
-            name_suffix="val",
             seed=42,
         )
 
@@ -91,7 +89,6 @@ def _preprocess_dataset(force: bool = False):
             output_dir=test_output_path,
             llm=llm_model,
             shuffle=False,
-            name_suffix="test",
             seed=42,
         )
 

@@ -149,7 +149,6 @@ def preprocess(
     output_dir: str,
     llm: LLM_Model,
     shuffle: bool = True,
-    name_suffix: str = "",
     seed: int = 42,
 ) -> Dataset | DatasetDict:
 
@@ -213,9 +212,22 @@ def preprocess(
         ]
     )
     ds.set_format(type="torch", columns=["input_ids", "attention_mask", "labels"])
-
-    out_dir = os.path.join(output_dir, f"preprocessed_{name_suffix}".rstrip("_"))
     
-    logger.info(f"Saving preprocessed dataset to {out_dir}")
-    ds.save_to_disk(out_dir)
+    os.makedirs(output_dir, exist_ok=True)
+    
+    if os.path.exists(output_dir) and os.listdir(output_dir):
+        logger.warning(
+            f"Output directory {output_dir} already exists and is not empty. Overwriting contents."
+        )
+        for f in os.listdir(output_dir):
+            file_path = os.path.join(output_dir, f)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+            elif os.path.isdir(file_path):
+                import shutil
+                
+                shutil.rmtree(file_path)
+    
+    logger.info(f"Saving preprocessed dataset to {output_dir}")
+    ds.save_to_disk(output_dir)
     return ds
