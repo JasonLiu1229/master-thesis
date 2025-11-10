@@ -173,6 +173,7 @@ def preprocess(
 
     all_data: List[Dict[str, Any]] = []
 
+    logger.info(f"Preprocessing files in {input_dir}...")
     for file in files:
         input_path = os.path.join(input_dir, file)
         with open(input_path, "r", encoding="utf-8") as f:
@@ -195,6 +196,9 @@ def preprocess(
 
                 all_data.append(feat)
 
+    if not all_data:
+        logging.error("No valid examples found after preprocessing.")
+        
     assert all_data, "No valid examples found after preprocessing."
 
     ds = Dataset.from_list(all_data)
@@ -208,5 +212,7 @@ def preprocess(
     ds.set_format(type="torch", columns=["input_ids", "attention_mask", "labels"])
 
     out_dir = os.path.join(output_dir, f"preprocessed_{name_suffix}".rstrip("_"))
+    
+    logger.info(f"Saving preprocessed dataset to {out_dir}")
     ds.save_to_disk(out_dir)
     return ds

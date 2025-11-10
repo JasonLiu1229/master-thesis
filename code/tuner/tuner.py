@@ -79,6 +79,7 @@ def define_base():
                 torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
             )
         else:
+            logger.info("Loading model with QLoRA quantization...")
             bnb_config = BitsAndBytesConfig(
                 load_in_4bit=True,
                 bnb_4bit_use_double_quant=True,
@@ -132,13 +133,14 @@ def get_llm_model() -> LLM_Model:
     if _llm_model is None:
         logger.info("Defining base LLM model...")
         define_base()
+        logger.info("LLM model defined and loaded.")
     return _llm_model
 
 
 def tune():
     output_dir = config["OUTPUT_DIR"]
-    train_data_path = output_dir + config["TRAIN_DIR"]
-    val_data_path = output_dir + config["VAL_DIR"]
+    train_data_path = os.path.join(output_dir, config["TRAIN_DIR"])
+    val_data_path = os.path.join(output_dir, config["VAL_DIR"])
 
     train_ds = load_ds(train_data_path)
     val_ds = load_ds(val_data_path)
