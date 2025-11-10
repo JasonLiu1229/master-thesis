@@ -197,6 +197,8 @@ def preprocess(
                         continue
 
                     all_data.append(feat)
+                    
+    logger.info(f"Preprocessed {len(all_data)} examples.")
 
     if not all_data:
         logging.error("No valid examples found after preprocessing.")
@@ -213,8 +215,6 @@ def preprocess(
     )
     ds.set_format(type="torch", columns=["input_ids", "attention_mask", "labels"])
     
-    os.makedirs(output_dir, exist_ok=True)
-    
     if os.path.exists(output_dir) and os.listdir(output_dir):
         logger.warning(
             f"Output directory {output_dir} already exists and is not empty. Overwriting contents."
@@ -230,4 +230,8 @@ def preprocess(
     
     logger.info(f"Saving preprocessed dataset to {output_dir}")
     ds.save_to_disk(output_dir)
+    
+    # Post condition to ensure dataset is saved
+    assert os.path.exists(output_dir), f"Failed to save dataset to {output_dir}."
+    
     return ds
