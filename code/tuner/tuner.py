@@ -183,7 +183,8 @@ def tune():
     logger.info("Starting training...")
     trainer.train()
 
-    adapter_dir = os.path.join("out/", "adapter")
+    adapter_dir = config["ADAPTER_SAVE_PATH"]
     os.makedirs(adapter_dir, exist_ok=True)
     model.save_pretrained(adapter_dir)
     tokenizer.save_pretrained(adapter_dir)
+    logger.info(f"Adapter model saved to {adapter_dir}")

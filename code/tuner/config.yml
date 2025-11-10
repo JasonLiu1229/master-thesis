@@ -8,6 +8,7 @@ INPUT_DIR: in
 
 # Model save path
 SAVE_MODEL_PATH: /out/model/
+ADAPTER_SAVE_PATH: /out/adapter/
 
 # Logs
 LOG_DIR: /out/logs
