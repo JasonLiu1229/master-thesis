@@ -215,23 +215,25 @@ def preprocess(
     )
     ds.set_format(type="torch", columns=["input_ids", "attention_mask", "labels"])
     
-    if os.path.exists(output_dir) and os.listdir(output_dir):
-        logger.warning(
-            f"Output directory {output_dir} already exists and is not empty. Overwriting contents."
-        )
+    if os.listdir(output_dir):
+        logger.warning(f"Output directory {output_dir} already exists and is not empty. Overwriting contents.")
         for f in os.listdir(output_dir):
             file_path = os.path.join(output_dir, f)
             if os.path.isfile(file_path):
                 os.remove(file_path)
             elif os.path.isdir(file_path):
                 import shutil
-                
                 shutil.rmtree(file_path)
     
-    logger.info(f"Saving preprocessed dataset to {output_dir}")
-    ds.save_to_disk(output_dir)
+    try:
+        ds.save_to_disk(output_dir)
+    except Exception as e:
+        logger.exception(f"Failed to save dataset to {output_dir}: {e}")
+        raise
     
     # Post condition to ensure dataset is saved
-    assert os.path.exists(output_dir), f"Failed to save dataset to {output_dir}."
+    if not (os.path.exists(output_dir) and os.path.isdir(output_dir)):
+        raise RuntimeError(f"Dataset directory not found after save: {output_dir}")
     
+    logger.info(f"Saving preprocessed dataset to {output_dir}")
     return ds

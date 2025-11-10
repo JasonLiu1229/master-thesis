@@ -3,15 +3,15 @@ TRAIN_DIR: train
 VAL_DIR: val
 TEST_DIR: test
 
-OUTPUT_DIR: /out/data_preprocessed/
+OUTPUT_DIR: out/data_preprocessed
 INPUT_DIR: in
 
 # Model save path
-SAVE_MODEL_PATH: /out/model/
-ADAPTER_SAVE_PATH: /out/adapter/
+SAVE_MODEL_PATH: out/model
+ADAPTER_SAVE_PATH: out/adapter
 
 # Logs
-LOG_DIR: /out/logs
+LOG_DIR: out/logs
 
 # Model parameters
 MODEL_ID: Qwen/Qwen2.5-Coder-7B-Instruct
