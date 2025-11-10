@@ -1,12 +1,13 @@
 import difflib
 import json
+import logging
 import os
 import random
-import logging
 from typing import Any, Dict, List, Tuple
 
 import yaml
 from datasets import Dataset, DatasetDict
+from logger import setup_logging
 
 from model import LLM_Model
 
@@ -27,15 +28,9 @@ USER_PROMPT_TEMPLATE = (
     "Return ONLY the improved code block, nothing else."
 )
 
-logger = logging.getLogger('tuner')
+setup_logging("tuner")
 
-logging.basicConfig(
-    format="%(asctime)s %(levelname)-8s %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    filename="out/logs/tuner.log",
-    encoding="utf-8",
-    level=logging.INFO,
-)
+logger = logging.getLogger("tuner")
 
 config = {}
 with open("config.yml", "r") as f:
@@ -155,12 +150,12 @@ def preprocess(
     name_suffix: str = "",
     seed: int = 42,
 ) -> Dataset | DatasetDict:
-    
+
     if not os.path.exists(input_dir):
         logging.error(f"Input directory {input_dir} does not exist.")
-        
+
     assert os.path.exists(input_dir), f"Input directory {input_dir} does not exist."
-    
+
     os.makedirs(output_dir, exist_ok=True)
 
     files = [f for f in os.listdir(input_dir) if f.endswith(".jsonl")]
@@ -197,7 +192,7 @@ def preprocess(
                     k in feat for k in ("input_ids", "attention_mask", "labels")
                 ):
                     continue
-                
+
                 all_data.append(feat)
 
     assert all_data, "No valid examples found after preprocessing."

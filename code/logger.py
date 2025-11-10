@@ -2,13 +2,14 @@ import logging
 import os
 import sys
 
+
 def setup_logging(name: str = "log"):
     os.makedirs("out/logs", exist_ok=True)
-    
+
     if not os.path.exists(f"out/logs/{name}.log"):
         with open(f"out/logs/{name}.log", "w"):
             pass
-        
+
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s %(levelname)-8s %(name)s: %(message)s",
@@ -16,7 +17,7 @@ def setup_logging(name: str = "log"):
             logging.FileHandler(f"out/logs/{name}.log", encoding="utf-8"),
             logging.StreamHandler(),
         ],
-        force=True, 
+        force=True,
     )
 
     def _excepthook(exc_type, exc, tb):

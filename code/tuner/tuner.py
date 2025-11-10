@@ -4,9 +4,9 @@ import os
 import torch
 import yaml
 from datasets import DatasetDict
+from logger import setup_logging
 
 from model import LLM_Model
-from logger import setup_logging
 
 from peft import get_peft_model, LoraConfig
 from transformers import (
