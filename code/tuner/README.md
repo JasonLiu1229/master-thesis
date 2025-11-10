@@ -1,6 +1,6 @@
 # Tuner information
 
-This tuner is designed for Ollama Instruct models. It may also work with other models that operate similarly, such as Mistral.
+This tuner is made for Qwen model.
 
 ## Requirements
 
@@ -12,4 +12,10 @@ In the config setting several constants are defined, these are important to chan
 
 ## How does it work
 
+So the main code consist of argparse arguments. So check these out to know what options are available. The main thing is preproccing, if the dataset is not available or generated yet. If it is, you can enable the tune command to tune the chosen model.
+
 ## Run
+
+There is a docker file made for this. So make use of the docker file, to make the run work seaminglisly. If you want to run it locally, you can check the requirements file and download it manually.
+
+`docker compose --profile tune up` is the main command to run it all. By default it will generate the dataset and tune it afterwards.
