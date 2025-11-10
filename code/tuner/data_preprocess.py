@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import random
+from tqdm import tqdm
 from typing import Any, Dict, List, Tuple
 
 import yaml
@@ -174,7 +175,7 @@ def preprocess(
     all_data: List[Dict[str, Any]] = []
 
     logger.info(f"Preprocessing files in {input_dir}...")
-    for file in files:
+    for _, file in enumerate(tqdm(files, desc="Files")):
         input_path = os.path.join(input_dir, file)
         with open(input_path, "r", encoding="utf-8") as f:
             for line in f:
