@@ -34,8 +34,8 @@ def _preprocess_dataset():
     # train dataset
     logger.info("Preprocessing training dataset...")
     
-    train_path = config["INPUT_DIR"] + config["TRAIN_DIR"]
-    train_output_path = config["OUTPUT_DIR"] + config["TRAIN_DIR"]
+    train_path = os.path.join(config["INPUT_DIR"], config["TRAIN_DIR"])
+    train_output_path = os.path.join(config["OUTPUT_DIR"], config["TRAIN_DIR"])
 
     preprocess(
         input_dir=train_path,
@@ -49,8 +49,8 @@ def _preprocess_dataset():
     # val dataset
     logger.info("Preprocessing validation dataset...")
     
-    val_path = config["INPUT_DIR"] + config["VAL_DIR"]
-    val_output_path = config["OUTPUT_DIR"] + config["VAL_DIR"]
+    val_path = os.path.join(config["INPUT_DIR"], config["VAL_DIR"])
+    val_output_path = os.path.join(config["OUTPUT_DIR"], config["VAL_DIR"])
 
     preprocess(
         input_dir=val_path,
@@ -64,8 +64,8 @@ def _preprocess_dataset():
     # test dataset
     logger.info("Preprocessing test dataset...")
     
-    test_path = config["INPUT_DIR"] + config["TEST_DIR"]
-    test_output_path = config["OUTPUT_DIR"] + config["TEST_DIR"]
+    test_path = os.path.join(config["INPUT_DIR"], config["TEST_DIR"])
+    test_output_path = os.path.join(config["OUTPUT_DIR"], config["TEST_DIR"])
 
     preprocess(
         input_dir=test_path,

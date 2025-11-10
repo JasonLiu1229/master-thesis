@@ -1,7 +1,7 @@
 # Dataset directories
-TRAIN_DIR: /train/
-VAL_DIR: /val/
-TEST_DIR: /test/
+TRAIN_DIR: train
+VAL_DIR: val
+TEST_DIR: test
 
 OUTPUT_DIR: /out/data_preprocessed/
 INPUT_DIR: /in

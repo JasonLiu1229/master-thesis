@@ -2,6 +2,7 @@ import difflib
 import json
 import os
 import random
+import logging
 from typing import Any, Dict, List, Tuple
 
 import yaml
@@ -24,6 +25,16 @@ USER_PROMPT_TEMPLATE = (
     "{obf}\n"
     "```\n\n"
     "Return ONLY the improved code block, nothing else."
+)
+
+logger = logging.getLogger('tuner')
+
+logging.basicConfig(
+    format="%(asctime)s %(levelname)-8s %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    filename="out/logs/tuner.log",
+    encoding="utf-8",
+    level=logging.INFO,
 )
 
 config = {}
@@ -144,7 +155,12 @@ def preprocess(
     name_suffix: str = "",
     seed: int = 42,
 ) -> Dataset | DatasetDict:
+    
+    if not os.path.exists(input_dir):
+        logging.error(f"Input directory {input_dir} does not exist.")
+        
     assert os.path.exists(input_dir), f"Input directory {input_dir} does not exist."
+    
     os.makedirs(output_dir, exist_ok=True)
 
     files = [f for f in os.listdir(input_dir) if f.endswith(".jsonl")]
