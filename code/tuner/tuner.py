@@ -165,7 +165,7 @@ def tune():
         lr_scheduler_type="cosine",
         weight_decay=0.0,
         logging_steps=config["LOGGING_STEPS"],
-        evaluation_strategy="steps" if val_ds is not None else "no",
+        eval_strategy="steps" if val_ds is not None else "no",
         eval_steps=config["EVAL_STEPS"],
         save_steps=config["EVAL_STEPS"],
         save_total_limit=config["MAX_SAVE_TOTAL"],
