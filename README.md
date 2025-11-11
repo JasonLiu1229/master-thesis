@@ -62,11 +62,36 @@ To run the benchmarking, you need to make sure that the [replication package](ht
 
 Also make sure the `compose.yml` file is set correctly. The pathing for the replication can mismatch based on your download loacation and naming of the file.
 
-TODO: ADD STEPS OF THE BENCHMARKING
+The benchmarking itself is a simple docker run command: `docker compose --profile benchmark`. Be aware that this will generate nothing usefull if the other techniques are not ran themselves. The other techniques can be found in the `compose.yml` to find what profile they are set to. After running the needed techniques for your study, you can run benchmark and see a `benchmark.csv` file generated where all results are combined.
 
-#### LLM tool
+#### LLM tuning
 
-TODO
+The tuning code consist of two parts, one is the data preprocessing and the other is the tuning itself.
+
+##### Data preprocessing
+
+Again this is also dockerized so you do not have to run any special commands besides docker to make this work. The data preprocesing does need the dataset that you want to preprocess in a specific format:
+
+```jsonl
+{
+  prompt: {
+    # obf code
+  },
+  response: {
+    # gt code
+  }
+}
+```
+
+So be aware of this.
+
+After running the preprocess code, three folders will be generated. These will consist of the dataset in a `.arrow` format.
+
+##### Tuning
+
+The tuning is done using [QLoRA](https://medium.com/@dillipprasad60/qlora-explained-a-deep-dive-into-parametric-efficient-fine-tuning-in-large-language-models-llms-c1a4794b1766), just know that it is a fine tuning task to tune a model for a specific task or domain. So perfect for us.
+
+Overall you can just run `docker compose --profile tune up` to run the preprocess and tuning simaltainiously. Note in this repo the dataset is already preprocessed for you, so if you want to use a different one, add `--force` in the Dockerfile that can be found in `docker/tuner.Dockerfile`.
 
 ## References
 
