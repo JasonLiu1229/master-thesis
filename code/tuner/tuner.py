@@ -17,8 +17,8 @@ from transformers import (
     BitsAndBytesConfig,
     DataCollatorForLanguageModeling,
     Trainer,
-    TrainingArguments,
     TrainerCallback,
+    TrainingArguments,
 )
 
 setup_logging("tuner")
@@ -29,6 +29,14 @@ _llm_model: LLM_Model = None
 config = {}
 with open("config.yml", "r") as f:
     config = yaml.safe_load(f)
+
+
+class Heartbeat(TrainerCallback):
+    def on_step_end(self, args, state, control, **kwargs):
+        if state.global_step % 100 == 0:  # every 10 steps
+            logging.info(
+                f"[HB] Step {state.global_step} completed. loss = {state.log_history[-1].get('loss', 'N/A')}"
+            )
 
 
 def load_ds(path: str) -> Dataset:
@@ -72,7 +80,7 @@ def define_base():
 
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
-        
+
     tokenizer.padding_side = "right"
 
     if config["USE_QLORA"]:
@@ -139,7 +147,7 @@ def define_base():
         model.config.use_cache = False
     except Exception:
         pass
-    
+
     _llm_model = set_llm_model(model, config["MODEL_ID"], tokenizer)
 
     return model, tokenizer
@@ -195,10 +203,6 @@ def make_args(val_ds: Dataset | None) -> TrainingArguments:
 
     return TrainingArguments(**kw)
 
-class Heartbeat(TrainerCallback):
-    def on_step_end(self, args, state, control, **kwargs):
-        if state.global_step % 100 == 0:  # every 10 steps
-            logging.info(f"[HB] Step {state.global_step} completed. loss = {state.log_history[-1].get('loss', 'N/A')}")
 
 def tune():
     output_dir = config["OUTPUT_DIR"]
