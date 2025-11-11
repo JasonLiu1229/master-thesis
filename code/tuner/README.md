@@ -1,6 +1,6 @@
 # Tuner information
 
-This tuner is made for Qwen model.
+This tuner is made for Qwen model. Adapt it if you are using a different model and want to make use of this tuner code.
 
 ## Requirements
 
