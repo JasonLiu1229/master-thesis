@@ -55,7 +55,7 @@ services:
       - .env
     profiles: ["api", "full"]
     volumes:
-      - hf_cache_api:/root/.cache/huggingface/
+      - hf_cache:/root/.cache/huggingface/
 
   tuner:
     container_name: tuner
@@ -63,11 +63,10 @@ services:
       dockerfile: docker/tuner.Dockerfile
     volumes:
       - ./out:/app/out/
-      - hf_cache_tuner:/root/.cache/huggingface/
+      - hf_cache:/root/.cache/huggingface/
     working_dir: /app
     gpus: all
     profiles: ["tune"]
 
 volumes:
-  hf_cache_api:
-  hf_cache_tuner:
+  hf_cache:

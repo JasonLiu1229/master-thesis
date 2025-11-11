@@ -3,7 +3,7 @@ import os
 
 import torch
 import yaml
-from datasets import DatasetDict
+from datasets import Dataset
 from logger import setup_logging
 
 from model import LLM_Model
@@ -28,10 +28,12 @@ with open("config.yml", "r") as f:
     config = yaml.safe_load(f)
 
 
-def load_ds(path: str) -> DatasetDict:
-    assert os.path.exists(path), f"Dataset path {path} does not exist."
+def load_ds(path: str) -> Dataset:
+    if not os.path.exists(path):
+        logger.warning(f"Dataset path {path} does not exist. Returning None.")
+        raise FileNotFoundError(f"Dataset path {path} does not exist.")
     try:
-        return DatasetDict.load_from_disk(path)
+        return Dataset.load_from_disk(path)
     except Exception as e:
         logger.error(f"Failed to load dataset from {path}: {e}")
         raise RuntimeError(f"Failed to load dataset from {path}: {e}")

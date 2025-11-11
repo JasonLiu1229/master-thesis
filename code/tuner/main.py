@@ -34,7 +34,7 @@ def _preprocess_dataset(force: bool = False):
         )
     ) and not force and os.listdir(train_output_path):
         logger.info(
-            f"Preprocessed training dataset already exists at {train_output_path}/preprocessed__train. Skipping preprocessing."
+            f"Preprocessed training dataset already exists at {train_output_path}. Skipping preprocessing."
         )
     else:
         preprocess(
@@ -57,7 +57,7 @@ def _preprocess_dataset(force: bool = False):
         )
     ) and not force and os.listdir(val_output_path):
         logger.info(
-            f"Preprocessed validation dataset already exists at {val_output_path}/preprocessed_val. Skipping preprocessing."
+            f"Preprocessed validation dataset already exists at {val_output_path}. Skipping preprocessing."
         )
     else:
         preprocess(
@@ -80,7 +80,7 @@ def _preprocess_dataset(force: bool = False):
         )
     ) and not force and os.listdir(test_output_path):
         logger.info(
-            f"Preprocessed test dataset already exists at {test_output_path}/preprocessed_test. Skipping preprocessing."
+            f"Preprocessed test dataset already exists at {test_output_path}. Skipping preprocessing."
         )
     else:
         preprocess(
