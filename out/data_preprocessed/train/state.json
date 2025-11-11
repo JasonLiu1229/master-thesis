@@ -1,0 +1,23 @@
+{
+  "_data_files": [
+    {
+      "filename": "data-00000-of-00003.arrow"
+    },
+    {
+      "filename": "data-00001-of-00003.arrow"
+    },
+    {
+      "filename": "data-00002-of-00003.arrow"
+    }
+  ],
+  "_fingerprint": "a7db1609b6c77342",
+  "_format_columns": [
+    "input_ids",
+    "attention_mask",
+    "labels"
+  ],
+  "_format_kwargs": {},
+  "_format_type": "torch",
+  "_output_all_columns": false,
+  "_split": null
+}
