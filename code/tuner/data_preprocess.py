@@ -3,8 +3,6 @@ import json
 import logging
 import os
 import random
-from tqdm import tqdm
-from tqdm.contrib.logging import logging_redirect_tqdm
 from typing import Any, Dict, List, Tuple
 
 import yaml
@@ -12,6 +10,8 @@ from datasets import Dataset, DatasetDict
 from logger import setup_logging
 
 from model import LLM_Model
+from tqdm import tqdm
+from tqdm.contrib.logging import logging_redirect_tqdm
 
 from transformers import AutoTokenizer
 
@@ -197,12 +197,12 @@ def preprocess(
                         continue
 
                     all_data.append(feat)
-                    
+
     logger.info(f"Preprocessed {len(all_data)} examples.")
 
     if not all_data:
         logging.error("No valid examples found after preprocessing.")
-        
+
     assert all_data, "No valid examples found after preprocessing."
 
     ds = Dataset.from_list(all_data)
@@ -214,26 +214,29 @@ def preprocess(
         ]
     )
     ds.set_format(type="torch", columns=["input_ids", "attention_mask", "labels"])
-    
+
     if os.listdir(output_dir):
-        logger.warning(f"Output directory {output_dir} already exists and is not empty. Overwriting contents.")
+        logger.warning(
+            f"Output directory {output_dir} already exists and is not empty. Overwriting contents."
+        )
         for f in os.listdir(output_dir):
             file_path = os.path.join(output_dir, f)
             if os.path.isfile(file_path):
                 os.remove(file_path)
             elif os.path.isdir(file_path):
                 import shutil
+
                 shutil.rmtree(file_path)
-    
+
     try:
         ds.save_to_disk(output_dir)
     except Exception as e:
         logger.exception(f"Failed to save dataset to {output_dir}: {e}")
         raise
-    
+
     # Post condition to ensure dataset is saved
     if not (os.path.exists(output_dir) and os.path.isdir(output_dir)):
         raise RuntimeError(f"Dataset directory not found after save: {output_dir}")
-    
+
     logger.info(f"Saving preprocessed dataset to {output_dir}")
     return ds

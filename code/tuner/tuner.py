@@ -141,8 +141,10 @@ def get_llm_model() -> LLM_Model:
 
 
 def make_args(val_ds: Dataset | None) -> TrainingArguments:
-
     sig = inspect.signature(TrainingArguments)
+
+    logging.info("Creating TrainingArguments...")
+
     kw = TrainingArguments(
         output_dir=config["SAVE_MODEL_PATH"],
         num_train_epochs=config["NUM_EPOCHS"],
@@ -161,7 +163,7 @@ def make_args(val_ds: Dataset | None) -> TrainingArguments:
         gradient_checkpointing=True,
         report_to=["tensorboard"],
     )
-    
+
     try:
         kw["bf16"] = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
     except Exception:

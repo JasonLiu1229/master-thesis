@@ -19,7 +19,7 @@ with open("config.yml", "r") as f:
 
 def _preprocess_dataset(force: bool = False):
     llm_model = get_llm_model()
-    
+
     os.makedirs(config["OUTPUT_DIR"], exist_ok=True)
 
     # train dataset
@@ -28,11 +28,15 @@ def _preprocess_dataset(force: bool = False):
     train_path = os.path.join(config["INPUT_DIR"], config["TRAIN_DIR"])
     train_output_path = os.path.join(config["OUTPUT_DIR"], config["TRAIN_DIR"])
 
-    if os.path.exists(
-        os.path.join(
-            train_output_path,
+    if (
+        os.path.exists(
+            os.path.join(
+                train_output_path,
+            )
         )
-    ) and not force and os.listdir(train_output_path):
+        and not force
+        and os.listdir(train_output_path)
+    ):
         logger.info(
             f"Preprocessed training dataset already exists at {train_output_path}. Skipping preprocessing."
         )
@@ -51,11 +55,15 @@ def _preprocess_dataset(force: bool = False):
     val_path = os.path.join(config["INPUT_DIR"], config["VAL_DIR"])
     val_output_path = os.path.join(config["OUTPUT_DIR"], config["VAL_DIR"])
 
-    if os.path.exists(
-        os.path.join(
-            val_output_path,
+    if (
+        os.path.exists(
+            os.path.join(
+                val_output_path,
+            )
         )
-    ) and not force and os.listdir(val_output_path):
+        and not force
+        and os.listdir(val_output_path)
+    ):
         logger.info(
             f"Preprocessed validation dataset already exists at {val_output_path}. Skipping preprocessing."
         )
@@ -74,11 +82,15 @@ def _preprocess_dataset(force: bool = False):
     test_path = os.path.join(config["INPUT_DIR"], config["TEST_DIR"])
     test_output_path = os.path.join(config["OUTPUT_DIR"], config["TEST_DIR"])
 
-    if os.path.exists(
-        os.path.join(
-            test_output_path,
+    if (
+        os.path.exists(
+            os.path.join(
+                test_output_path,
+            )
         )
-    ) and not force and os.listdir(test_output_path):
+        and not force
+        and os.listdir(test_output_path)
+    ):
         logger.info(
             f"Preprocessed test dataset already exists at {test_output_path}. Skipping preprocessing."
         )
