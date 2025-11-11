@@ -18,6 +18,7 @@ from transformers import (
     DataCollatorForLanguageModeling,
     Trainer,
     TrainingArguments,
+    TrainerCallback,
 )
 
 setup_logging("tuner")
@@ -176,6 +177,7 @@ def make_args(val_ds: Dataset | None) -> TrainingArguments:
         "gradient_checkpointing": True,
         "report_to": ["tensorboard"],
         "load_best_model_at_end": True if val_ds is not None else False,
+        "disable_tqdm": False,
     }
 
     try:
@@ -193,6 +195,10 @@ def make_args(val_ds: Dataset | None) -> TrainingArguments:
 
     return TrainingArguments(**kw)
 
+class Heartbeat(TrainerCallback):
+    def on_step_end(self, args, state, control, **kwargs):
+        if state.global_step % 100 == 0:  # every 10 steps
+            logging.info(f"[HB] Step {state.global_step} completed. loss = {state.log_history[-1].get('loss', 'N/A')}")
 
 def tune():
     output_dir = config["OUTPUT_DIR"]
@@ -218,6 +224,7 @@ def tune():
         data_collator=collator,
         train_dataset=train_ds,
         eval_dataset=val_ds,
+        callbacks=[Heartbeat()],
     )
 
     logger.info("Starting training...")
