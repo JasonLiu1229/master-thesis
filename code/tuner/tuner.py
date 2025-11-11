@@ -9,7 +9,8 @@ from logger import setup_logging
 
 from model import LLM_Model
 
-from peft import get_peft_model, LoraConfig
+from peft import get_peft_model, LoraConfig, prepare_model_for_kbit_training
+
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
@@ -70,6 +71,8 @@ def define_base():
 
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
+        
+    tokenizer.padding_side = "right"
 
     if config["USE_QLORA"]:
         if not torch.cuda.is_available():
@@ -96,12 +99,21 @@ def define_base():
                 device_map="auto",
                 torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
             )
+
+            base_model = prepare_model_for_kbit_training(base_model)
     else:
+        logging.info("Loading model without quantization...")
         base_model = AutoModelForCausalLM.from_pretrained(
             config["MODEL_ID"],
             device_map="auto",
             torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
         )
+
+    try:
+        base_model.gradient_checkpointing_enable()
+        base_model.enable_input_require_grads()
+    except Exception:
+        pass
 
     lora_config = LoraConfig(
         r=config["RANK"],
@@ -126,6 +138,7 @@ def define_base():
         model.config.use_cache = False
     except Exception:
         pass
+    
     _llm_model = set_llm_model(model, config["MODEL_ID"], tokenizer)
 
     return model, tokenizer
@@ -194,6 +207,7 @@ def tune():
     collator = DataCollatorForLanguageModeling(
         tokenizer=tokenizer,
         mlm=False,
+        pad_to_multiple_of=8,  # for better performance on GPUs
     )
 
     args = make_args(val_ds)
