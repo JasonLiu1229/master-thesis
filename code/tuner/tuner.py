@@ -145,24 +145,25 @@ def make_args(val_ds: Dataset | None) -> TrainingArguments:
 
     logging.info("Creating TrainingArguments...")
 
-    kw = TrainingArguments(
-        output_dir=config["SAVE_MODEL_PATH"],
-        num_train_epochs=config["NUM_EPOCHS"],
-        per_device_train_batch_size=config["BATCH_SIZE_PER_DEVICE"],
-        per_device_eval_batch_size=config["BATCH_SIZE_PER_DEVICE"],
-        gradient_accumulation_steps=config["GRAD_ACCUM_STEPS"],
-        learning_rate=config["LEARNING_RATE"],
-        warmup_ratio=0.03,  # starts with a lower LR and then slowly increases to the set LR based on this ratio
-        lr_scheduler_type="cosine",  # slow decay in the beginning, fast decay at the end
-        weight_decay=0.0,
-        logging_steps=config["LOGGING_STEPS"],
-        eval_steps=config["EVAL_STEPS"],
-        save_steps=config["EVAL_STEPS"],
-        save_total_limit=config["MAX_SAVE_TOTAL"],
-        bf16=False,
-        gradient_checkpointing=True,
-        report_to=["tensorboard"],
-    )
+    kw = {
+        "output_dir": config["SAVE_MODEL_PATH"],
+        "num_train_epochs": config["NUM_EPOCHS"],
+        "per_device_train_batch_size": config["BATCH_SIZE_PER_DEVICE"],
+        "per_device_eval_batch_size": config["BATCH_SIZE_PER_DEVICE"],
+        "gradient_accumulation_steps": config["GRAD_ACCUM_STEPS"],
+        "learning_rate": config["LEARNING_RATE"],
+        "warmup_ratio": 0.03,  # starts with a lower LR and then slowly increases to the set LR based on this ratio
+        "lr_scheduler_type": "cosine",  # slow decay in the beginning, fast decay at the end
+        "weight_decay": 0.0,
+        "logging_steps": config["LOGGING_STEPS"],
+        "eval_steps": config["EVAL_STEPS"],
+        "save_steps": config["EVAL_STEPS"],
+        "save_total_limit": config["MAX_SAVE_TOTAL"],
+        "bf16": False,
+        "gradient_checkpointing": True,
+        "report_to": ["tensorboard"],
+        "load_best_model_at_end": True if val_ds is not None else False,
+    }
 
     try:
         kw["bf16"] = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
