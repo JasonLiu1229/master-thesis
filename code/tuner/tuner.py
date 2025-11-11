@@ -1,3 +1,4 @@
+import inspect
 import logging
 import os
 
@@ -139,6 +140,44 @@ def get_llm_model() -> LLM_Model:
     return _llm_model
 
 
+def make_args(val_ds: Dataset | None) -> TrainingArguments:
+
+    sig = inspect.signature(TrainingArguments)
+    kw = TrainingArguments(
+        output_dir=config["SAVE_MODEL_PATH"],
+        num_train_epochs=config["NUM_EPOCHS"],
+        per_device_train_batch_size=config["BATCH_SIZE_PER_DEVICE"],
+        per_device_eval_batch_size=config["BATCH_SIZE_PER_DEVICE"],
+        gradient_accumulation_steps=config["GRAD_ACCUM_STEPS"],
+        learning_rate=config["LEARNING_RATE"],
+        warmup_ratio=0.03,  # starts with a lower LR and then slowly increases to the set LR based on this ratio
+        lr_scheduler_type="cosine",  # slow decay in the beginning, fast decay at the end
+        weight_decay=0.0,
+        logging_steps=config["LOGGING_STEPS"],
+        eval_steps=config["EVAL_STEPS"],
+        save_steps=config["EVAL_STEPS"],
+        save_total_limit=config["MAX_SAVE_TOTAL"],
+        bf16=False,
+        gradient_checkpointing=True,
+        report_to=["tensorboard"],
+    )
+    
+    try:
+        kw["bf16"] = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
+    except Exception:
+        kw["bf16"] = False
+
+    if "evaluation_strategy" in sig.parameters:
+        kw["evaluation_strategy"] = "steps" if val_ds is not None else "no"
+    else:
+        kw["eval_strategy"] = "steps" if val_ds is not None else "no"
+
+    if "save_strategy" in sig.parameters:
+        kw["save_strategy"] = "steps"
+
+    return TrainingArguments(**kw)
+
+
 def tune():
     output_dir = config["OUTPUT_DIR"]
     train_data_path = os.path.join(output_dir, config["TRAIN_DIR"])
@@ -154,25 +193,7 @@ def tune():
         mlm=False,
     )
 
-    args = TrainingArguments(
-        output_dir=config["SAVE_MODEL_PATH"],
-        num_train_epochs=config["NUM_EPOCHS"],
-        per_device_train_batch_size=config["BATCH_SIZE_PER_DEVICE"],
-        per_device_eval_batch_size=config["BATCH_SIZE_PER_DEVICE"],
-        gradient_accumulation_steps=config["GRAD_ACCUM_STEPS"],
-        learning_rate=config["LEARNING_RATE"],
-        warmup_ratio=0.03,
-        lr_scheduler_type="cosine",
-        weight_decay=0.0,
-        logging_steps=config["LOGGING_STEPS"],
-        eval_strategy="steps" if val_ds is not None else "no",
-        eval_steps=config["EVAL_STEPS"],
-        save_steps=config["EVAL_STEPS"],
-        save_total_limit=config["MAX_SAVE_TOTAL"],
-        bf16=torch.cuda.is_bf16_supported(),
-        gradient_checkpointing=True,
-        report_to=["tensorboard"],
-    )
+    args = make_args(val_ds)
 
     trainer = Trainer(
         model=model,
