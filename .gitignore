@@ -8,3 +8,4 @@ rep_package_previous/
 
 out/logs/*
 # out/data_preprocessed/*
+out/model/runs/*
