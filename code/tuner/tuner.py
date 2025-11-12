@@ -21,6 +21,8 @@ from transformers import (
     TrainingArguments,
 )
 
+from transformers.trainer_utils import get_last_checkpoint
+
 setup_logging("tuner")
 logger = logging.getLogger("tuner")
 
@@ -221,6 +223,10 @@ def tune():
     )
 
     args = make_args(val_ds)
+    
+    last_ckpt = None
+    if os.path.isdir(args.output_dir):
+        last_ckpt = get_last_checkpoint(args.output_dir)
 
     trainer = Trainer(
         model=model,
@@ -232,7 +238,12 @@ def tune():
     )
 
     logger.info("Starting training...")
-    trainer.train()
+    
+    if config.get("RESUME_FROM_LAST_CP", False) and last_ckpt is not None:
+        logger.info(f"Resuming training from checkpoint: {last_ckpt}")
+        trainer.train(resume_from_checkpoint=last_ckpt)
+    else:
+        trainer.train()
 
     adapter_dir = config["ADAPTER_SAVE_PATH"]
     os.makedirs(adapter_dir, exist_ok=True)
