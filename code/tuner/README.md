@@ -10,6 +10,8 @@ The requirements are noted in the `requirements/requirements_tuner.txt`. This is
 
 In the config setting several constants are defined, these are important to change in case file or directory naming is different. Here we also define some parameters that can be changed for training phase.
 
+Important note: because of hardware limitations it is recomended to train on a smaller dataset, you can configure this too in the `.yml` file. Here we can set the fraction of how much we want to use of the original dataset.
+
 ## How does it work
 
 So the main code consist of argparse arguments. So check these out to know what options are available. The main thing is preproccing, if the dataset is not available or generated yet. If it is, you can enable the tune command to tune the chosen model.

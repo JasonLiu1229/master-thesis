@@ -84,17 +84,21 @@ def define_base():
         tokenizer.pad_token = tokenizer.eos_token
 
     tokenizer.padding_side = "right"
+    
+    def base_model_load():
+        return AutoModelForCausalLM.from_pretrained(
+            config["MODEL_ID"],
+            device_map="auto",
+            torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
+            attn_implementation="flash_attention_2"
+        )
 
     if config["USE_QLORA"]:
         if not torch.cuda.is_available():
             logger.warning(
                 "QLoRA is enabled but CUDA is not available. Falling back to non-quantized model."
             )
-            base_model = AutoModelForCausalLM.from_pretrained(
-                config["MODEL_ID"],
-                device_map="auto",
-                torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
-            )
+            base_model = base_model_load()
         else:
             logger.info("Loading model with QLoRA quantization...")
             bnb_config = BitsAndBytesConfig(
@@ -109,16 +113,13 @@ def define_base():
                 quantization_config=bnb_config,
                 device_map="auto",
                 torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
+                attn_implementation="flash_attention_2"
             )
 
             base_model = prepare_model_for_kbit_training(base_model)
     else:
         logging.info("Loading model without quantization...")
-        base_model = AutoModelForCausalLM.from_pretrained(
-            config["MODEL_ID"],
-            device_map="auto",
-            torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
-        )
+        base_model = base_model_load()
 
     try:
         base_model.gradient_checkpointing_enable()
@@ -147,6 +148,7 @@ def define_base():
 
     try:
         model.config.use_cache = False
+        model = torch.compile(model)
     except Exception:
         pass
 
@@ -188,6 +190,8 @@ def make_args(val_ds: Dataset | None) -> TrainingArguments:
         "report_to": ["tensorboard"],
         "load_best_model_at_end": True if val_ds is not None else False,
         "disable_tqdm": False,
+        "group_by_length": True,          
+        "dataloader_num_workers": 4,  
     }
 
     try:
@@ -228,6 +232,17 @@ def tune():
     if os.path.isdir(args.output_dir):
         last_ckpt = get_last_checkpoint(args.output_dir)
 
+    if config.get("USE_SMALLER_DATASET", False):
+        fraction = config.get("SMALLER_FRACTION", 0.1)
+        train_size = int(len(train_ds) * fraction)
+        val_size = int(len(val_ds) * fraction) if val_ds is not None else 0
+        train_ds = train_ds.shuffle(seed=42).select(range(train_size))
+        if val_ds is not None:
+            val_ds = val_ds.shuffle(seed=42).select(range(val_size))
+        logger.info(
+            f"Using smaller dataset fraction: {fraction}. Train size: {train_size}, Val size: {val_size}"
+        )
+    
     trainer = Trainer(
         model=model,
         args=args,

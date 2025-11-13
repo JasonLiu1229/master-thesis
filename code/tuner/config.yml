@@ -16,20 +16,24 @@ LOG_DIR: out/logs
 # Model parameters
 MODEL_ID: Qwen/Qwen2.5-Coder-7B-Instruct
 
-MAX_LENGTH: 4096
+MAX_LENGTH: 2048
 BATCH_SIZE_PER_DEVICE: 1
-GRAD_ACCUM_STEPS: 8
-NUM_EPOCHS: 3
+GRAD_ACCUM_STEPS: 4
+NUM_EPOCHS: 2
 LEARNING_RATE: 0.0001
-MAX_SAVE_TOTAL: 3
-LOGGING_STEPS: 20
-EVAL_STEPS: 200
-SAVE_STEPS: 200
+MAX_SAVE_TOTAL: 1
+LOGGING_STEPS: 200
+EVAL_STEPS: 2000
+SAVE_STEPS: 2000
 SAVE_TOTAL_LIMIT: 3
 
 # QLoRA parameters (https://datawizz.ai/blog/understanding-lora-adapters-rank-and-alpha-parameters)
-USE_QLORA: True # If not using QLoRA, we will do regular fine-tuning LoRA.
+USE_QLORA: true # If not using QLoRA, we will do regular fine-tuning LoRA.
 RANK: 16 # The rank determines the dimensionality of the low-rank decomposition. High R -> higher adaptation capacity but more memory and compute cost.
 LORA_ALPHA: 32 # is a scaling factor that controls the contribution of the LoRA adaptation to the original weights.
 LORA_DROPOUT: 0.05 # in LoRA randomly zeros out some of the activations before the low-rank adapters during training, just like regular dropout.
-RESUME_FROM_LAST_CP: true # Whether to resume training from the last checkpoint in the output directory.
+RESUME_FROM_LAST_CP: false # Whether to resume training from the last checkpoint in the output directory.
+
+# smaller dataset config
+USE_SMALLER_DATASET: true
+SMALLER_FRACTION: 0.5 # Fraction of the dataset to use if USE_SMALLER_DATASET is true.
