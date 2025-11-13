@@ -1,9 +1,15 @@
 import anyio
 from model import get_model
+import yaml
 
-model_id = "Qwen/Qwen2.5-Coder-7B-Instruct"
+config = {}
+with open("config.yml", "r") as f:
+    config = yaml.safe_load(f)
 
 
 async def ask_llm(user_message: str) -> str:
-    llm = get_model(model_id)
+    if config["USE_LOCAL_LLM"]:
+        llm = get_model(config["MODEL_ID"], model_path=config["LOCAL_MODEL_PATH"])]
+    else:
+        llm = get_model(config["MODEL_ID"])
     return await anyio.to_thread.run_sync(llm.generate, user_message)
