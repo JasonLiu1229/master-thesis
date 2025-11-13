@@ -94,6 +94,10 @@ class LLM_Model:
         self.model_style = self._infer_model_style(model_path)
 
         self._warmup()
+    
+    def load_local_model(self, local_model_path):
+        # TODO: Implement loading from local path 
+        pass
 
     @torch.inference_mode()
     def _warmup(self):
@@ -161,6 +165,20 @@ def get_model(model_id) -> LLM_Model:
             raise
         _llm_model = m
     return _llm_model
+
+def get_local_model(local_model_path) -> LLM_Model:
+    global _llm_model
+    if _llm_model is None:
+        print("Loading local LLM model into memory...")
+        m = LLM_Model()
+        try:
+            pass  # TODO: Implement loading from local path
+        except Exception as e:
+            print(f"Error loading local model {local_model_path}: {e}")
+            raise
+        _llm_model = m
+    return _llm_model
+    
 
 
 def update_model(model: LLM_Model):
