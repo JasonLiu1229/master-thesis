@@ -28,6 +28,11 @@ services:
     env_file:
       - .env
     profiles: ["t3_a", "test", "full"]
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - pipeline
 
   benchmark:
     container_name: benchmark
@@ -56,6 +61,14 @@ services:
     profiles: ["api", "full"]
     volumes:
       - hf_cache:/root/.cache/huggingface/
+    networks:
+      - pipeline
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
 
   tuner:
     container_name: tuner
@@ -70,3 +83,7 @@ services:
 
 volumes:
   hf_cache:
+
+networks:
+  pipeline:
+    driver: bridge
