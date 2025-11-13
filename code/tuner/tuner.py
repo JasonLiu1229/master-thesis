@@ -17,7 +17,7 @@ from transformers import (
     BitsAndBytesConfig,
     DataCollatorForLanguageModeling,
     Trainer,
-    TrainerCallback,
+    # TrainerCallback,
     TrainingArguments,
 )
 
@@ -33,12 +33,12 @@ with open("config.yml", "r") as f:
     config = yaml.safe_load(f)
 
 
-class Heartbeat(TrainerCallback):
-    def on_step_end(self, args, state, control, **kwargs):
-        if state.global_step % 100 == 0:  # every 10 steps
-            logging.info(
-                f"[HB] Step {state.global_step} completed. loss = {state.log_history[-1].get('loss', 'N/A')}"
-            )
+# class Heartbeat(TrainerCallback):
+#     def on_step_end(self, args, state, control, **kwargs):
+#         if state.global_step % 100 == 0:  # every 10 steps
+#             logging.info(
+#                 f"[HB] Step {state.global_step} completed. loss = {state.log_history[-1].get('loss', 'N/A')}"
+#             )
 
 
 def load_ds(path: str) -> Dataset:
@@ -234,7 +234,7 @@ def tune():
         data_collator=collator,
         train_dataset=train_ds,
         eval_dataset=val_ds,
-        callbacks=[Heartbeat()],
+        # callbacks=[Heartbeat()],
     )
 
     logger.info("Starting training...")
