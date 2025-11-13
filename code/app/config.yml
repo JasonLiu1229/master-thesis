@@ -1,3 +1,5 @@
+# Configuration for LLM model
 MODEL_ID: "Qwen/Qwen2.5-Coder-7B-Instruct"
+
 USE_LOCAL_MDOEL: false
 LOCAL_MODEL_PATH: "/model/qwen2.5-custom"
