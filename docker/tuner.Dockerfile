@@ -6,7 +6,7 @@ ENV TOKENIZERS_PARALLELISM=false
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git build-essential \
- && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --upgrade pip setuptools wheel packaging ninja
 
@@ -17,7 +17,10 @@ RUN pip install flash_attn --no-build-isolation
 COPY requirements/requirements_tuner.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt
 
-RUN pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+RUN pip3 install --no-cache-dir \
+    torch>=2.7.0 \
+    torchvision>=0.22.0 \
+    --index-url https://download.pytorch.org/whl/cu128
 
 COPY ../code/tuner /app
 COPY ../code/model.py /app
