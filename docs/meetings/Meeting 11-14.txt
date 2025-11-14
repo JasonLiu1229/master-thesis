@@ -1,6 +1,8 @@
 Model tuning takes 522 hours
     - is it possible to run on server
+        - needs confirmation from serge
 
 Start on pipeline
     - simple pipeline using non tuned model and paid model
         - straight 1 pass pipeline
+        - this is okay

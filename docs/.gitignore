@@ -1,0 +1,21 @@
+# Word temporary files
+~$*.doc*
+~*.tmp  
+*.wbk
+*.docx#  
+*.doc~  
+
+# Excel temporary files
+~$*.xls*
+*.xlk
+*.xlsx#
+*.xlsm#
+
+# PowerPoint temporary files
+~$*.ppt*
+*.pptx#
+*.pptm#
+
+# Generic Office autosave files
+*.tmp
+*.~*
