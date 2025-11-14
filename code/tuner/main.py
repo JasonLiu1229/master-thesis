@@ -138,9 +138,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.preprocess:
-        logging.info("Preprocessing dataset...")
+        logger.info("Preprocessing dataset...")
         _preprocess_dataset(force=args.force)
 
     if args.tune:
-        logging.info("Tuning model...")
+        logger.info("Tuning model...")
         tune_model()

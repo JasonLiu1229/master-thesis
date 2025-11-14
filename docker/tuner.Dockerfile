@@ -2,6 +2,8 @@ FROM nvcr.io/nvidia/pytorch:25.01-py3
 
 WORKDIR /workspace
 
+ENV TOKENIZERS_PARALLELISM=false
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git build-essential \
  && rm -rf /var/lib/apt/lists/*

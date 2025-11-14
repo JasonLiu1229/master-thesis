@@ -118,7 +118,7 @@ def define_base():
 
             base_model = prepare_model_for_kbit_training(base_model)
     else:
-        logging.info("Loading model without quantization...")
+        logger.info("Loading model without quantization...")
         base_model = base_model_load()
 
     try:
@@ -168,7 +168,7 @@ def get_llm_model() -> LLM_Model:
 def make_args(val_ds: Dataset | None) -> TrainingArguments:
     sig = inspect.signature(TrainingArguments)
 
-    logging.info("Creating TrainingArguments...")
+    logger.info("Creating TrainingArguments...")
 
     kw = {
         "output_dir": config["SAVE_MODEL_PATH"],
