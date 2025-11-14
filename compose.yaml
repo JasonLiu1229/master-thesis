@@ -89,6 +89,7 @@ services:
       memlock:
         soft: -1
         hard: -1
+    ipc: host
 
 volumes:
   hf_cache:
