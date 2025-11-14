@@ -148,7 +148,6 @@ def define_base():
 
     try:
         model.config.use_cache = False
-        model = torch.compile(model)
     except Exception:
         pass
 

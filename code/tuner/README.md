@@ -14,7 +14,7 @@ Important note: because of hardware limitations it is recomended to train on a s
 
 ## How does it work
 
-So the main code consist of argparse arguments. So check these out to know what options are available. The main thing is preproccing, if the dataset is not available or generated yet. If it is, you can enable the tune command to tune the chosen model.
+So the main code consist of argparse arguments. So check these out to know what options are available. The main thing is preproccing, if the dataset is not available or generated yet. If it is, you can enable the tune command to tune the chosen model. Also be aware that you need to generate the dataset yourself first before running this code and setting the right pathing too.
 
 ## Run
 
