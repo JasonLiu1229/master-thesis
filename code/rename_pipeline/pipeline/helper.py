@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List
+import json
 
 def _wrap_test_case(test_case: str) -> str:
     """
