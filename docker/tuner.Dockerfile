@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/pytorch:25.01-py3
+FROM nvcr.io/nvidia/pytorch:25.06-py3
 
 WORKDIR /workspace
 
@@ -16,11 +16,6 @@ RUN pip install flash_attn --no-build-isolation
 
 COPY requirements/requirements_tuner.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt
-
-RUN pip3 install --no-cache-dir \
-    torch>=2.7.0 \
-    torchvision>=0.22.0 \
-    --index-url https://download.pytorch.org/whl/cu128
 
 COPY ../code/tuner /app
 COPY ../code/model.py /app
