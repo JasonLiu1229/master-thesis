@@ -18,7 +18,14 @@ def _extract_tests_from_source(source_code: str) -> List[str]:
     pass
 
 def extract_tests_from_file(file_path: Path) -> List[str]:
-    pass
+    assert file_path.exists(), f"File {file_path} does not exist"
+    
+    test_cases = list()
+
+    with open(file_path, 'r') as file:
+        test_cases = _extract_tests_from_source(file.read())
+
+    return test_cases
 
 def combine_test_cases(test_cases: List[str]):
     """
