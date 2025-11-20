@@ -9,6 +9,7 @@ class JavaTestSpan: # A smaller form to save the test_cases
     method_line: int
     start_line: int
     end_line: int
+    file_path: str
 
 
 def wrap_test_case(test_case: str) -> str:
@@ -22,7 +23,7 @@ def wrap_test_case(test_case: str) -> str:
     """
     pass
     
-def _extract_tests_from_source(source_code: str) -> List[JavaTestSpan]:
+def _extract_tests_from_source(source_code: str, file_path: str) -> List[JavaTestSpan]:
     pass
 
 def extract_tests_from_file(file_path: Path) -> List[JavaTestSpan]:
@@ -31,9 +32,12 @@ def extract_tests_from_file(file_path: Path) -> List[JavaTestSpan]:
     test_cases: List[JavaTestSpan] = list()
 
     with open(file_path, 'r') as file:
-        test_cases = _extract_tests_from_source(file.read())
+        test_cases = _extract_tests_from_source(file.read(), file_path)
 
     return test_cases
+
+def parse_test_case(file_path: str, test_span: JavaTestSpan):
+    pass
 
 def combine_test_cases(test_cases: List[str]):
     """
