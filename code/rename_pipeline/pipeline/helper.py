@@ -1,8 +1,8 @@
+import os
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List
-import re
-import os
 
 METHOD_SIG_RE = re.compile(
     r"\b(?:public|protected|private)?\s*"
@@ -21,12 +21,14 @@ class JavaTestSpan:  # A smaller form to save the test_cases
     start_line: int
     end_line: int
     file_path: str
-    
-@dataclass 
+
+
+@dataclass
 class JavaTestCase:
     name: str
     original: JavaTestSpan
     code: str
+
 
 # === Eval helper functions ===
 def convert_json_to_java(json_file):
@@ -79,7 +81,6 @@ def _extract_tests_from_source(source_code: str, file_path: str) -> List[JavaTes
                     or sig_line.startswith("//")
                     or sig_line.startswith("/*")
                     or sig_line.endswith("*/")
-                    or sig_line.startswith("@")
                 ):
                     j += 1
                     continue
@@ -91,12 +92,16 @@ def _extract_tests_from_source(source_code: str, file_path: str) -> List[JavaTes
                     method_line = j
                     break
 
+                if sig_line.startswith("@"):
+                    j += 1
+                    continue
+
                 j += 1
 
             brace_count = 0
             found_open = False
             end_line = method_line
-            
+
             k = method_line
             while k < n:
                 for ch in lines[k]:
@@ -152,33 +157,40 @@ def parse_test_case(test_span: JavaTestSpan):
         source_code = f.read()
         source_code = source_code.splitlines()
         return source_code[test_span.start_line : test_span.end_line + 1]
-    
+
+
 def pre_process_file(file_path: Path) -> List[str]:
-    
+
     spans = extract_tests_from_file(file_path=file_path)
-    
+
     pre_processed_tests: List[str] = []
     for span in spans:
         pre_processed_tests.append(wrap_test_case(parse_test_case(span)))
-    
+
     return pre_processed_tests
+
 
 # === Post process functions ===
 def _remove_wrap(code: str):
     pass
 
-def _swap_test_case(code:str, new_test_case: JavaTestCase):
+
+def _swap_test_case(code: str, new_test_case: JavaTestCase):
     """
-        Replace the original test case with the new one
+    Replace the original test case with the new one
     """
     pass
+
 
 def post_process_file(test_cases: List[JavaTestCase]):
     """
-        Replace all the old test cases with the newly generated ones and make file at the end
+    Replace all the old test cases with the newly generated ones and make file at the end
     """
     pass
 
+
 if __name__ == "__main__":
-    spans = extract_tests_from_file("code/rename_pipeline/pipeline/assets/randoop_example_unit_test.java")
+    spans = extract_tests_from_file(
+        "code/rename_pipeline/pipeline/assets/randoop_example_unit_test.java"
+    )
     print(wrap_test_case(parse_test_case(spans[1])))

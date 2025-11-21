@@ -12,8 +12,7 @@ public class Calculator_ESTest {
         assertEquals(5, result);
     }
 
-    @Test
-    public void test1() throws Throwable {
+    @Test public void test1() throws Throwable {
         Calculator calc = new Calculator();
         int result = calc.multiply(4, 0);
 
