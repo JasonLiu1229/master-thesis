@@ -128,7 +128,7 @@ def _extract_tests_from_source(source_code: str, file_path: str) -> List[JavaTes
 
 
 def extract_tests_from_file(file_path: Path) -> List[JavaTestSpan]:
-    assert file_path.exists(), f"File {file_path} does not exist"
+    assert os.path.exists(file_path), f"File {file_path} does not exist"
 
     test_spans: List[JavaTestSpan] = list()
 
@@ -154,5 +154,5 @@ def combine_test_cases(test_cases: List[str]):
 
 
 if __name__ == "__main__":
-    spans = extract_tests_from_file("assets/randoop_example_unit_test.java")
+    spans = extract_tests_from_file("code/rename_pipeline/pipeline/assets/randoop_example_unit_test.java")
     print(wrap_test_case(parse_test_case(spans[0])))
