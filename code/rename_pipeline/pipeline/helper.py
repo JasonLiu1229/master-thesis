@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List
 import re
+import os
 
 METHOD_SIG_RE = re.compile(
     r"\b(?:public|protected|private)?\s*"
@@ -38,11 +39,11 @@ def wrap_test_case(test_case: str) -> str:
         public void func_1() { ... }
     }
     """
-    lines = test_cases.splitlines()
+    lines = test_case.splitlines()
 
     wrapped = []
     wrapped.append("public class TestClass1 {")
-    wrapped.extend(liness)
+    wrapped.extend(lines)
     wrapped.append("}")
     return "\n".join(wrapped)
 
