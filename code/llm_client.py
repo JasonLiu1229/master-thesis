@@ -7,14 +7,14 @@ class LLMClient:
         self.api_key = api_key
         self.base_url = base_url
 
-    def chat(self, model, messages):
+    def chat(self, model, messages, role):
         import requests
 
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}",
         }
-        data = {"model": model, "messages": messages}
+        data = {"model": model, "messages": messages, "role": role}
         response = requests.post(self.base_url, headers=headers, json=data)
         response.raise_for_status()
         return response.json()["choices"][0]["message"]["content"]

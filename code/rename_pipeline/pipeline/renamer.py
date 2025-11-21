@@ -1,9 +1,8 @@
-SYSTEM_INSTRUCTION = (
-    "You are a code refactoring assistant.\n"
-    "Rename identifiers in the following Java unit test so that names are meaningful and self-explanatory.\n"
-    "Do NOT change logic, literals, comments, formatting, assertions, or method call structure.\n"
-    "Only improve identifier names (methods, variables)."
-)
+import os
+
+from dotenv import load_dotenv
+
+from llm_client import LLMClient
 
 USER_PROMPT_TEMPLATE = (
     "Here is the obfuscated test:\n\n"
@@ -12,3 +11,10 @@ USER_PROMPT_TEMPLATE = (
     "```\n\n"
     "Return ONLY the improved code block, nothing else."
 )
+
+load_dotenv()
+
+API_KEY = os.getenv("API_KEY")
+API_URL = os.getenv("API_URL")
+
+client = LLMClient(API_KEY, API_URL)
