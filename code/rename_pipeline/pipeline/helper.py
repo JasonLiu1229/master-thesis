@@ -39,11 +39,9 @@ def wrap_test_case(test_case: str) -> str:
         public void func_1() { ... }
     }
     """
-    lines = test_case.splitlines()
-
     wrapped = []
     wrapped.append("public class TestClass1 {")
-    wrapped.extend(lines)
+    wrapped.extend(test_case)
     wrapped.append("}")
     return "\n".join(wrapped)
 
@@ -90,8 +88,9 @@ def _extract_tests_from_source(source_code: str, file_path: str) -> List[JavaTes
 
             brace_count = 0
             found_open = False
-            k = end_line = method_line
-
+            end_line = method_line
+            
+            k = method_line
             while k < n:
                 for ch in lines[k]:
                     if ch == "{":
@@ -100,7 +99,7 @@ def _extract_tests_from_source(source_code: str, file_path: str) -> List[JavaTes
                     elif ch == "}":
                         brace_count -= 1
                 if brace_count == 0 and found_open:
-                    end_line == k
+                    end_line = k
                     break
                 k += 1
 
@@ -108,6 +107,7 @@ def _extract_tests_from_source(source_code: str, file_path: str) -> List[JavaTes
                 # unbalanced count of braces
                 end_line = n - 1
 
+            print(f"{method_name} starts at {annotation_line + 1} ands end at {end_line}")
             test_spans.append(
                 JavaTestSpan(
                     name=method_name,
@@ -143,6 +143,7 @@ def parse_test_case(test_span: JavaTestSpan):
 
     with open(test_span.file_path, "r") as f:
         source_code = f.read()
+        source_code = source_code.splitlines()
         return source_code[test_span.start_line : test_span.end_line + 1]
 
 
@@ -155,4 +156,4 @@ def combine_test_cases(test_cases: List[str]):
 
 if __name__ == "__main__":
     spans = extract_tests_from_file("code/rename_pipeline/pipeline/assets/randoop_example_unit_test.java")
-    print(wrap_test_case(parse_test_case(spans[0])))
+    print(wrap_test_case(parse_test_case(spans[1])))
