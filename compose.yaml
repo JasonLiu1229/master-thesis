@@ -19,10 +19,10 @@ services:
     gpus: all
     profiles: ["t2", "arno", "test"]
 
-  t3_a:
-    container_name: t3_a
+  t3:
+    container_name: t3
     build:
-      dockerfile: docker/t3_a.Dockerfile
+      dockerfile: docker/t3.Dockerfile
     volumes:
       - ./out:/app/code/out/
     env_file:
