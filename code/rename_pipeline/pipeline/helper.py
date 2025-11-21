@@ -107,7 +107,7 @@ def _extract_tests_from_source(source_code: str, file_path: str) -> List[JavaTes
                 # unbalanced count of braces
                 end_line = n - 1
 
-            print(f"{method_name} starts at {annotation_line + 1} ands end at {end_line}")
+            # print(f"{method_name} starts at {annotation_line + 1} ands end at {end_line}")
             test_spans.append(
                 JavaTestSpan(
                     name=method_name,
