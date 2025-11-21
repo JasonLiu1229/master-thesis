@@ -153,7 +153,6 @@ def combine_test_cases(test_cases: List[str]):
     """
     pass
 
-
 if __name__ == "__main__":
     spans = extract_tests_from_file("code/rename_pipeline/pipeline/assets/randoop_example_unit_test.java")
     print(wrap_test_case(parse_test_case(spans[1])))
