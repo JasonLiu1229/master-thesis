@@ -29,11 +29,13 @@ NOTE: **DO NOT** add your enviroment variables to the repository or anywhere pub
 
 ### T2 (RefBert)
 
-### T3_a (Open source model, not fine tuned)
+### T3
 
-### T3_b (Open source model, fine tuned)
+#### Open source model, not fine tuned
 
-### T3_c (Paid model, not fine tuned)
+#### Open source model, fine tuned
+
+#### Paid model, not fine tuned
 
 ## Setup steps
 
