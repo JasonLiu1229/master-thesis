@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
-from schemas.chat_schema import ChatRequest, ChatResponse
+from schemas.chat_schema import ChatRequest, ChatResponse, ChatMessage, ChatChoice
 from services.llm import ask_llm
 from services.security import verify_api_key
 
@@ -7,7 +7,7 @@ router = APIRouter()
 
 
 @router.post("/chat", response_model=ChatResponse)
-async def chat_endpoint(body: ChatRequest):
+async def chat_endpoint(body: ChatRequest) -> ChatResponse:
     """
     Middleman endpoint:
     - take user message
@@ -33,7 +33,7 @@ async def chat_endpoint(body: ChatRequest):
             )
     try:
         reply_text = await ask_llm(body.user_message)
-        return ChatResponse(reply=reply_text)
+        return ChatResponse(choices=[ChatChoice(message=ChatMessage(content=reply_text))])
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY, detail="Upstream LLM error"
