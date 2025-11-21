@@ -11,3 +11,5 @@ out/logs/*
 out/model/runs/*
 out/model/checkpoint*
 out/model/data_preprocessed/cache-*
+
+.pytest_cache/*
