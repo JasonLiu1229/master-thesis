@@ -21,8 +21,14 @@ class JavaTestSpan:  # A smaller form to save the test_cases
     start_line: int
     end_line: int
     file_path: str
+    
+@dataclass 
+class JavaTestCase:
+    name: str
+    original: JavaTestSpan
+    code: str
 
-
+# === Eval helper functions ===
 def convert_json_to_java(json_file):
     """
     For jsonl files that contain java code, this needs to be converted to a valid java format for testing/eval function
@@ -30,6 +36,7 @@ def convert_json_to_java(json_file):
     pass
 
 
+# === Preprocess helper functions ===
 def wrap_test_case(test_case: str) -> str:
     """
     Wrap the test case so it matches as similar as the original training data
@@ -145,11 +152,30 @@ def parse_test_case(test_span: JavaTestSpan):
         source_code = f.read()
         source_code = source_code.splitlines()
         return source_code[test_span.start_line : test_span.end_line + 1]
+    
+def pre_process_file(file_path: Path) -> List[str]:
+    
+    spans = extract_tests_from_file(file_path=file_path)
+    
+    pre_processed_tests: List[str] = []
+    for span in spans:
+        pre_processed_tests.append(wrap_test_case(parse_test_case(span)))
+    
+    return pre_processed_tests
 
+# === Post process functions ===
+def _remove_wrap(code: str):
+    pass
 
-def combine_test_cases(test_cases: List[str]):
+def _swap_test_case(code:str, new_test_case: JavaTestCase):
     """
-    After the post processing of the test cases they need to be combined again to a single file
+        Replace the original test case with the new one
+    """
+    pass
+
+def post_process_file(test_cases: List[JavaTestCase]):
+    """
+        Replace all the old test cases with the newly generated ones and make file at the end
     """
     pass
 
