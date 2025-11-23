@@ -21,13 +21,13 @@ class JavaTestSpan:  # A smaller form to save the test_cases
     method_line: int
     start_line: int
     end_line: int
-    file_path: str
+    file_path: Path
 
 
 @dataclass
 class JavaTestCase:
     name: str
-    original: JavaTestSpan
+    original_code: str
     code: str
 
 

@@ -54,7 +54,7 @@ def rename(java_test_span: JavaTestSpan):
 
     assert new_test_code != "", "New test code is not made, it is still empty"
     assert new_method_name != "", "New method name is not made, it is still empty"
-    return JavaTestCase(new_method_name, java_test_span, new_test_code)
+    return JavaTestCase(name=new_method_name, original_code=source_code, code=new_test_code)
 
 def rename_eval(src: str):
     pass
