@@ -1,4 +1,5 @@
 import argparse
+import os
 from pathlib import Path
 
 from logger import setup_logging
@@ -49,11 +50,11 @@ def argument_parser():
     #     default=1
     # )
 
-    parser.add_argument(
-        "--config",
-        help="Optional YAML/JSON configuration file for pipeline parameters.",
-        type=Path
-    )
+    # parser.add_argument(
+    #     "--config",
+    #     help="Optional YAML/JSON configuration file for pipeline parameters.",
+    #     type=Path
+    # )
 
     parser.add_argument(
         "--force",
@@ -70,6 +71,28 @@ def argument_parser():
 
     return parser
 
+def process_single(file: Path):
+    pass
+
+def process_folder(dir: Path, is_eval: bool):
+    if is_eval:
+        logger.info("Running evaluation")
+        pass
+
 if __name__ == "__main__":
     
     args = argument_parser()
+
+    # Checks for input
+    assert os.path.exists(args.dir), f"Path {args.dir} does not exists"
+    assert os.path.exists(args.file), f"Path {args.file} does not exists"
+    
+    
+    if args.mode == "single":
+        logger.info("Processing single file")
+        process_single(args.file)
+    else:
+        logger.info("Processing folder")
+        process_folder(args.dir, is_eval=(args.mode == "eval"))
+
+    
