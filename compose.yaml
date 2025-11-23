@@ -27,7 +27,7 @@ services:
       - ./out:/app/code/out/
     env_file:
       - .env
-    profiles: ["t3", "test", "full"]
+    profiles: ["t3", "test", "full_local"]
     depends_on:
       api:
         condition: service_healthy
@@ -42,7 +42,7 @@ services:
       - ./out:/app/code/out/
     env_file:
       - .env
-    profiles: ["t3_eval"]
+    profiles: ["t3_eval", "full_local"]
     depends_on:
       api:
         condition: service_healthy
@@ -73,7 +73,7 @@ services:
     gpus: all
     env_file:
       - .env
-    profiles: ["api", "full"]
+    profiles: ["api", "full_local"]
     volumes:
       - hf_cache:/root/.cache/huggingface/
       - model_cache:/app/model/
