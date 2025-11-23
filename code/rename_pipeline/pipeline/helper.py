@@ -26,7 +26,7 @@ class JavaTestSpan:  # A smaller form to save the test_cases
 
 @dataclass
 class JavaTestCase:
-    name: str
+    name: str           # Just for debugging purposes
     original_code: str
     code: str
 

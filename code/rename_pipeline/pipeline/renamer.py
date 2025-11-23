@@ -9,6 +9,7 @@ from helper import (
     parse_method_name,
     parse_test_case,
     wrap_test_case,
+    remove_wrap,
 )
 from llm_client import LLMClient
 from logger import setup_logging
@@ -45,16 +46,20 @@ def rename(java_test_span: JavaTestSpan):
     source_code = parse_test_case(java_test_span)
 
     wrapped_source_code = wrap_test_case(source_code)
+    
+    source_code_clean = '\n'.join(source_code)
 
     user_message = USER_PROMPT_TEMPLATE.format(test_case=wrapped_source_code)
 
     new_test_code = client.chat(LLM_MODEL, [user_message])
+    
+    new_test_code_clean = remove_wrap(new_test_code)
 
     new_method_name = parse_method_name(new_test_code)
 
     assert new_test_code != "", "New test code is not made, it is still empty"
     assert new_method_name != "", "New method name is not made, it is still empty"
-    return JavaTestCase(name=new_method_name, original_code=source_code, code=new_test_code)
+    return JavaTestCase(name=new_method_name, original_code=source_code_clean, code=new_test_code_clean)
 
 def rename_eval(src: str):
     pass
