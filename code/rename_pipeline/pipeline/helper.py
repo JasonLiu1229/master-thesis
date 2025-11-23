@@ -173,7 +173,9 @@ def pre_process_file(file_path: Path) -> List[str]:
 
 # === Post process functions ===
 def _remove_wrap(code: str):
-    pass
+    pattern = r"@Test\s+public void\s+[A-Za-z0-9_]+\s*\([^)]*\)\s*(?:throws [A-Za-z0-9_.,\s]+)?\s*\{[\s\S]*?\}"
+    m = re.search(pattern, code)
+    return m.group(0) if m else ""
 
 
 def _swap_test_case(code: str, new_test_case: JavaTestCase):
@@ -206,5 +208,7 @@ if __name__ == "__main__":
     spans = extract_tests_from_file(
         "code/rename_pipeline/pipeline/assets/randoop_example_unit_test.java"
     )
-    print(parse_method_name(wrap_test_case(parse_test_case(spans[1]))))
+    # print(parse_method_name(wrap_test_case(parse_test_case(spans[1]))))
+    print(wrap_test_case(parse_test_case(spans[1])))
+    print(_remove_wrap(wrap_test_case(parse_test_case(spans[1]))))
     
