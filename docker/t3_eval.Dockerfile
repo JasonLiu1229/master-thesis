@@ -12,12 +12,9 @@ COPY ../code/rename_pipeline app/
 COPY ../code/llm_client.py app/
 COPY ../code/logger.py app/
 
-COPY ../tools/java-dataset-converter-llm/dataset/test/jsonl  app/in/test
+COPY ../tools/java-dataset-converter-llm/dataset/test/jsonl  /app/in/test
 
 WORKDIR /app
 
-# Single
-CMD ["python3", "t3.py", "--mode", "single", "--file", "pipeline/assets/randoop_example_unit_test.java", "--force", "--output", "out/java/"] 
-
-# # Folder
-# CMD ["python3", "t3.py", "--mode", "dir", "--dir", "pipeline/assets/", "--force", "--output", "out/java/"] 
+# Eval
+CMD ["python3", "t3.py", "--mode", "eval", "--dir", "in/test", "--force", "--output", "out/java/"] 

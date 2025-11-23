@@ -27,7 +27,22 @@ services:
       - ./out:/app/code/out/
     env_file:
       - .env
-    profiles: ["t3_a", "test", "full"]
+    profiles: ["t3", "test", "full"]
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - pipeline
+  
+  t3_eval:
+    container_name: t3_eval
+    build:
+      dockerfile: docker/t3_eval.Dockerfile
+    volumes:
+      - ./out:/app/code/out/
+    env_file:
+      - .env
+    profiles: ["t3_eval"]
     depends_on:
       api:
         condition: service_healthy
