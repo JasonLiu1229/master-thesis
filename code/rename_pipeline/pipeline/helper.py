@@ -1,5 +1,6 @@
 import os
 import re
+import javalang
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List
@@ -188,12 +189,22 @@ def post_process_file(test_cases: List[JavaTestCase]):
     """
     pass
 
-def parse_method_name(test_case: str):
-    pass
+def parse_method_name(test_case: str) -> str:
+    tree = javalang.parse.parse(test_case)
+    
+    methods = list(tree.filter(javalang.tree.MethodDeclaration))
+
+    assert len(methods) == 1, f"Expected exactly 1 method, found {len(methods)}"
+
+    _, method = methods[0]  
+
+    return method.name
+
 
 
 if __name__ == "__main__":
     spans = extract_tests_from_file(
         "code/rename_pipeline/pipeline/assets/randoop_example_unit_test.java"
     )
-    print(wrap_test_case(parse_test_case(spans[1])))
+    print(parse_method_name(wrap_test_case(parse_test_case(spans[1]))))
+    
