@@ -172,24 +172,46 @@ def pre_process_file(file_path: Path) -> List[str]:
 
 
 # === Post process functions ===
-def _remove_wrap(code: str):
+def remove_wrap(code: str):
     pattern = r"@Test\s+public void\s+[A-Za-z0-9_]+\s*\([^)]*\)\s*(?:throws [A-Za-z0-9_.,\s]+)?\s*\{[\s\S]*?\}"
     m = re.search(pattern, code)
     return m.group(0) if m else ""
 
 
-def _swap_test_case(code: str, new_test_case: JavaTestCase):
+def _swap_test_case(source_code: str, new_test_case: JavaTestCase) -> str:
     """
-    Replace the original test case with the new one
+    Replace the original test case with the new one in the given Java source.
     """
-    pass
+    old = new_test_case.original_code
+    new = new_test_case.code
+
+    old = old.strip()
+    new = new.strip()
+
+    if old not in source_code:
+        raise ValueError(f"Original test case for {new_test_case.name!r} not found in source_code")
+
+    return source_code.replace(old, new, 1)
 
 
-def post_process_file(test_cases: List[JavaTestCase], output_file: Path, force=False):
+def post_process_file(source_code: str, test_cases: List[JavaTestCase], output_file: Path, force=False):
     """
     Replace all the old test cases with the newly generated ones and make file at the end
     """
-    pass
+    
+    for test_case in test_cases:
+        source_code = _swap_test_case(source_code, test_case)
+        
+    if os.path.exists(output_file):
+        if force:
+            with open(output_file, 'w') as f: 
+                f.write(source_code)
+        else:
+            raise FileExistsError(f"{output_file} already exists and force was not enabled")
+    else:
+        with open(output_file, 'w') as f: 
+                f.write(source_code)
+
 
 def parse_method_name(test_case: str) -> str:
     tree = javalang.parse.parse(test_case)
@@ -208,7 +230,24 @@ if __name__ == "__main__":
     spans = extract_tests_from_file(
         "code/rename_pipeline/pipeline/assets/randoop_example_unit_test.java"
     )
-    # print(parse_method_name(wrap_test_case(parse_test_case(spans[1]))))
-    print(wrap_test_case(parse_test_case(spans[1])))
-    print(_remove_wrap(wrap_test_case(parse_test_case(spans[1]))))
+    
+    source_code = None
+    with open("code/rename_pipeline/pipeline/assets/randoop_example_unit_test.java", "r") as file:
+        source_code = file.read()
+    
+    print(f"Original source code: \n\n {source_code}")
+    
+    test_to_replace = parse_test_case(spans[1])
+    test_to_replace = "\n".join(test_to_replace)
+    
+    new_test = (
+        '@Test public void calculator_test() throws Throwable {'
+        'Calculator calc = new Calculator();'
+        'int result = calc.multiply(4, 0);'
+        'assertEquals(0, result);'
+        '}'
+        )
+    
+    print(f"New source code: \n\n{_swap_test_case(source_code, JavaTestCase("calculator_test", test_to_replace, new_test))}")
+    
     
