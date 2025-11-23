@@ -12,8 +12,6 @@ COPY ../code/rename_pipeline app/
 COPY ../code/llm_client.py app/
 COPY ../code/logger.py app/
 
-COPY ../tools/java-dataset-converter-llm/dataset/test/jsonl  app/in/test
-
 WORKDIR /app
 
 # Single

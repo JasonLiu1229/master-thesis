@@ -14,3 +14,17 @@ Here an example of how it should look like:
 ```
 
 As you can see the prompt will be the obfuscated or input java code and the response should be the oracle output.
+
+## How does it work
+
+So the pipeline works using docker. It is defined as 't3'.
+
+It consist of several arguments:
+
+- mode: with this you can select what mode you will use the pipeline as. You can use it for a single file, a whole directory or for evalutaion.
+- file: when selecting single, you have to specify what file you want to process
+- dir: when selecting dir or eval, you have to specify what directory you want to process
+- force: this flag enables overwriting of existing files, in case files already exist they will be overwritten when this flag is enabled
+- output: this flag specifies where the newly generated files will be stored
+
+Note: in the docker compose file you will see, t3 and t3_eval. As you can guess one is for evaluation and makes use of jsonl files. These files needs to be made seperatly, similar to the [tuning](../tuner/README.md) code. The processing code itself can be found in the [tools](../../tools/) folder.
