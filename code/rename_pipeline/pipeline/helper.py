@@ -188,6 +188,9 @@ def post_process_file(test_cases: List[JavaTestCase]):
     """
     pass
 
+def parse_method_name(test_case: str):
+    pass
+
 
 if __name__ == "__main__":
     spans = extract_tests_from_file(

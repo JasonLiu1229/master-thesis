@@ -77,6 +77,7 @@ def process_single(file: Path):
 def process_folder(dir: Path, is_eval: bool):
     if is_eval:
         logger.info("Running evaluation")
+        logger.warning("not implemented yet")
         pass
 
 if __name__ == "__main__":
