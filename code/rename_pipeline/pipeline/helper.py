@@ -228,11 +228,11 @@ def parse_method_name(test_case: str) -> str:
 
 if __name__ == "__main__":
     spans = extract_tests_from_file(
-        "code/rename_pipeline/pipeline/assets/randoop_example_unit_test.java"
+        "code/rename_pipeline/pipeline/assets/randoop_example_unit_test_calc.java"
     )
     
     source_code = None
-    with open("code/rename_pipeline/pipeline/assets/randoop_example_unit_test.java", "r") as file:
+    with open("code/rename_pipeline/pipeline/assets/randoop_example_unit_test_calc.java", "r") as file:
         source_code = file.read()
     
     print(f"Original source code: \n\n {source_code}")
