@@ -183,7 +183,7 @@ def _swap_test_case(code: str, new_test_case: JavaTestCase):
     pass
 
 
-def post_process_file(test_cases: List[JavaTestCase]):
+def post_process_file(test_cases: List[JavaTestCase], output_file: Path, force=False):
     """
     Replace all the old test cases with the newly generated ones and make file at the end
     """

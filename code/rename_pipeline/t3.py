@@ -7,7 +7,8 @@ from pathlib import Path
 import tqdm
 
 from logger import setup_logging
-from pipeline.renamer import rename, rename_eval
+from pipeline.renamer import rename
+from pipeline.helper import extract_tests_from_file, post_process_file
 
 setup_logging("pipeline")
 logger = logging.getLogger("pipeline")
@@ -69,22 +70,44 @@ def argument_parser():
 
     return parser
 
+args = argument_parser()
+    
+def process_single(file: Path, out: Path):
+    test_cases_spans = extract_tests_from_file(file)
+    
+    test_cases = list()
+    
+    for test_span in tqdm(
+        test_cases_spans,
+        desc=f"Renaming tests in {file.name}",
+        leave=False,
+        unit="test",
+    ):
+        test_cases.append(rename(test_span))
 
-def process_single(file: Path):
-    pass
+    output_file = out / file.name
+    
+    post_process_file(test_cases=test_cases, output_file=output_file, force=args.force)
+    
+    logger.info(f"Renamed and outputed file: {file} to {output_file}")
 
 
-def process_folder(dir: Path, is_eval: bool):
+def process_folder(root: Path, out: Path, is_eval: bool):
+    out.mkdir(parents=True, exist_ok=True)
+
     if is_eval:
         logger.info("Running evaluation")
         logger.warning("not implemented yet")
-        pass
+        return
 
+    java_files = sorted(root.glob("*.java"))
+
+    for file in tqdm(java_files, desc="Files", unit="file"):
+        process_single(file, out)
+        
+    logger.info("Folder processed")
 
 if __name__ == "__main__":
-
-    args = argument_parser()
-
     # Checks for input
     assert os.path.exists(args.dir), f"Path {args.dir} does not exists"
     assert os.path.exists(args.file), f"Path {args.file} does not exists"
