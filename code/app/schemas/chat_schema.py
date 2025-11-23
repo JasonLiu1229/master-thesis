@@ -1,12 +1,12 @@
 from pydantic import BaseModel
 from types import List
 
-class ChatRequest(BaseModel):
-    user_message: str
-    api_key: str | None = None
-    
 class ChatMessage(BaseModel):
+    role:str
     content: str
+class ChatRequest(BaseModel):
+    messages: List[ChatMessage]
+    model: str
 
 class ChatChoice(BaseModel):
     message: ChatMessage

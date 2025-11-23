@@ -43,7 +43,7 @@ with open("config.yml", "r") as f:
 
 def load_ds(path: str) -> Dataset:
     if not os.path.exists(path):
-        logger.warning(f"Dataset path {path} does not exist. Returning None.")
+        logger.error(f"Dataset path {path} does not exist. Returning None.")
         raise FileNotFoundError(f"Dataset path {path} does not exist.")
     try:
         return Dataset.load_from_disk(path)
