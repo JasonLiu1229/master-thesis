@@ -1,3 +1,5 @@
 LLM Studio
 
 More images for longer slides
+
+In case of long thesis title, splits title in parts to explain it part by part
