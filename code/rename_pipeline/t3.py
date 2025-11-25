@@ -4,7 +4,7 @@ import os
 
 from pathlib import Path
 
-import tqdm
+from tqdm import tqdm
 
 from logger import setup_logging
 from pipeline.helper import extract_tests_from_file, post_process_file
@@ -116,7 +116,7 @@ if __name__ == "__main__":
         if not os.path.exists(args.file):
             logger.error(f"Path {args.file} does not exists")
 
-        process_single(file=args.file, out=args.out, force=args.force)
+        process_single(file=args.file, out=args.output, force=args.force)
     else:
         logger.info("Processing folder")
 
@@ -124,5 +124,5 @@ if __name__ == "__main__":
             logger.error(f"Path {args.dir} does not exists")
 
         process_folder(
-            args.dir, out=args.out, is_eval=(args.mode == "eval"), force=args.force
+            args.dir, out=args.output, is_eval=(args.mode == "eval"), force=args.force
         )
