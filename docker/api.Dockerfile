@@ -18,5 +18,6 @@ WORKDIR /app
 COPY ../code/app /app
 COPY ../code/model.py /app
 COPY ../../out/model/checkpoint-* /app/model/
+COPY ../code/logger.py /app
 
 CMD ["fastapi", "run", "main.py", "--host", "0.0.0.0", "--port", "8000"]

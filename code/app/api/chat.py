@@ -1,16 +1,27 @@
-from fastapi import APIRouter, HTTPException, status, Header
-from schemas.chat_schema import ChatRequest, ChatResponse, ChatMessage, ChatChoice
+import logging
+
+from fastapi import APIRouter, Header, HTTPException, status
+
+from logger import setup_logging
+from schemas.chat_schema import ChatChoice, ChatMessage, ChatRequest, ChatResponse
 from services.llm import ask_llm
 from services.security import verify_api_key
 
+setup_logging("api")
+logger = logging.getLogger("api")
+
 router = APIRouter()
 
+
 @router.post("/chat", response_model=ChatResponse)
-async def chat_endpoint(body: ChatRequest, authorization: str = Header(None)) -> ChatResponse:
+async def chat_endpoint(
+    body: ChatRequest, authorization: str = Header(None)
+) -> ChatResponse:
     if authorization:
         scheme, _, key = authorization.partition(" ")
         if scheme.lower() == "bearer":
             import json
+
             with open("json_db.json", "r") as f:
                 db = json.load(f)
 
@@ -20,13 +31,10 @@ async def chat_endpoint(body: ChatRequest, authorization: str = Header(None)) ->
             )
 
             if not verify:
-                raise HTTPException(
-                    status_code=401,
-                    detail="Invalid API key"
-                )
+                raise HTTPException(status_code=401, detail="Invalid API key")
 
     user_message = ""
-    
+
     for message in body.messages:
         if message.role == "user":
             user_message = message.content
@@ -46,7 +54,7 @@ async def chat_endpoint(body: ChatRequest, authorization: str = Header(None)) ->
             ]
         )
     except Exception as e:
+        logger.error(f"Upstream LLM error: {e}")
         raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="Upstream LLM error"
+            status_code=status.HTTP_502_BAD_GATEWAY, detail=f"Upstream LLM error: {e}"
         ) from e
