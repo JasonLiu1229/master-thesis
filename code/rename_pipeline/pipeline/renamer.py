@@ -3,7 +3,7 @@ import os
 
 from dotenv import load_dotenv
 
-from helper import (
+from pipeline.helper import (
     JavaTestCase,
     JavaTestSpan,
     parse_method_name,

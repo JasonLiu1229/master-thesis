@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from types import List
+from typing import List
 
 class ChatMessage(BaseModel):
     role:str

@@ -7,8 +7,8 @@ from pathlib import Path
 import tqdm
 
 from logger import setup_logging
-from pipeline.renamer import rename
 from pipeline.helper import extract_tests_from_file, post_process_file
+from pipeline.renamer import rename
 
 setup_logging("pipeline")
 logger = logging.getLogger("pipeline")
@@ -70,13 +70,12 @@ def argument_parser():
 
     return parser
 
-args = argument_parser()
-    
-def process_single(file: Path, out: Path):
+
+def process_single(file: Path, out: Path, force: bool):
     test_cases_spans = extract_tests_from_file(file)
-    
+
     test_cases = list()
-    
+
     for test_span in tqdm(
         test_cases_spans,
         desc=f"Renaming tests in {file.name}",
@@ -86,13 +85,13 @@ def process_single(file: Path, out: Path):
         test_cases.append(rename(test_span))
 
     output_file = out / file.name
-    
-    post_process_file(test_cases=test_cases, output_file=output_file, force=args.force)
-    
+
+    post_process_file(test_cases=test_cases, output_file=output_file, force=force)
+
     logger.info(f"Renamed and outputed file: {file} to {output_file}")
 
 
-def process_folder(root: Path, out: Path, is_eval: bool):
+def process_folder(root: Path, out: Path, is_eval: bool, force: bool):
     out.mkdir(parents=True, exist_ok=True)
 
     if is_eval:
@@ -103,18 +102,27 @@ def process_folder(root: Path, out: Path, is_eval: bool):
     java_files = sorted(root.glob("*.java"))
 
     for file in tqdm(java_files, desc="Files", unit="file"):
-        process_single(file, out)
-        
+        process_single(file, out, force)
+
     logger.info("Folder processed")
 
+
 if __name__ == "__main__":
-    # Checks for input
-    assert os.path.exists(args.dir), f"Path {args.dir} does not exists"
-    assert os.path.exists(args.file), f"Path {args.file} does not exists"
+    args = argument_parser().parse_args()
 
     if args.mode == "single":
         logger.info("Processing single file")
-        process_single(args.file)
+
+        if not os.path.exists(args.file):
+            logger.error(f"Path {args.file} does not exists")
+
+        process_single(file=args.file, out=args.out, force=args.force)
     else:
         logger.info("Processing folder")
-        process_folder(args.dir, is_eval=(args.mode == "eval"))
+
+        if not os.path.exists(args.dir):
+            logger.error(f"Path {args.dir} does not exists")
+
+        process_folder(
+            args.dir, out=args.out, is_eval=(args.mode == "eval"), force=args.force
+        )
