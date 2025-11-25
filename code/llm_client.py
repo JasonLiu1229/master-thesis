@@ -1,6 +1,11 @@
 import os
 from dotenv import load_dotenv
 
+from logger import setup_logging
+import logging
+
+setup_logging("llm_client")
+logger = logging.getLogger("llm_client")
 
 class LLMClient:
     def __init__(self, api_key, base_url="https://api.openai.com/v1/chat/completions"):
@@ -16,6 +21,13 @@ class LLMClient:
         }
         data = {"model": model, "messages": messages}
         response = requests.post(self.base_url, headers=headers, json=data)
+        
+        if response.status_code != 200:
+            logger.error(f"LLM ERROR status: {response.status_code}")
+            try:
+                logger.error(f"LLM ERROR body: {response.json()}")
+            except Exception:
+                logger.error(f"LLM ERROR raw body: {response.text}")
         response.raise_for_status()
         return response.json()["choices"][0]["message"]["content"]
 
