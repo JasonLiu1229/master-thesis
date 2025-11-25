@@ -2,17 +2,17 @@ import logging
 import os
 
 from dotenv import load_dotenv
+from llm_client import LLMClient
+from logger import setup_logging
 
 from pipeline.helper import (
     JavaTestCase,
     JavaTestSpan,
     parse_method_name,
     parse_test_case,
-    wrap_test_case,
     remove_wrap,
+    wrap_test_case,
 )
-from llm_client import LLMClient
-from logger import setup_logging
 
 setup_logging("pipeline")
 logger = logging.getLogger("pipeline")
@@ -24,6 +24,14 @@ USER_PROMPT_TEMPLATE = (
     "```\n\n"
     "Return ONLY the improved code block, nothing else."
 )
+
+SYSTEM_INSTRUCTION = (
+    "You are a code refactoring assistant.\n"
+    "Rename identifiers in the following Java unit test so that names are meaningful and self-explanatory.\n"
+    "Do NOT change logic, literals, comments, formatting, assertions, or method call structure.\n"
+    "Only improve identifier names (methods, variables)."
+)
+
 
 load_dotenv()
 
@@ -46,20 +54,34 @@ def rename(java_test_span: JavaTestSpan):
     source_code = parse_test_case(java_test_span)
 
     wrapped_source_code = wrap_test_case(source_code)
-    
-    source_code_clean = '\n'.join(source_code)
+
+    source_code_clean = "\n".join(source_code)
 
     user_message = USER_PROMPT_TEMPLATE.format(test_case=wrapped_source_code)
-
-    new_test_code = client.chat(LLM_MODEL, [user_message])
     
+    messages = [
+        {
+            "role": "system",
+            "content": SYSTEM_INSTRUCTION,
+        },
+        {
+            "role": "user",
+            "content": user_message,
+        },
+    ]
+
+    new_test_code = client.chat(LLM_MODEL, messages)
+
     new_test_code_clean = remove_wrap(new_test_code)
 
     new_method_name = parse_method_name(new_test_code)
 
     assert new_test_code != "", "New test code is not made, it is still empty"
     assert new_method_name != "", "New method name is not made, it is still empty"
-    return JavaTestCase(name=new_method_name, original_code=source_code_clean, code=new_test_code_clean)
+    return JavaTestCase(
+        name=new_method_name, original_code=source_code_clean, code=new_test_code_clean
+    )
+
 
 def rename_eval(src: str):
     pass

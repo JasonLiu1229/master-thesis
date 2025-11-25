@@ -25,12 +25,28 @@ async def chat_endpoint(body: ChatRequest, authorization: str = Header(None)) ->
                     detail="Invalid API key"
                 )
 
-    user_message = body.messages[-1].content
+    user_message = ""
+    
+    for message in body.messages:
+        if message.role == "user":
+            user_message = message.content
+            break
 
     try:
         reply_text = await ask_llm(user_message)
-        return ChatResponse(choices=[ChatChoice(message=ChatMessage(content=reply_text))])
+
+        return ChatResponse(
+            choices=[
+                ChatChoice(
+                    message=ChatMessage(
+                        role="assistant",
+                        content=reply_text,
+                    )
+                )
+            ]
+        )
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY, detail="Upstream LLM error"
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Upstream LLM error"
         ) from e
