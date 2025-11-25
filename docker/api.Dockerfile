@@ -19,4 +19,4 @@ COPY ../code/app /app
 COPY ../code/model.py /app
 COPY ../../out/model/checkpoint-* /app/model/
 
-CMD ["fastapi", "run", "main.py", "--host", "0.0.0.0", "--port", "80"]
+CMD ["fastapi", "run", "main.py", "--host", "0.0.0.0", "--port", "8000"]
