@@ -85,8 +85,13 @@ def process_single(file: Path, out: Path, force: bool):
         test_cases.append(rename(test_span))
 
     output_file = out / file.name
-
-    post_process_file(test_cases=test_cases, output_file=output_file, force=force)
+    
+    source_code = None
+    
+    with open(file, "r") as file:
+        source_code = file.read()
+    
+    post_process_file(source_code=source_code, test_cases=test_cases, output_file=output_file, force=force)
 
     logger.info(f"Renamed and outputed file: {file} to {output_file}")
 

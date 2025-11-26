@@ -224,7 +224,15 @@ def parse_method_name(test_case: str) -> str:
 
     return method.name
 
-
+def strip_markdown_fences(code: str) -> str:
+    code = code.strip()
+    if code.startswith("```"):
+        lines = code.splitlines()
+        lines = lines[1:]
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        return "\n".join(lines).strip()
+    return code
 
 if __name__ == "__main__":
     spans = extract_tests_from_file(

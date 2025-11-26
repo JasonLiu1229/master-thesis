@@ -12,6 +12,7 @@ from pipeline.helper import (
     parse_test_case,
     remove_wrap,
     wrap_test_case,
+    strip_markdown_fences
 )
 
 setup_logging("pipeline")
@@ -71,6 +72,10 @@ def rename(java_test_span: JavaTestSpan):
     ]
 
     new_test_code = client.chat(LLM_MODEL, messages)
+    
+    # logger.info(f"new test codeP: {new_test_code}")
+    
+    new_test_code = strip_markdown_fences(new_test_code)
 
     new_test_code_clean = remove_wrap(new_test_code)
 
