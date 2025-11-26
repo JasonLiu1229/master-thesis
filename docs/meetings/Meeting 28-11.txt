@@ -1,0 +1,9 @@
+Over mail meeting
+
+Cloud how much Vram i should go for 
+    - Online for a model of 7B it states that I should go for 24GB of Vram
+        - RTX 4090 https://www.runpod.io/pricing 0.34 euro per hour
+    - Could go for bigger, then i can change setting for config so more Vram is consumed?
+
+Bigger model
+    - Currently I train a 7B params one, should i choose a bigger one if we do it over cloud?
