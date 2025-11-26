@@ -24,7 +24,7 @@ services:
     build:
       dockerfile: docker/t3.Dockerfile
     volumes:
-      - ./out:/app/code/out/
+      - ./out:/app/out/
     env_file:
       - .env
     profiles: ["t3", "test", "full_local"]
@@ -77,6 +77,7 @@ services:
     volumes:
       - hf_cache:/root/.cache/huggingface/
       - model_cache:/app/model/
+      - ./out:/app/out/
     networks:
       - pipeline
     healthcheck:
