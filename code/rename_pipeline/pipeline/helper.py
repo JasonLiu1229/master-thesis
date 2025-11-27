@@ -36,6 +36,7 @@ class JavaTestCase:
     name: str  # Just for debugging purposes
     original_code: str
     code: str
+    clean: bool = True
 
 
 # === Eval helper functions ===
@@ -178,7 +179,7 @@ def pre_process_file(file_path: Path) -> List[str]:
     return pre_processed_tests
 
 
-def _normalize_java_tokens(code: str):
+def _normalize_java_tokens(code: str): # Made using GPT
     """
     Tokenize Java code and normalize identifiers to placeholders (ID0, ID1, ...).
     Non-identifier tokens keep their exact value.
@@ -193,7 +194,6 @@ def _normalize_java_tokens(code: str):
     for tok in tokens:
         ttype = type(tok).__name__
 
-        # Identifiers: variable names, method names, class names, etc.
         if isinstance(tok, jtok.Identifier):
             name = tok.value
             if name not in id_map:
@@ -201,13 +201,12 @@ def _normalize_java_tokens(code: str):
                 next_id += 1
             normalized.append((ttype, id_map[name]))
         else:
-            # For everything else we keep the literal value (to freeze structure)
             normalized.append((ttype, tok.value))
 
     return normalized
 
 
-def only_identifier_renames(original: str, transformed: str) -> bool:
+def only_identifier_renames(original: str, transformed: str) -> bool: # Made using GPT
     """
     Return True if the only differences between original and transformed code
     are identifier renamings (variable/method/class names).
@@ -218,7 +217,6 @@ def only_identifier_renames(original: str, transformed: str) -> bool:
         orig_norm = _normalize_java_tokens(original)
         new_norm = _normalize_java_tokens(transformed)
     except jtok.LexerError:
-        # If we can't even tokenize, treat it as unsafe
         return False
 
     return orig_norm == new_norm
@@ -272,7 +270,8 @@ def post_process_file(
     """
 
     for test_case in test_cases:
-        source_code = _swap_test_case(source_code, test_case)
+        if test_case.clean:
+            source_code = _swap_test_case(source_code, test_case)
 
     if os.path.exists(output_file):
         if force:
