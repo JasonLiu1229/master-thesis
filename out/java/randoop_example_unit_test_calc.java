@@ -20,13 +20,16 @@ public class Calculator_ESTest {
     }
 
     @Test
-    public void testDivisionByZero() throws Throwable {
-        Calculator calculator = new Calculator();
+    public void test2() throws Throwable {
+        Calculator calc = new Calculator();
         
         try {
-            calculator.divide(10, 0);
+            calc.divide(10, 0);
             fail("Expected ArithmeticException to be thrown");
+        } catch (ArithmeticException e) {
+            // Expected exception
         }
+    }
 
     @Test(timeout = 4000)
     public void testSubtractionOperation() throws Throwable {

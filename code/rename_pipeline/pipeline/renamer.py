@@ -33,6 +33,21 @@ USER_PROMPT_TEMPLATE = (
     "Return ONLY the improved code block, nothing else."
 )
 
+REATTEMPT_PROMPT_TEMPLATE = (
+    "Regenerate a new unit test from scratch.\n"
+    "Do not reuse your previous test. \n"
+    "Here is the previous test and its failure:\n"
+    "```java\n"
+    "{failed_test_case}\n"
+    "```\n\n"
+    "Here is the code-under-test:\n"
+    "```java\n"
+    "{test_case}\n"
+    "```\n\n"
+    "Produce a new correct test. Output test code only.\n"
+    "Return ONLY the improved code block, nothing else."
+)
+
 SYSTEM_INSTRUCTION = (
     "You are a code refactoring assistant.\n"
     "Rename identifiers in the following Java unit test so that names are meaningful and self-explanatory.\n"
@@ -49,6 +64,17 @@ LLM_MODEL = os.getenv(key="LLM_MODEL")
 
 client = LLMClient(API_KEY, API_URL)
 
+def make_messages(user_message: str):
+    return [
+        {
+            "role": "system",
+            "content": SYSTEM_INSTRUCTION,
+        },
+        {
+            "role": "user",
+            "content": user_message,
+        },
+    ]
 
 def rename(java_test_span: JavaTestSpan):
     assert os.path.exists(
@@ -63,16 +89,7 @@ def rename(java_test_span: JavaTestSpan):
 
     user_message = USER_PROMPT_TEMPLATE.format(test_case=wrapped_source_code)
 
-    messages = [
-        {
-            "role": "system",
-            "content": SYSTEM_INSTRUCTION,
-        },
-        {
-            "role": "user",
-            "content": user_message,
-        },
-    ]
+    messages = make_messages(user_message)
 
     best_code = None
     best_name = original_method_name
@@ -96,6 +113,10 @@ def rename(java_test_span: JavaTestSpan):
             logger.warning(
                 f"The new test case has logic changes: {original_method_name} (attempt {i + 1})"
             )
+            
+            # use remake prompt
+            user_message = REATTEMPT_PROMPT_TEMPLATE.format(test_case=wrapped_source_code, failed_test_case=candidate_code)
+            messages = make_messages(user_message)
             continue
 
         try:
