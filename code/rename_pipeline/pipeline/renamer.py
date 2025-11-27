@@ -1,6 +1,8 @@
 import logging
 import os
 
+import yaml
+
 from dotenv import load_dotenv
 from llm_client import LLMClient
 from logger import setup_logging
@@ -8,15 +10,13 @@ from logger import setup_logging
 from pipeline.helper import (
     JavaTestCase,
     JavaTestSpan,
+    only_identifier_renames,
     parse_method_name,
     parse_test_case,
     remove_wrap,
-    wrap_test_case,
     strip_markdown_fences,
-    only_identifier_renames
+    wrap_test_case,
 )
-
-import yaml
 
 config = {}
 with open("pipeline/config.yml", "r") as f:
@@ -48,6 +48,7 @@ API_URL = os.getenv("API_URL")
 LLM_MODEL = os.getenv(key="LLM_MODEL")
 
 client = LLMClient(API_KEY, API_URL)
+
 
 def rename(java_test_span: JavaTestSpan):
     assert os.path.exists(
@@ -107,11 +108,10 @@ def rename(java_test_span: JavaTestSpan):
             )
             continue
 
- 
         best_code = candidate_code
         best_name = candidate_name
         clean = True
-        break  
+        break
 
     if not clean or best_code is None:
         logger.warning(
