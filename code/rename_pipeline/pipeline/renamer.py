@@ -35,8 +35,8 @@ USER_PROMPT_TEMPLATE = (
 
 REATTEMPT_PROMPT_TEMPLATE = (
     "Regenerate a new unit test from scratch.\n"
-    "Do not reuse your previous test. \n"
-    "Here is the previous test and its failure:\n"
+    "Do not reuse your previous test.\n"
+    "Here is the previous test:\n"
     "```java\n"
     "{failed_test_case}\n"
     "```\n\n"
@@ -44,8 +44,12 @@ REATTEMPT_PROMPT_TEMPLATE = (
     "```java\n"
     "{test_case}\n"
     "```\n\n"
-    "Produce a new correct test. Output test code only.\n"
-    "Return ONLY the improved code block, nothing else."
+    "TASK:\n"
+    "1. Identify the root cause of the failure.\n"
+    "2. Update your understanding of the intended behavior.\n"
+    "3. Generate a fully new, self-contained, correct unit test.\n"
+    "4. Do NOT reuse or modify the previous attempt.\n"
+    "5. Output ONLY the final improved full test code, nothing else.\n"
 )
 
 SYSTEM_INSTRUCTION = (
@@ -64,6 +68,7 @@ LLM_MODEL = os.getenv(key="LLM_MODEL")
 
 client = LLMClient(API_KEY, API_URL)
 
+
 def make_messages(user_message: str):
     return [
         {
@@ -75,6 +80,7 @@ def make_messages(user_message: str):
             "content": user_message,
         },
     ]
+
 
 def rename(java_test_span: JavaTestSpan):
     assert os.path.exists(
@@ -113,9 +119,11 @@ def rename(java_test_span: JavaTestSpan):
             logger.warning(
                 f"The new test case has logic changes: {original_method_name} (attempt {i + 1})"
             )
-            
+
             # use remake prompt
-            user_message = REATTEMPT_PROMPT_TEMPLATE.format(test_case=wrapped_source_code, failed_test_case=candidate_code)
+            user_message = REATTEMPT_PROMPT_TEMPLATE.format(
+                test_case=wrapped_source_code, failed_test_case=candidate_code
+            )
             messages = make_messages(user_message)
             continue
 
