@@ -55,6 +55,8 @@ def rename(java_test_span: JavaTestSpan):
     source_code = parse_test_case(java_test_span)
 
     wrapped_source_code = wrap_test_case(source_code)
+    
+    original_method_name = parse_method_name(wrapped_source_code)
 
     source_code_clean = "\n".join(source_code)
 
@@ -83,6 +85,8 @@ def rename(java_test_span: JavaTestSpan):
 
     assert new_test_code != "", "New test code is not made, it is still empty"
     assert new_method_name != "", "New method name is not made, it is still empty"
+    
+    logger.info(f"new test method name: {new_method_name}, original test method name: {original_method_name}")
     return JavaTestCase(
         name=new_method_name, original_code=source_code_clean, code=new_test_code_clean
     )

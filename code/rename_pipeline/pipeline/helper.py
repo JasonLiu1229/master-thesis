@@ -1,9 +1,13 @@
+import logging
 import os
 import re
-import javalang
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List
+
+import javalang
+import javalang.tokenizer as jtok
+from logger import setup_logging
 
 METHOD_SIG_RE = re.compile(
     r"\b(?:public|protected|private)?\s*"
@@ -12,6 +16,9 @@ METHOD_SIG_RE = re.compile(
     r"(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s*"
     r"\(",
 )
+
+setup_logging("pipeline")
+logger = logging.getLogger("pipeline")
 
 
 @dataclass
@@ -26,7 +33,7 @@ class JavaTestSpan:  # A smaller form to save the test_cases
 
 @dataclass
 class JavaTestCase:
-    name: str           # Just for debugging purposes
+    name: str  # Just for debugging purposes
     original_code: str
     code: str
 
@@ -171,9 +178,62 @@ def pre_process_file(file_path: Path) -> List[str]:
     return pre_processed_tests
 
 
+def _normalize_java_tokens(code: str):
+    """
+    Tokenize Java code and normalize identifiers to placeholders (ID0, ID1, ...).
+    Non-identifier tokens keep their exact value.
+    The resulting sequence can be compared between original and transformed code
+    to see if only identifiers changed.
+    """
+    tokens = list(jtok.tokenize(code))
+    id_map = {}
+    next_id = 0
+    normalized = []
+
+    for tok in tokens:
+        ttype = type(tok).__name__
+
+        # Identifiers: variable names, method names, class names, etc.
+        if isinstance(tok, jtok.Identifier):
+            name = tok.value
+            if name not in id_map:
+                id_map[name] = f"ID{next_id}"
+                next_id += 1
+            normalized.append((ttype, id_map[name]))
+        else:
+            # For everything else we keep the literal value (to freeze structure)
+            normalized.append((ttype, tok.value))
+
+    return normalized
+
+
+def only_identifier_renames(original: str, transformed: str) -> bool:
+    """
+    Return True if the only differences between original and transformed code
+    are identifier renamings (variable/method/class names).
+
+    If tokenization fails or structural tokens differ, return False.
+    """
+    try:
+        orig_norm = _normalize_java_tokens(original)
+        new_norm = _normalize_java_tokens(transformed)
+    except jtok.LexerError:
+        # If we can't even tokenize, treat it as unsafe
+        return False
+
+    return orig_norm == new_norm
+
+
 # === Post process functions ===
 def remove_wrap(code: str):
-    pattern = r"@Test\s+public void\s+[A-Za-z0-9_]+\s*\([^)]*\)\s*(?:throws [A-Za-z0-9_.,\s]+)?\s*\{[\s\S]*?\}"
+    pattern = (
+        r"@Test(?:\s*\([^)]*\))?\s+"
+        r"public\s+void\s+[A-Za-z_][A-Za-z0-9_]*\s*"  # method name
+        r"\([^)]*\)\s*"
+        r"(?:throws [A-Za-z0-9_.,\s]+)?\s*"
+        r"\{[\s\S]*?\}"
+    )
+
     m = re.search(pattern, code)
     return m.group(0) if m else ""
 
@@ -188,41 +248,59 @@ def _swap_test_case(source_code: str, new_test_case: JavaTestCase) -> str:
     old = old.strip()
     new = new.strip()
 
+    if not new:
+        logger.warning(
+            f"New test code for {new_test_case.name!r} is empty; refusing to replace."
+        )
+        return source_code
+
+    logger.info(f"new source code: {new}, to be replaced: {old}")
+
     if old not in source_code:
-        raise ValueError(f"Original test case for {new_test_case.name!r} not found in source_code")
+        raise ValueError(
+            f"Original test case for {new_test_case.name!r} not found in source_code"
+        )
 
     return source_code.replace(old, new, 1)
 
 
-def post_process_file(source_code: str, test_cases: List[JavaTestCase], output_file: Path, force=False):
+def post_process_file(
+    source_code: str, test_cases: List[JavaTestCase], output_file: Path, force=False
+):
     """
     Replace all the old test cases with the newly generated ones and make file at the end
     """
-    
+
     for test_case in test_cases:
         source_code = _swap_test_case(source_code, test_case)
-        
+
     if os.path.exists(output_file):
         if force:
-            with open(output_file, 'w') as f: 
+            logger.warning(f"Force enabled, overwriting file: {output_file}")
+            with open(output_file, "w") as f:
                 f.write(source_code)
         else:
-            raise FileExistsError(f"{output_file} already exists and force was not enabled")
+            raise FileExistsError(
+                f"{output_file} already exists and force was not enabled"
+            )
     else:
-        with open(output_file, 'w') as f: 
-                f.write(source_code)
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
+
+        with open(output_file, "w") as f:
+            f.write(source_code)
 
 
 def parse_method_name(test_case: str) -> str:
     tree = javalang.parse.parse(test_case)
-    
+
     methods = list(tree.filter(javalang.tree.MethodDeclaration))
 
     assert len(methods) == 1, f"Expected exactly 1 method, found {len(methods)}"
 
-    _, method = methods[0]  
+    _, method = methods[0]
 
     return method.name
+
 
 def strip_markdown_fences(code: str) -> str:
     code = code.strip()
@@ -234,28 +312,31 @@ def strip_markdown_fences(code: str) -> str:
         return "\n".join(lines).strip()
     return code
 
+
 if __name__ == "__main__":
     spans = extract_tests_from_file(
         "code/rename_pipeline/pipeline/assets/randoop_example_unit_test_calc.java"
     )
-    
+
     source_code = None
-    with open("code/rename_pipeline/pipeline/assets/randoop_example_unit_test_calc.java", "r") as file:
+    with open(
+        "code/rename_pipeline/pipeline/assets/randoop_example_unit_test_calc.java", "r"
+    ) as file:
         source_code = file.read()
-    
+
     print(f"Original source code: \n\n {source_code}")
-    
+
     test_to_replace = parse_test_case(spans[1])
     test_to_replace = "\n".join(test_to_replace)
-    
+
     new_test = (
-        '@Test public void calculator_test() throws Throwable {'
-        'Calculator calc = new Calculator();'
-        'int result = calc.multiply(4, 0);'
-        'assertEquals(0, result);'
-        '}'
-        )
-    
-    print(f"New source code: \n\n{_swap_test_case(source_code, JavaTestCase("calculator_test", test_to_replace, new_test))}")
-    
-    
+        "@Test public void calculator_test() throws Throwable {"
+        "Calculator calc = new Calculator();"
+        "int result = calc.multiply(4, 0);"
+        "assertEquals(0, result);"
+        "}"
+    )
+
+    print(
+        f"New source code: \n\n{_swap_test_case(source_code, JavaTestCase("calculator_test", test_to_replace, new_test))}"
+    )

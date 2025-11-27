@@ -13,6 +13,7 @@ from pipeline.renamer import rename
 setup_logging("pipeline")
 logger = logging.getLogger("pipeline")
 
+MODE = None
 
 def argument_parser():
     parser = argparse.ArgumentParser(description="Pipeline configuration")
@@ -91,9 +92,10 @@ def process_single(file: Path, out: Path, force: bool):
     with open(file, "r") as file:
         source_code = file.read()
     
-    post_process_file(source_code=source_code, test_cases=test_cases, output_file=output_file, force=force)
+    if not MODE == "eval":
+        post_process_file(source_code=source_code, test_cases=test_cases, output_file=output_file, force=force)
 
-    logger.info(f"Renamed and outputed file: {file} to {output_file}")
+    logger.info(f"Renamed and outputed file: {file.name} to {output_file}")
 
 
 def process_folder(root: Path, out: Path, is_eval: bool, force: bool):
@@ -114,8 +116,10 @@ def process_folder(root: Path, out: Path, is_eval: bool, force: bool):
 
 if __name__ == "__main__":
     args = argument_parser().parse_args()
+    
+    MODE = args.mode
 
-    if args.mode == "single":
+    if MODE == "single":
         logger.info("Processing single file")
 
         if not os.path.exists(args.file):
@@ -129,5 +133,5 @@ if __name__ == "__main__":
             logger.error(f"Path {args.dir} does not exists")
 
         process_folder(
-            args.dir, out=args.output, is_eval=(args.mode == "eval"), force=args.force
+            args.dir, out=args.output, is_eval=(MODE == "eval"), force=args.force
         )
