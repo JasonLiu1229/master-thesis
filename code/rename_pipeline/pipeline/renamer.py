@@ -45,7 +45,7 @@ REATTEMPT_PROMPT_TEMPLATE = (
     "{test_case}\n"
     "```\n\n"
     "TASK:\n"
-    "1. Identify the root cause of the failure.\n"
+    "1. Identify the root cause and the difference of the two test codes.\n"
     "2. Update your understanding of the intended behavior.\n"
     "3. Generate a fully new, self-contained, correct unit test.\n"
     "4. Do NOT reuse or modify the previous attempt.\n"
