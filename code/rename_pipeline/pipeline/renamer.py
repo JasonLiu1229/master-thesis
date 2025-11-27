@@ -19,7 +19,7 @@ from pipeline.helper import (
 import yaml
 
 config = {}
-with open("config.yml", "r") as f:
+with open("pipeline/config.yml", "r") as f:
     config = yaml.safe_load(f)
 
 setup_logging("pipeline")
