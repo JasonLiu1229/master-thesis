@@ -34,14 +34,16 @@ async def chat_endpoint(
                 raise HTTPException(status_code=401, detail="Invalid API key")
 
     user_message = ""
+    sys_instruction = ""
 
     for message in body.messages:
         if message.role == "user":
             user_message = message.content
-            break
+        if message.role == "system":
+            sys_instruction = message.content
 
     try:
-        reply_text = await ask_llm(user_message)
+        reply_text = await ask_llm(user_message, sys_instruction)
 
         return ChatResponse(
             choices=[

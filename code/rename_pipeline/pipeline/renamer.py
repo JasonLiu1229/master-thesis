@@ -35,8 +35,8 @@ USER_PROMPT_TEMPLATE = (
 
 REATTEMPT_PROMPT_TEMPLATE = (
     "Regenerate a new unit test from scratch.\n"
-    "Do not reuse your previous test.\n"
-    "Here is the previous test:\n"
+    "Do not reuse your failed test case.\n"
+    "Here is the failed test case test:\n"
     "```java\n"
     "{failed_test_case}\n"
     "```\n\n"
@@ -49,13 +49,21 @@ REATTEMPT_PROMPT_TEMPLATE = (
     "2. Update your understanding of the intended behavior.\n"
     "3. Generate a fully new, self-contained, correct unit test.\n"
     "4. Do NOT reuse or modify the previous attempt.\n"
-    "5. Output ONLY the final improved full test code, nothing else.\n"
+    "5. Output ONLY the final improved full test code, nothing else and remember ONLY modify identifiers.\n"
 )
+
 
 SYSTEM_INSTRUCTION = (
     "You are a code refactoring assistant.\n"
     "Rename identifiers in the following Java unit test so that names are meaningful and self-explanatory.\n"
     "Do **NOT** change logic, literals, comments, formatting, assertions, or method call structure.\n"
+    "ONLY improve identifier names (methods, variables)."
+)
+
+REATTEMPT_SYSTEM_INSTRUCT = (
+    "You are a code refactoring assistant.\n"
+    "Compare the failed test case and the original, and fix what is missing or what is different compared to the code under test"
+    "Again do **NOT** change logic, literals, comments, formatting, assertions, or method call structure from the code under test.\n"
     "ONLY improve identifier names (methods, variables)."
 )
 
@@ -69,11 +77,11 @@ LLM_MODEL = os.getenv(key="LLM_MODEL")
 client = LLMClient(API_KEY, API_URL)
 
 
-def make_messages(user_message: str):
+def make_messages(user_message: str, sys_instruction: str = SYSTEM_INSTRUCTION):
     return [
         {
             "role": "system",
-            "content": SYSTEM_INSTRUCTION,
+            "content": sys_instruction,
         },
         {
             "role": "user",
@@ -82,15 +90,7 @@ def make_messages(user_message: str):
     ]
 
 
-def rename(java_test_span: JavaTestSpan):
-    assert os.path.exists(
-        java_test_span.file_path
-    ), f"Java file path: {java_test_span.file_path} does not exists"
-
-    source_code_lines = parse_test_case(java_test_span)
-    source_code_clean = "\n".join(source_code_lines)
-
-    wrapped_source_code = wrap_test_case(source_code_lines)
+def _rename_process(wrapped_source_code: str, source_code_clean):
     original_method_name = parse_method_name(wrapped_source_code)
 
     user_message = USER_PROMPT_TEMPLATE.format(test_case=wrapped_source_code)
@@ -119,12 +119,15 @@ def rename(java_test_span: JavaTestSpan):
             logger.warning(
                 f"The new test case has logic changes: {original_method_name} (attempt {i + 1})"
             )
+            logger.warning(
+                f"New candidate code:\n{candidate_code}"
+            )
 
             # use remake prompt
             user_message = REATTEMPT_PROMPT_TEMPLATE.format(
                 test_case=wrapped_source_code, failed_test_case=candidate_code
             )
-            messages = make_messages(user_message)
+            messages = make_messages(user_message, REATTEMPT_SYSTEM_INSTRUCT)
             continue
 
         try:
@@ -163,6 +166,18 @@ def rename(java_test_span: JavaTestSpan):
         code=best_code,
         clean=clean,
     )
+
+
+def rename(java_test_span: JavaTestSpan):
+    assert os.path.exists(
+        java_test_span.file_path
+    ), f"Java file path: {java_test_span.file_path} does not exists"
+
+    source_code_lines = parse_test_case(java_test_span)
+    source_code_clean = "\n".join(source_code_lines)
+
+    wrapped_source_code = wrap_test_case(source_code_lines)
+    return _rename_process(wrapped_source_code, source_code_clean)
 
 
 def rename_eval(src: str):
