@@ -122,10 +122,10 @@ def process_single_eval(file_path: Path) -> tuple[List[PairMetrics], int]:
 
         predicted_code, clean = rename_eval(obf_code)
 
-        if not clean:
+        if not clean: # do not evaluate failed code
             failed_count += 1
-
-        metrics.append(evaluate(oracle_code, predicted_code))
+        else:
+            metrics.append(evaluate(oracle_code, predicted_code))
 
     return metrics, failed_count
 
