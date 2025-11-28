@@ -109,7 +109,7 @@ def evaluate(oracle: str, prediction: str):
     )
 
 
-def compute_avg_metrics(metrics: List[PairMetrics]) -> Dict[str, float]:
+def compute_final_metrics(metrics: List[PairMetrics]) -> Dict[str, float]:
     """
     Compute average metrics for a whole dataset.
 

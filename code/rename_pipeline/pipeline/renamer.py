@@ -179,4 +179,7 @@ def rename(java_test_span: JavaTestSpan):
 
 
 def rename_eval(src: str):
-    pass
+    source_code_clean = remove_wrap(src)
+    java_test_case = _rename_process(src, source_code_clean)
+
+    return wrap_test_case(java_test_case.code), int(java_test_case.clean)

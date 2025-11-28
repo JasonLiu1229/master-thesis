@@ -7,9 +7,13 @@ from pathlib import Path
 from typing import List
 
 from logger import setup_logging
-from pipeline.eval import compute_avg_metrics, evaluate, PairMetrics
-from pipeline.helper import extract_tests_from_file, post_process_file
-from pipeline.renamer import rename
+from pipeline.eval import compute_final_metrics, evaluate, PairMetrics
+from pipeline.helper import (
+    extract_tests_from_file,
+    post_process_eval,
+    post_process_file,
+)
+from pipeline.renamer import rename, rename_eval
 from tqdm import tqdm
 
 setup_logging("pipeline")
@@ -92,7 +96,7 @@ def process_single(file: Path, out: Path, force: bool):
     logger.info(f"Renamed and outputed file: {file.name} to {output_file}")
 
 
-def process_single_eval(file_path: Path):
+def process_single_eval(file_path: Path) -> tuple[List[PairMetrics], int]:
     items = []  # in case more than one oracle in one file
 
     with open(file_path, "r", encoding="utf-8") as f:
@@ -104,6 +108,8 @@ def process_single_eval(file_path: Path):
 
     metrics: List[PairMetrics] = []
 
+    failed_count = 0
+
     for item in items:
         obf_code = item.get("prompt", "")
         oracle_code = item.get("response", "")
@@ -113,8 +119,16 @@ def process_single_eval(file_path: Path):
                 f"One of the codes was missing to complete evaluation for that oracle in file {file_path.name}"
             )
             continue
-        
-        
+
+        predicted_code, clean = rename_eval(obf_code)
+
+        if not clean:
+            failed_count += 1
+
+        metrics.append(evaluate(oracle_code, predicted_code))
+
+    return metrics, failed_count
+
 
 def process_folder(root: Path, out: Path, is_eval: bool, force: bool):
     out.mkdir(parents=True, exist_ok=True)
@@ -123,8 +137,19 @@ def process_folder(root: Path, out: Path, is_eval: bool, force: bool):
         logger.info("Running evaluation")
         jsonl_files = sorted(root.glob("*.jsonl"))
 
-        for file in tqdm(jsonl_files, desc="Files", unit="file"):
-            process_single_eval(file)
+        failed_count = 0
+        total_metrics: List[PairMetrics] = []
+
+        for file in tqdm(jsonl_files, desc="Oracle files", unit="oracle"):
+            metrics, count = process_single_eval(file)
+            total_metrics.extend(metrics)
+            failed_count += count
+
+        final_metric = compute_final_metrics(total_metrics)
+        
+        post_process_eval(final_metric, out, force)
+
+        logger.info("Folder evaluated")
         return
 
     java_files = sorted(root.glob("*.java"))

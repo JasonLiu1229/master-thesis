@@ -1,6 +1,9 @@
+import json
 import logging
 import os
 import re
+import yaml
+
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List
@@ -16,6 +19,10 @@ METHOD_SIG_RE = re.compile(
     r"(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s*"
     r"\(",
 )
+
+config = {}
+with open("pipeline/config.yml", "r") as f:
+    config = yaml.safe_load(f)
 
 setup_logging("pipeline")
 logger = logging.getLogger("pipeline")
@@ -179,7 +186,7 @@ def pre_process_file(file_path: Path) -> List[str]:
     return pre_processed_tests
 
 
-def _normalize_java_tokens(code: str): # Made using GPT
+def _normalize_java_tokens(code: str):  # Made using GPT
     """
     Tokenize Java code and normalize identifiers to placeholders (ID0, ID1, ...).
     Non-identifier tokens keep their exact value.
@@ -206,7 +213,7 @@ def _normalize_java_tokens(code: str): # Made using GPT
     return normalized
 
 
-def only_identifier_renames(original: str, transformed: str) -> bool: # Made using GPT
+def only_identifier_renames(original: str, transformed: str) -> bool:  # Made using GPT
     """
     Return True if the only differences between original and transformed code
     are identifier renamings (variable/method/class names).
@@ -276,8 +283,6 @@ def post_process_file(
     if os.path.exists(output_file):
         if force:
             logger.warning(f"Force enabled, overwriting file: {output_file}")
-            with open(output_file, "w") as f:
-                f.write(source_code)
         else:
             raise FileExistsError(
                 f"{output_file} already exists and force was not enabled"
@@ -285,8 +290,8 @@ def post_process_file(
     else:
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
-        with open(output_file, "w") as f:
-            f.write(source_code)
+    with open(output_file, "w") as f:
+        f.write(source_code)
 
 
 def parse_method_name(test_case: str) -> str:
@@ -310,6 +315,25 @@ def strip_markdown_fences(code: str) -> str:
             lines = lines[:-1]
         return "\n".join(lines).strip()
     return code
+
+
+def post_process_eval(metrics: dict, out: Path, force=False):
+    output_file: Path = out.joinpath(config["EVAL_OUTPUT_FILE_NAME"])
+    
+    if os.path.exists(output_file):
+        if force:
+            logger.warning(f"Force enabled, overwriting file: {output_file}")
+        else:
+            raise FileExistsError(
+                f"{output_file} already exists and force was not enabled"
+            )
+    else:
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
+
+    with output_file.open("w", encoding="utf-8") as f:
+        json.dump(metrics, f, indent=2, sort_keys=True)
+        
+    logger.info(f"Evaluated metrics and outputed to: {output_file}")
 
 
 if __name__ == "__main__":
