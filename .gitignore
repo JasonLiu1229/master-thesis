@@ -11,5 +11,6 @@ out/logs/*
 out/model/runs/*
 out/model/checkpoint*
 out/model/data_preprocessed/cache-*
+out/java/*
 
 .pytest_cache/*
