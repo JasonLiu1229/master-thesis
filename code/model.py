@@ -43,9 +43,9 @@ class LLM_Model:
         self,
         prompt,
         max_new_tokens=256,
-        temperature=0.2,
-        top_p=0.9,
-        top_k=40,
+        temperature=0.25,
+        top_p=0.85,
+        top_k=5,
         do_sample=False,
         sys_instruction: str = SYSTEM_INSTRUCTION,
     ):

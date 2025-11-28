@@ -33,23 +33,19 @@ USER_PROMPT_TEMPLATE = (
     "Return ONLY the improved code block, nothing else."
 )
 
-REATTEMPT_PROMPT_TEMPLATE = (
-    "Regenerate a new unit test from scratch.\n"
-    "Do not reuse your failed test case.\n"
-    "Here is the failed test case test:\n"
-    "```java\n"
-    "{failed_test_case}\n"
-    "```\n\n"
-    "Here is the code-under-test:\n"
+RETRY_USER_PROMPT_TEMPLATE = (
+    "Here is the original obfuscated test:\n\n"
     "```java\n"
     "{test_case}\n"
     "```\n\n"
-    "TASK:\n"
-    "1. Identify the root cause and the difference of the two test codes.\n"
-    "2. Update your understanding of the intended behavior.\n"
-    "3. Generate a fully new, self-contained, correct unit test.\n"
-    "4. Do NOT reuse or modify the previous attempt.\n"
-    "5. Output ONLY the final improved full test code, nothing else and remember ONLY modify identifiers.\n"
+    "Error reason: {error_reason}\n\n"
+    "Here is your previous refactored version, which was rejected because it changed logic/exception handling:\n\n"
+    "```java\n"
+    "{failed_test_case}\n"
+    "```\n\n"
+    "Produce a new version that ONLY renames identifiers and keeps the logic, assertions, and try/catch structure "
+    "identical to the original test.\n"
+    "Return ONLY the improved code block, nothing else."
 )
 
 SYSTEM_INSTRUCTION = (
@@ -62,8 +58,12 @@ SYSTEM_INSTRUCTION = (
 REATTEMPT_SYSTEM_INSTRUCT = (
     "You are a code refactoring assistant.\n"
     "Rename identifiers in the following Java unit test so that names are meaningful and self-explanatory.\n"
-    "Again do **NOT** change logic, literals, comments, formatting, assertions, try and catch methodology, or method call structure.\n"
-    "ONLY improve identifier names (methods, variables)."
+    "Do NOT change logic, literals, comments, formatting, assertions, or method call structure.\n"
+    "Do NOT add, remove, or modify any try, catch, or finally blocks.\n"
+    "Do NOT change which exception types are caught.\n"
+    "Do NOT remove empty catch blocks, even if they only contain a comment.\n"
+    "Only improve identifier names (methods, variables).\n"
+    "If you are unsure whether a change would modify control flow or exception handling, do not make that change."
 )
 
 
@@ -112,6 +112,13 @@ def _rename_process(wrapped_source_code: str, source_code_clean):
             logger.warning(
                 f"Empty candidate after remove_wrap for {original_method_name} on attempt {i + 1}"
             )
+
+            user_message = RETRY_USER_PROMPT_TEMPLATE.format(
+                test_case=wrapped_source_code,
+                failed_test_case=wrap_test_case(candidate_code),
+                error_reason=f"Empty candidate after remove_wrap for {original_method_name}",
+            )
+            messages = make_messages(user_message, REATTEMPT_SYSTEM_INSTRUCT)
             continue
 
         if not only_identifier_renames(source_code_clean, candidate_code):
@@ -120,9 +127,10 @@ def _rename_process(wrapped_source_code: str, source_code_clean):
             )
             logger.warning(f"New candidate code:\n{candidate_code}")
 
-            # use remake prompt
-            user_message = REATTEMPT_PROMPT_TEMPLATE.format(
-                test_case=wrapped_source_code, failed_test_case=candidate_code
+            user_message = RETRY_USER_PROMPT_TEMPLATE.format(
+                test_case=wrapped_source_code,
+                failed_test_case=wrap_test_case(candidate_code),
+                error_reason="The new test case has logic changes",
             )
             messages = make_messages(user_message, REATTEMPT_SYSTEM_INSTRUCT)
             continue
@@ -135,6 +143,14 @@ def _rename_process(wrapped_source_code: str, source_code_clean):
                 f"Failed to parse method name for {original_method_name} on attempt "
                 f"{i + 1}: {e}"
             )
+
+            user_message = RETRY_USER_PROMPT_TEMPLATE.format(
+                test_case=wrapped_source_code,
+                failed_test_case=wrap_test_case(candidate_code),
+                error_reason=f"Failed to parse method name for {original_method_name}",
+            )
+            
+            messages = make_messages(user_message, REATTEMPT_SYSTEM_INSTRUCT)
             continue
 
         best_code = candidate_code
