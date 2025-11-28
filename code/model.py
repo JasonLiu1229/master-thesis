@@ -1,8 +1,8 @@
+import os
 from enum import Enum
 
 import torch
-import os
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
 
 
 SYSTEM_INSTRUCTION = (
@@ -45,22 +45,29 @@ class LLM_Model:
         max_new_tokens=256,
         temperature=0.2,
         top_p=0.9,
+        top_k=40,
         do_sample=False,
         sys_instruction: str = SYSTEM_INSTRUCTION,
     ):
         assert self.model is not None, "Model not loaded."
         assert self.tokenizer is not None, "Tokenizer not loaded."
 
-        formatted_prompt = self._build_model_input(prompt, sys_instruction=sys_instruction)
+        formatted_prompt = self._build_model_input(
+            prompt, sys_instruction=sys_instruction
+        )
         inputs = self.tokenizer(formatted_prompt, return_tensors="pt")
+
+        gen_config = GenerationConfig(
+            do_sample=do_sample,
+            temperature=temperature,
+            top_p=top_p,
+            top_k=top_k,
+        )
 
         outputs = self.model.generate(
             **inputs.to(self.model.device),
             max_new_tokens=max_new_tokens,
-            do_sample=do_sample,
-            temperature=temperature,
-            top_p=top_p,
-            use_cache=True,
+            generation_config=gen_config,
             pad_token_id=self.tokenizer.pad_token_id,
             eos_token_id=self.tokenizer.eos_token_id,
         )
@@ -111,13 +118,13 @@ class LLM_Model:
         self._warmup()
 
     def load_local_model(self, local_model_path):
-        assert os.path.exists(local_model_path), f"Model path does not exists: {local_model_path}"
-        
+        assert os.path.exists(
+            local_model_path
+        ), f"Model path does not exists: {local_model_path}"
+
         self.tokenizer = AutoTokenizer.from_pretrained(local_model_path)
         self.model = AutoModelForCausalLM.from_pretrained(
-            local_model_path,
-            torch_dtype="auto",
-            device_map="auto"
+            local_model_path, torch_dtype="auto", device_map="auto"
         ).eval()
 
     @torch.inference_mode()
@@ -156,7 +163,9 @@ class LLM_Model:
         return ModelStyle.Plain
 
     def _build_model_input(
-        self, user_prompt: str, sys_instruction: str = "You are a helpful coding assistant."
+        self,
+        user_prompt: str,
+        sys_instruction: str = "You are a helpful coding assistant.",
     ) -> str:
         if "qwen" in self.model_id.lower() and getattr(
             self.tokenizer, "chat_template", None
