@@ -16,6 +16,6 @@ async def ask_llm(user_message: str, sys_instruction: str) -> str:
     return await anyio.to_thread.run_sync(
         llm.generate,
         user_message,
-        sys_instruction=sys_instruction
+        sys_instruction=sys_instruction,
+        do_sample=True
     )
-

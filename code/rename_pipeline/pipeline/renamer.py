@@ -55,15 +55,14 @@ REATTEMPT_PROMPT_TEMPLATE = (
 SYSTEM_INSTRUCTION = (
     "You are a code refactoring assistant.\n"
     "Rename identifiers in the following Java unit test so that names are meaningful and self-explanatory.\n"
-    "Do **NOT** change logic, literals, comments, formatting, assertions, or method call structure.\n"
+    "Do **NOT** change logic, literals, comments, formatting, assertions, try and catch methodology, or method call structure.\n"
     "ONLY improve identifier names (methods, variables)."
 )
 
 REATTEMPT_SYSTEM_INSTRUCT = (
     "You are a code refactoring assistant.\n"
-    "Compare the failed test case and the original, and keep everything from the original code under test."
     "Rename identifiers in the following Java unit test so that names are meaningful and self-explanatory.\n"
-    "Again do **NOT** change logic, literals, comments, formatting, assertions, or method call structure from the code under test.\n"
+    "Again do **NOT** change logic, literals, comments, formatting, assertions, try and catch methodology, or method call structure.\n"
     "ONLY improve identifier names (methods, variables)."
 )
 
