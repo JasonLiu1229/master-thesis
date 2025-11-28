@@ -1,19 +1,22 @@
 import argparse
+import json
 import logging
 import os
 
 from pathlib import Path
-
-from tqdm import tqdm
+from typing import List
 
 from logger import setup_logging
+from pipeline.eval import compute_avg_metrics, evaluate, PairMetrics
 from pipeline.helper import extract_tests_from_file, post_process_file
 from pipeline.renamer import rename
+from tqdm import tqdm
 
 setup_logging("pipeline")
 logger = logging.getLogger("pipeline")
 
 MODE = None
+
 
 def argument_parser():
     parser = argparse.ArgumentParser(description="Pipeline configuration")
@@ -47,19 +50,6 @@ def argument_parser():
         type=Path,
     )
 
-    # parser.add_argument(
-    #     "--workers",
-    #     help="Number of parallel workers to use for processing.",
-    #     type=int,
-    #     default=1
-    # )
-
-    # parser.add_argument(
-    #     "--config",
-    #     help="Optional YAML/JSON configuration file for pipeline parameters.",
-    #     type=Path
-    # )
-
     parser.add_argument(
         "--force",
         help="Overwrite existing output directory/files if they already exist.",
@@ -86,24 +76,55 @@ def process_single(file: Path, out: Path, force: bool):
         test_cases.append(rename(test_span))
 
     output_file = out / file.name
-    
+
     source_code = None
-    
+
     with open(file, "r") as file:
         source_code = file.read()
-    
-    if not MODE == "eval":
-        post_process_file(source_code=source_code, test_cases=test_cases, output_file=output_file, force=force)
+
+    post_process_file(
+        source_code=source_code,
+        test_cases=test_cases,
+        output_file=output_file,
+        force=force,
+    )
 
     logger.info(f"Renamed and outputed file: {file.name} to {output_file}")
 
+
+def process_single_eval(file_path: Path):
+    items = []  # in case more than one oracle in one file
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            items.append(json.loads(line))
+
+    metrics: List[PairMetrics] = []
+
+    for item in items:
+        obf_code = item.get("prompt", "")
+        oracle_code = item.get("response", "")
+
+        if not obf_code or not oracle_code:
+            logger.warning(
+                f"One of the codes was missing to complete evaluation for that oracle in file {file_path.name}"
+            )
+            continue
+        
+        
 
 def process_folder(root: Path, out: Path, is_eval: bool, force: bool):
     out.mkdir(parents=True, exist_ok=True)
 
     if is_eval:
         logger.info("Running evaluation")
-        logger.warning("not implemented yet")
+        jsonl_files = sorted(root.glob("*.jsonl"))
+
+        for file in tqdm(jsonl_files, desc="Files", unit="file"):
+            process_single_eval(file)
         return
 
     java_files = sorted(root.glob("*.java"))
@@ -116,7 +137,7 @@ def process_folder(root: Path, out: Path, is_eval: bool, force: bool):
 
 if __name__ == "__main__":
     args = argument_parser().parse_args()
-    
+
     MODE = args.mode
 
     if MODE == "single":
