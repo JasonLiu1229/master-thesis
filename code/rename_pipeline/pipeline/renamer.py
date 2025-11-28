@@ -52,7 +52,6 @@ REATTEMPT_PROMPT_TEMPLATE = (
     "5. Output ONLY the final improved full test code, nothing else and remember ONLY modify identifiers.\n"
 )
 
-
 SYSTEM_INSTRUCTION = (
     "You are a code refactoring assistant.\n"
     "Rename identifiers in the following Java unit test so that names are meaningful and self-explanatory.\n"
@@ -62,7 +61,8 @@ SYSTEM_INSTRUCTION = (
 
 REATTEMPT_SYSTEM_INSTRUCT = (
     "You are a code refactoring assistant.\n"
-    "Compare the failed test case and the original, and fix what is missing or what is different compared to the code under test"
+    "Compare the failed test case and the original, and keep everything from the original code under test."
+    "Rename identifiers in the following Java unit test so that names are meaningful and self-explanatory.\n"
     "Again do **NOT** change logic, literals, comments, formatting, assertions, or method call structure from the code under test.\n"
     "ONLY improve identifier names (methods, variables)."
 )
@@ -119,9 +119,7 @@ def _rename_process(wrapped_source_code: str, source_code_clean):
             logger.warning(
                 f"The new test case has logic changes: {original_method_name} (attempt {i + 1})"
             )
-            logger.warning(
-                f"New candidate code:\n{candidate_code}"
-            )
+            logger.warning(f"New candidate code:\n{candidate_code}")
 
             # use remake prompt
             user_message = REATTEMPT_PROMPT_TEMPLATE.format(
