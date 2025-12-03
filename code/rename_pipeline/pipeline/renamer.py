@@ -104,7 +104,7 @@ def _rename_process(wrapped_source_code: str, source_code_clean: str):
     clean = False
 
     for i in range(config["TRIES"]):
-        logger.info(f"LLM attempt {i + 1} (mapping) for {original_method_name}")
+        logger.info(f"\nLLM attempt {i + 1} (mapping) for {original_method_name}")
         raw = client.chat(LLM_MODEL, messages)
         raw = strip_markdown_fences(raw).strip()
 
