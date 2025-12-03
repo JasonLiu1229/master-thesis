@@ -11,6 +11,7 @@ RUN pip3 install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements
 COPY ../code/rename_pipeline app/
 COPY ../code/llm_client.py app/
 COPY ../code/logger.py app/
+COPY ../code/prompts.py app/
 
 WORKDIR /app
 

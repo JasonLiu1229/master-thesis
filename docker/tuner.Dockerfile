@@ -20,6 +20,7 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.
 COPY ../code/tuner /app
 COPY ../code/model.py /app
 COPY ../code/logger.py /app
+COPY ../code/prompts.py app/
 
 COPY ../tools/java-dataset-converter-llm/dataset/train/jsonl /app/in/train
 COPY ../tools/java-dataset-converter-llm/dataset/val/jsonl   /app/in/val

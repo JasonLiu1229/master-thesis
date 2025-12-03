@@ -9,13 +9,7 @@ from transformers import (
     GenerationConfig,
 )
 
-SYSTEM_INSTRUCTION = (
-    "You are a code refactoring assistant.\n"
-    "Rename identifiers in the following Java unit test so that names are meaningful and self-explanatory.\n"
-    "Do NOT change logic, literals, comments, formatting, assertions, or method call structure.\n"
-    "Only improve identifier names (methods, variables)."
-)
-
+from prompts import SYSTEM_INSTRUCTION
 
 class ModelStyle(Enum):
     LlamaInstruct = "inst"
