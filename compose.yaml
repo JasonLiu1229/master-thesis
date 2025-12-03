@@ -76,7 +76,7 @@ services:
     profiles: ["api", "full_local", "full_local_eval"]
     volumes:
       - hf_cache:/root/.cache/huggingface/
-      - model_cache:/app/model/
+      - model_cache:/app/model/local_model/
       - ./out:/app/out/
     networks:
       - pipeline

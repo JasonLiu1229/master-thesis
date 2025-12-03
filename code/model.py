@@ -204,23 +204,6 @@ def get_model(model_id) -> LLM_Model:
         _llm_model = m
     return _llm_model
 
-def convert_checkpoint(checkpoint_model_path, base_arch, out="out/model/local_model/"):
-    base_model = AutoModelForCausalLM.from_pretrained(
-        base_arch,
-        torch_dtype="auto",
-        device_map="auto"
-    )
-
-    state = torch.load(checkpoint_model_path, map_location="auto")
-    
-    base_model.load_state_dict(state)
-    
-    tokenizer = AutoTokenizer.from_pretrained(base_arch)
-    
-    base_model.save_pretrained(out)
-    tokenizer.save_pretrained(out)
-    print(f"Saved ckpt from: {checkpoint_model_path} to {out}")
-    
 
 def get_local_model(local_model_path) -> LLM_Model:
     global _llm_model
