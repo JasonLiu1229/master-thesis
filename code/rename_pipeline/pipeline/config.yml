@@ -1,2 +1,5 @@
-TRIES: 3
+TRIES: 3 # number of times to retry each failed example
+
 EVAL_OUTPUT_FILE_NAME: t3_benchmark_results.json
+
+AMOUNT_OF_EVAL_SAMPLES: 10 # set to -1 to use all eval samples

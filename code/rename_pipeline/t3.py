@@ -6,6 +6,8 @@ import os
 from pathlib import Path
 from typing import List
 
+import yaml
+
 from logger import setup_logging
 from pipeline.eval import compute_final_metrics, evaluate, PairMetrics
 from pipeline.helper import (
@@ -18,6 +20,10 @@ from tqdm import tqdm
 
 setup_logging("pipeline")
 logger = logging.getLogger("pipeline")
+
+config = {}
+with open("pipeline/config.yml", "r") as f:
+    config = yaml.safe_load(f)
 
 MODE = None
 
@@ -122,7 +128,7 @@ def process_single_eval(file_path: Path) -> tuple[List[PairMetrics], int]:
 
         predicted_code, clean = rename_eval(obf_code)
 
-        if not clean: # do not evaluate failed code
+        if not clean:  # do not evaluate failed code
             failed_count += 1
         else:
             metrics.append(evaluate(oracle_code, predicted_code))
@@ -140,13 +146,18 @@ def process_folder(root: Path, out: Path, is_eval: bool, force: bool):
         failed_count = 0
         total_metrics: List[PairMetrics] = []
 
-        for file in tqdm(jsonl_files, desc="Oracle files", unit="oracle"):
+        limit = len(jsonl_files)
+        
+        if config["AMOUNT_OF_EVAL_SAMPLES"] != -1:
+            limit = config["AMOUNT_OF_EVAL_SAMPLES"]
+        
+        for file in tqdm(jsonl_files[:limit], desc="Oracle files", unit="oracle"):
             metrics, count = process_single_eval(file)
             total_metrics.extend(metrics)
             failed_count += count
 
         final_metric = compute_final_metrics(total_metrics)
-        
+
         post_process_eval(final_metric, out, force)
 
         logger.info("Folder evaluated")

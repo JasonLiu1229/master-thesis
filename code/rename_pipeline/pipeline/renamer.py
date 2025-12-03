@@ -125,7 +125,7 @@ def _rename_process(wrapped_source_code: str, source_code_clean):
             logger.warning(
                 f"The new test case has logic changes: {original_method_name} (attempt {i + 1})"
             )
-            logger.warning(f"New candidate code:\n{candidate_code}")
+            logger.warning(f"New candidate code:\n{candidate_code}\n\n compared to:\n{source_code_clean}")
 
             user_message = RETRY_USER_PROMPT_TEMPLATE.format(
                 test_case=wrapped_source_code,
