@@ -1,5 +1,8 @@
 # Configuration for LLM model
 MODEL_ID: "Qwen/Qwen2.5-Coder-7B-Instruct"
 
-USE_LOCAL_LLM: false
-LOCAL_MODEL_PATH: "/model/"
+USE_LOCAL_LLM: true
+LOCAL_MODEL_PATH: "model/local_model/"
+
+LOAD_FROM_CKPT: true
+CKPT_PATH: "model/checkpoint-12000"

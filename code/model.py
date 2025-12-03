@@ -2,8 +2,12 @@ import os
 from enum import Enum
 
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
-
+from transformers import (
+    AutoConfig,
+    AutoModelForCausalLM,
+    AutoTokenizer,
+    GenerationConfig,
+)
 
 SYSTEM_INSTRUCTION = (
     "You are a code refactoring assistant.\n"
@@ -200,6 +204,23 @@ def get_model(model_id) -> LLM_Model:
         _llm_model = m
     return _llm_model
 
+def convert_checkpoint(checkpoint_model_path, base_arch, out="out/model/local_model/"):
+    base_model = AutoModelForCausalLM.from_pretrained(
+        base_arch,
+        torch_dtype="auto",
+        device_map="auto"
+    )
+
+    state = torch.load(checkpoint_model_path, map_location="auto")
+    
+    base_model.load_state_dict(state)
+    
+    tokenizer = AutoTokenizer.from_pretrained(base_arch)
+    
+    base_model.save_pretrained(out)
+    tokenizer.save_pretrained(out)
+    print(f"Saved ckpt from: {checkpoint_model_path} to {out}")
+    
 
 def get_local_model(local_model_path) -> LLM_Model:
     global _llm_model
@@ -207,7 +228,12 @@ def get_local_model(local_model_path) -> LLM_Model:
         print("Loading local LLM model into memory...")
         m = LLM_Model()
         try:
-            pass  # TODO: Implement loading from local path
+            tokenizer = AutoTokenizer.from_pretrained(local_model_path)
+            model = AutoModelForCausalLM.from_pretrained(
+                local_model_path, torch_dtype="auto", device_map="auto"
+            ).eval()
+            name = AutoConfig.from_pretrained(local_model_path).model_type
+            m.set_model(model, name, tokenizer)
         except Exception as e:
             print(f"Error loading local model {local_model_path}: {e}")
             raise

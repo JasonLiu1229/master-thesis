@@ -10,6 +10,7 @@ out/logs/*
 # out/data_preprocessed/*
 out/model/runs/*
 out/model/checkpoint*
+out/model/local_model
 out/model/data_preprocessed/cache-*
 out/java/*
 
