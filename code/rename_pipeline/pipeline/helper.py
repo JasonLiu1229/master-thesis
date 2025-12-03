@@ -275,6 +275,91 @@ def log_colored_diff(
             Fore.MAGENTA + "\n--- original ---\n" + original_code + Style.RESET_ALL
         )
 
+def extract_identifier_candidates(wrapped_test_case: str) -> list[str]:
+    """
+    Given a wrapped Java test case,
+    return the list of identifier names we want the LLM to rename.
+
+    We include:
+      - test method name
+      - parameter names
+      - local variable names
+
+    We exclude:
+      - ALL_CAPS-style names (likely constants)
+    """
+    tree = javalang.parse.parse(wrapped_test_case)
+
+    methods = [node for _, node in tree.filter(javalang.tree.MethodDeclaration)]
+    assert (
+        len(methods) == 1
+    ), f"Expected exactly 1 method in wrapped test case, found {len(methods)}"
+
+    method = methods[0]
+    names: set[str] = set()
+
+    # Method (test) name
+    if method.name:
+        names.add(method.name)
+
+    # Parameters
+    for param in method.parameters:
+        names.add(param.name)
+
+    # Local variables
+    for _, var_decl in tree.filter(javalang.tree.VariableDeclarator):
+        names.add(var_decl.name)
+
+    def is_constant_like(name: str) -> bool:
+        return name.isupper()
+
+    candidates = sorted(n for n in names if not is_constant_like(n))
+    return candidates
+
+
+def apply_rename_mapping(code: str, mapping: dict[str, str]) -> str:
+    """
+    Apply a rename mapping to Java code by replacing ONLY identifier tokens,
+    leaving literals, comments, qualifiers, etc. untouched.
+
+    Uses javalang.tokenizer to locate identifier positions and patches the
+    original source string at those positions.
+    """
+    if not mapping:
+        return code
+
+    tokens = list(jtok.tokenize(code))
+
+    # Precompute line start offsets to convert (line, col) -> absolute index
+    lines = code.splitlines(keepends=True)
+    line_offsets: list[int] = []
+    offset = 0
+    for line in lines:
+        line_offsets.append(offset)
+        offset += len(line)
+
+    replacements: list[tuple[int, str, str]] = []
+
+    for tok in tokens:
+        if isinstance(tok, jtok.Identifier) and tok.value in mapping:
+            line, col = tok.position  
+            abs_index = line_offsets[line - 1] + (col - 1)
+            old = tok.value
+            new = mapping[old]
+            if old != new:
+                replacements.append((abs_index, old, new))
+
+    new_code = code
+    for idx, old, new in sorted(replacements, key=lambda x: x[0], reverse=True):
+        if new_code[idx : idx + len(old)] != old:
+            logger.warning(
+                f"Expected {old!r} at index {idx}, "
+                f"found {new_code[idx:idx+len(old)]!r}; skipping this replacement."
+            )
+            continue
+        new_code = new_code[:idx] + new + new_code[idx + len(old) :]
+
+    return new_code
 
 # === Post process functions ===
 def remove_wrap(code: str):

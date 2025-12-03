@@ -2,3 +2,7 @@ Went from full file renaming to only renaming the identifiers within the file.
     - so extracting the identifiers -> renaming them -> putting them back in the file
 
 
+Supercomputer access:
+    - https://docs.vscentrum.be/accounts/vsc_account.html
+        Master students can also use the infrastructure for their master thesis work. 
+        The promoter of the thesis should first send a motivation to hpc@uantwerpen.be and then the generic procedure should be followed (using your student UAntwerpen id) to request the account.

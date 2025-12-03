@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 
@@ -7,7 +8,16 @@ from dotenv import load_dotenv
 from llm_client import LLMClient
 from logger import setup_logging
 
+from prompts import (
+    REATTEMPT_SYSTEM_INSTRUCT,
+    RETRY_USER_PROMPT_TEMPLATE,
+    SYSTEM_INSTRUCTION,
+    USER_PROMPT_TEMPLATE,
+)
+
 from pipeline.helper import (
+    apply_rename_mapping,
+    extract_identifier_candidates,
     JavaTestCase,
     JavaTestSpan,
     log_colored_diff,
@@ -19,13 +29,6 @@ from pipeline.helper import (
     wrap_test_case,
 )
 
-from prompts import (
-    USER_PROMPT_TEMPLATE,
-    SYSTEM_INSTRUCTION,
-    REATTEMPT_SYSTEM_INSTRUCT,
-    RETRY_USER_PROMPT_TEMPLATE
-)
-
 
 config = {}
 with open("pipeline/config.yml", "r") as f:
@@ -33,7 +36,6 @@ with open("pipeline/config.yml", "r") as f:
 
 setup_logging("pipeline")
 logger = logging.getLogger("pipeline")
-
 
 
 load_dotenv()
@@ -58,77 +60,122 @@ def make_messages(user_message: str, sys_instruction: str = SYSTEM_INSTRUCTION):
     ]
 
 
-def _rename_process(wrapped_source_code: str, source_code_clean):
+def _format_identifier_list_for_prompt(identifiers: list[str]) -> str:
+    return "\n".join(f"- {name}" for name in identifiers)
+
+
+def _rename_process(wrapped_source_code: str, source_code_clean: str):
     original_method_name = parse_method_name(wrapped_source_code)
 
-    user_message = USER_PROMPT_TEMPLATE.format(test_case=wrapped_source_code)
+    try:
+        identifier_candidates = extract_identifier_candidates(wrapped_source_code)
+    except Exception as e:
+        logger.warning(
+            f"Failed to extract identifier candidates for {original_method_name}: {e}"
+        )
+        return JavaTestCase(
+            name=original_method_name,
+            original_code=source_code_clean,
+            code="",
+            clean=False,
+        )
 
-    messages = make_messages(user_message)
+    if not identifier_candidates:
+        logger.info(
+            f"No identifier candidates found for {original_method_name}; keeping original test."
+        )
+        return JavaTestCase(
+            name=original_method_name,
+            original_code=source_code_clean,
+            code="",
+            clean=False,
+        )
 
-    best_code = None
-    best_name = original_method_name
+    identifiers_for_prompt = _format_identifier_list_for_prompt(identifier_candidates)
+
+    user_message = USER_PROMPT_TEMPLATE.format(
+        test_case=wrapped_source_code,
+        identifiers=identifiers_for_prompt,
+    )
+
+    messages = make_messages(user_message, SYSTEM_INSTRUCTION)
+
+    best_mapping = None
     clean = False
 
     for i in range(config["TRIES"]):
-        logger.info(f"LLM attempt {i + 1} for {original_method_name}")
+        logger.info(f"LLM attempt {i + 1} (mapping) for {original_method_name}")
         raw = client.chat(LLM_MODEL, messages)
-
-        raw = strip_markdown_fences(raw)
-
-        candidate_code = remove_wrap(raw)
-
-        if not candidate_code:
-            logger.warning(
-                f"Empty candidate after remove_wrap for {original_method_name} on attempt {i + 1}"
-            )
-
-            user_message = RETRY_USER_PROMPT_TEMPLATE.format(
-                test_case=wrapped_source_code,
-                failed_test_case=wrap_test_case(candidate_code),
-                error_reason=f"Empty candidate after remove_wrap for {original_method_name}",
-            )
-            messages = make_messages(user_message, REATTEMPT_SYSTEM_INSTRUCT)
-            continue
-
-        if not only_identifier_renames(source_code_clean, candidate_code):
-            log_colored_diff(
-                logger, original_method_name, i + 1, source_code_clean, candidate_code
-            )
-
-            user_message = RETRY_USER_PROMPT_TEMPLATE.format(
-                test_case=wrapped_source_code,
-                failed_test_case=wrap_test_case(candidate_code),
-                error_reason="The new test case has logic changes",
-            )
-            messages = make_messages(user_message, REATTEMPT_SYSTEM_INSTRUCT)
-            continue
+        raw = strip_markdown_fences(raw).strip()
 
         try:
-            wrapped_candidate = wrap_test_case(candidate_code.splitlines())
-            candidate_name = parse_method_name(wrapped_candidate)
-        except Exception as e:
+            mapping = json.loads(raw)
+        except json.JSONDecodeError as e:
+            error_reason = f"Response was not valid JSON: {e}"
             logger.warning(
-                f"Failed to parse method name for {original_method_name} on attempt "
-                f"{i + 1}: {e}"
+                f"{error_reason} for {original_method_name} on attempt {i + 1}: {raw!r}"
+            )
+            user_message = RETRY_USER_PROMPT_TEMPLATE.format(
+                test_case=wrapped_source_code,
+                identifiers=identifiers_for_prompt,
+                error_reason=error_reason,
+                failed_response=raw,
+            )
+            messages = make_messages(user_message, REATTEMPT_SYSTEM_INSTRUCT)
+            continue
+
+        if not isinstance(mapping, dict):
+            error_reason = "Response JSON is not an object (expected mapping originalName -> newName)."
+            logger.warning(
+                f"{error_reason} for {original_method_name} on attempt {i + 1}: {raw!r}"
+            )
+            user_message = RETRY_USER_PROMPT_TEMPLATE.format(
+                test_case=wrapped_source_code,
+                identifiers=identifiers_for_prompt,
+                error_reason=error_reason,
+                failed_response=raw,
+            )
+            messages = make_messages(user_message, REATTEMPT_SYSTEM_INSTRUCT)
+            continue
+
+        candidate_set = set(identifier_candidates)
+        mapping_keys = set(mapping.keys())
+
+        extra_keys = mapping_keys - candidate_set
+        if extra_keys:
+            logger.warning(
+                f"Mapping for {original_method_name} contains unexpected keys {extra_keys}; they will be ignored."
+            )
+            for k in extra_keys:
+                mapping.pop(k, None)
+
+        missing = candidate_set - mapping_keys
+
+        if missing:
+            error_reason = (
+                "The mapping did not contain all required identifiers. "
+                f"Missing: {sorted(missing)}"
+            )
+            logger.warning(
+                f"{error_reason} for {original_method_name} on attempt {i+1}: {mapping}"
             )
 
             user_message = RETRY_USER_PROMPT_TEMPLATE.format(
                 test_case=wrapped_source_code,
-                failed_test_case=wrap_test_case(candidate_code),
-                error_reason=f"Failed to parse method name for {original_method_name}",
+                identifiers=identifiers_for_prompt,
+                error_reason=error_reason,
+                failed_response=json.dumps(mapping),
             )
-
             messages = make_messages(user_message, REATTEMPT_SYSTEM_INSTRUCT)
             continue
 
-        best_code = candidate_code
-        best_name = candidate_name
+        best_mapping = mapping
         clean = True
         break
 
-    if not clean or best_code is None:
+    if not clean or best_mapping is None:
         logger.warning(
-            f"All {config['TRIES']} attempts changed logic or failed for {original_method_name}; "
+            f"All {config['TRIES']} attempts failed to produce a usable mapping for {original_method_name}; "
             "keeping original test."
         )
         return JavaTestCase(
@@ -138,13 +185,46 @@ def _rename_process(wrapped_source_code: str, source_code_clean):
             clean=False,
         )
 
+    candidate_code = apply_rename_mapping(source_code_clean, best_mapping)
+
+    if not only_identifier_renames(
+        source_code_clean, candidate_code
+    ):  # Extra check just in case something went wrong
+        logger.error(
+            f"Internal error: apply_rename_mapping changed more than identifiers for {original_method_name}."
+        )
+        log_colored_diff(
+            logger, original_method_name, -1, source_code_clean, candidate_code
+        )
+        return JavaTestCase(
+            name=original_method_name,
+            original_code=source_code_clean,
+            code="",
+            clean=False,
+        )
+
+    try:
+        wrapped_candidate = wrap_test_case(candidate_code.splitlines())
+        candidate_name = parse_method_name(wrapped_candidate)
+    except Exception as e:
+        logger.warning(
+            f"Failed to parse method name after mapping for {original_method_name}: {e}"
+        )
+        return JavaTestCase(
+            name=original_method_name,
+            original_code=source_code_clean,
+            code="",
+            clean=False,
+        )
+
     logger.info(
-        f"Renamed test method: {original_method_name} -> {best_name} (clean={clean})"
+        f"Renamed test method (mapping mode): {original_method_name} -> {candidate_name} (clean={clean})"
     )
+
     return JavaTestCase(
-        name=best_name,
+        name=candidate_name,
         original_code=source_code_clean,
-        code=best_code,
+        code=candidate_code,
         clean=clean,
     )
 
