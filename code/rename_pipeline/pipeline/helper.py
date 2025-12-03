@@ -50,14 +50,6 @@ class JavaTestCase:
     clean: bool = True
 
 
-# === Eval helper functions ===
-def convert_json_to_java(json_file):
-    """
-    For jsonl files that contain java code, this needs to be converted to a valid java format for testing/eval function
-    """
-    pass
-
-
 # === Preprocess helper functions ===
 def wrap_test_case(test_case: str) -> str:
     """
@@ -235,7 +227,7 @@ def only_identifier_renames(original: str, transformed: str) -> bool:  # Made us
 
 def log_colored_diff(
     logger, original_name: str, attempt: int, original_code: str, candidate_code: str
-) -> None: # made using GPT
+) -> None:  # made using GPT
     logger.warning(
         Fore.YELLOW
         + f"The new test case has logic changes: {original_name} (attempt {attempt})"
@@ -275,6 +267,7 @@ def log_colored_diff(
             Fore.MAGENTA + "\n--- original ---\n" + original_code + Style.RESET_ALL
         )
 
+
 def extract_identifier_candidates(wrapped_test_case: str) -> list[str]:
     """
     Given a wrapped Java test case,
@@ -283,31 +276,66 @@ def extract_identifier_candidates(wrapped_test_case: str) -> list[str]:
     We include:
       - test method name
       - parameter names
-      - local variable names
+      - local variable names (only from the top-level test method)
 
     We exclude:
       - ALL_CAPS-style names (likely constants)
     """
-    tree = javalang.parse.parse(wrapped_test_case)
+    try:
+        tree = javalang.parse.parse(wrapped_test_case)
+    except Exception as e:
+        logger.warning(
+            f"extract_identifier_candidates: javalang parse failed, "
+            f"no candidates extracted. Error: {e}"
+        )
+        return []
 
-    methods = [node for _, node in tree.filter(javalang.tree.MethodDeclaration)]
-    if len(methods) != 1:
-        logger.error(f"Expected to find one method but found more or none for the following test case: \n{wrapped_test_case}")
-        raise ValueError(f"Expected to find one method but found more or none for the following test case: \n{wrapped_test_case}")
+    class_decls = [
+        t for t in tree.types if isinstance(t, javalang.tree.ClassDeclaration)
+    ]
+    
+    if not class_decls:
+        logger.error(
+            "extract_identifier_candidates: no ClassDeclaration found in wrapped test case."
+        )
+        return []
 
-    method = methods[0]
+    cls = class_decls[0]
+    methods = list(cls.methods)
+
+    if not methods:
+        logger.error("extract_identifier_candidates: no methods found in TestClass1.")
+        return []
+
+    test_method = None
+    if len(methods) == 1:
+        test_method = methods[0]
+    else:
+        for m in methods:
+            if getattr(m, "annotations", None):
+                for ann in m.annotations:
+                    if ann.name == "Test":
+                        test_method = m
+                        break
+            if test_method is not None:
+                break
+
+    if test_method is None:
+        logger.warning(
+            "extract_identifier_candidates: multiple methods in TestClass1, "
+            "but none annotated with @Test; using first method."
+        )
+        test_method = methods[0]
+
     names: set[str] = set()
 
-    # Method (test) name
-    if method.name:
-        names.add(method.name)
+    if test_method.name:
+        names.add(test_method.name)
 
-    # Parameters
-    for param in method.parameters:
+    for param in test_method.parameters:
         names.add(param.name)
 
-    # Local variables
-    for _, var_decl in tree.filter(javalang.tree.VariableDeclarator):
+    for _, var_decl in test_method.filter(javalang.tree.VariableDeclarator):
         names.add(var_decl.name)
 
     def is_constant_like(name: str) -> bool:
@@ -349,7 +377,7 @@ def apply_rename_mapping(code: str, mapping: dict[str, str]) -> str:
 
     for tok in tokens:
         if isinstance(tok, jtok.Identifier) and tok.value in mapping:
-            line, col = tok.position  
+            line, col = tok.position
             abs_index = line_offsets[line - 1] + (col - 1)
             old = tok.value
             new = mapping[old]
@@ -367,6 +395,7 @@ def apply_rename_mapping(code: str, mapping: dict[str, str]) -> str:
         new_code = new_code[:idx] + new + new_code[idx + len(old) :]
 
     return new_code
+
 
 # === Post process functions ===
 def remove_wrap(code: str):
@@ -434,15 +463,64 @@ def post_process_file(
 
 
 def parse_method_name(test_case: str) -> str:
-    tree = javalang.parse.parse(test_case)
+    """
+    Parse the wrapped test case and return the *top-level* test method name.
 
-    methods = list(tree.filter(javalang.tree.MethodDeclaration))
+    - First tries javalang and restricts to methods of the synthetic class.
+    - Ignores methods from anonymous / inner classes.
+    - If parsing fails, falls back to a regex on the source.
+    """
+    try:
+        tree = javalang.parse.parse(test_case)
 
-    assert len(methods) == 1, f"Expected exactly 1 method, found {len(methods)}"
+        class_decls = [
+            t for t in tree.types if isinstance(t, javalang.tree.ClassDeclaration)
+        ]
+        if class_decls:
+            cls = class_decls[0]
+            methods = list(cls.methods)
+        else:
 
-    _, method = methods[0]
+            methods = [node for _, node in tree.filter(javalang.tree.MethodDeclaration)]
 
-    return method.name
+        if len(methods) == 1:
+            return methods[0].name
+
+        test_methods = []
+        for m in methods:
+            if getattr(m, "annotations", None):
+                for ann in m.annotations:
+                    if ann.name == "Test":
+                        test_methods.append(m)
+                        break
+
+        if len(test_methods) == 1:
+            return test_methods[0].name
+
+        if methods:
+            logger.warning(
+                f"parse_method_name: multiple methods found; using first one. "
+                f"Candidates: {[m.name for m in methods]}"
+            )
+            return methods[0].name
+
+        logger.warning(
+            "parse_method_name: no methods found via javalang; falling back to regex."
+        )
+    except Exception as e:
+        logger.warning(
+            f"parse_method_name: javalang parse failed; falling back to regex. Error: {e}"
+        )
+
+    m = re.search(
+        r"@Test(?:\s*\([^)]*\))?.*?void\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(",
+        test_case,
+        re.DOTALL,
+    )
+    if m:
+        return m.group(1)
+
+    raise ValueError("parse_method_name: Could not find test method name")
 
 
 def strip_markdown_fences(code: str) -> str:
