@@ -1,8 +1,8 @@
+import difflib
 import json
 import logging
 import os
 import re
-import yaml
 
 from dataclasses import dataclass
 from pathlib import Path
@@ -10,6 +10,8 @@ from typing import List
 
 import javalang
 import javalang.tokenizer as jtok
+import yaml
+from colorama import Fore, init, Style
 from logger import setup_logging
 
 METHOD_SIG_RE = re.compile(
@@ -19,6 +21,8 @@ METHOD_SIG_RE = re.compile(
     r"(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s*"
     r"\(",
 )
+
+init(autoreset=True)
 
 config = {}
 with open("pipeline/config.yml", "r") as f:
@@ -229,6 +233,49 @@ def only_identifier_renames(original: str, transformed: str) -> bool:  # Made us
     return orig_norm == new_norm
 
 
+def log_colored_diff(
+    logger, original_name: str, attempt: int, original_code: str, candidate_code: str
+) -> None: # made using GPT
+    logger.warning(
+        Fore.YELLOW
+        + f"The new test case has logic changes: {original_name} (attempt {attempt})"
+        + Style.RESET_ALL
+    )
+
+    orig_lines = original_code.splitlines()
+    cand_lines = candidate_code.splitlines()
+
+    diff = difflib.unified_diff(
+        orig_lines, cand_lines, fromfile="original", tofile="candidate", lineterm=""
+    )
+
+    colored_lines = []
+    for line in diff:
+        if line.startswith("@@"):
+            colored_lines.append(Fore.MAGENTA + line + Style.RESET_ALL)
+        elif line.startswith("+") and not line.startswith("+++"):
+            colored_lines.append(Fore.GREEN + line + Style.RESET_ALL)
+        elif line.startswith("-") and not line.startswith("---"):
+            colored_lines.append(Fore.RED + line + Style.RESET_ALL)
+        else:
+            colored_lines.append(line)
+
+    if colored_lines:
+        logger.warning("\n" + "\n".join(colored_lines))
+    else:
+        logger.warning(
+            Fore.CYAN
+            + "No textual diff produced, dumping both versions:"
+            + Style.RESET_ALL
+        )
+        logger.warning(
+            Fore.CYAN + "\n--- candidate ---\n" + candidate_code + Style.RESET_ALL
+        )
+        logger.warning(
+            Fore.MAGENTA + "\n--- original ---\n" + original_code + Style.RESET_ALL
+        )
+
+
 # === Post process functions ===
 def remove_wrap(code: str):
     pattern = (
@@ -319,7 +366,7 @@ def strip_markdown_fences(code: str) -> str:
 
 def post_process_eval(metrics: dict, out: Path, force=False):
     output_file: Path = out.joinpath(config["EVAL_OUTPUT_FILE_NAME"])
-    
+
     if os.path.exists(output_file):
         if force:
             logger.warning(f"Force enabled, overwriting file: {output_file}")
@@ -332,7 +379,7 @@ def post_process_eval(metrics: dict, out: Path, force=False):
 
     with output_file.open("w", encoding="utf-8") as f:
         json.dump(metrics, f, indent=2, sort_keys=True)
-        
+
     logger.info(f"Evaluated metrics and outputed to: {output_file}")
 
 
