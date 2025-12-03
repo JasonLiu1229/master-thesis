@@ -103,6 +103,8 @@ def process_single(file: Path, out: Path, force: bool):
 
 
 def process_single_eval(file_path: Path) -> tuple[List[PairMetrics], int]:
+    logger.info(f"\nProcessing file: {file_path.name}")
+
     items = []  # in case more than one oracle in one file
 
     with open(file_path, "r", encoding="utf-8") as f:
@@ -147,10 +149,10 @@ def process_folder(root: Path, out: Path, is_eval: bool, force: bool):
         total_metrics: List[PairMetrics] = []
 
         limit = len(jsonl_files)
-        
+
         if config["AMOUNT_OF_EVAL_SAMPLES"] != -1:
             limit = config["AMOUNT_OF_EVAL_SAMPLES"]
-        
+
         for file in tqdm(jsonl_files[:limit], desc="Oracle files", unit="oracle"):
             metrics, count = process_single_eval(file)
             total_metrics.extend(metrics)

@@ -6,3 +6,6 @@ Supercomputer access:
     - https://docs.vscentrum.be/accounts/vsc_account.html
         Master students can also use the infrastructure for their master thesis work. 
         The promoter of the thesis should first send a motivation to hpc@uantwerpen.be and then the generic procedure should be followed (using your student UAntwerpen id) to request the account.
+
+Remade obfuscator using AST like parser:
+    - Originally used regex to find identifiers, but that was not perfect because some special cases were not handled well

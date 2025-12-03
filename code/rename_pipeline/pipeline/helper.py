@@ -291,9 +291,9 @@ def extract_identifier_candidates(wrapped_test_case: str) -> list[str]:
     tree = javalang.parse.parse(wrapped_test_case)
 
     methods = [node for _, node in tree.filter(javalang.tree.MethodDeclaration)]
-    assert (
-        len(methods) == 1
-    ), f"Expected exactly 1 method in wrapped test case, found {len(methods)}"
+    if len(methods) != 1:
+        logger.error(f"Expected to find one method but found more or none for the following test case: \n{wrapped_test_case}")
+        raise ValueError(f"Expected to find one method but found more or none for the following test case: \n{wrapped_test_case}")
 
     method = methods[0]
     names: set[str] = set()
@@ -328,7 +328,14 @@ def apply_rename_mapping(code: str, mapping: dict[str, str]) -> str:
     if not mapping:
         return code
 
-    tokens = list(jtok.tokenize(code))
+    try:
+        tokens = list(jtok.tokenize(code))
+    except jtok.LexerError as e:
+        logger.warning(
+            f"apply_rename_mapping: failed to tokenize code due to LexerError; "
+            f"leaving code unchanged. Error: {e}"
+        )
+        return code
 
     # Precompute line start offsets to convert (line, col) -> absolute index
     lines = code.splitlines(keepends=True)
