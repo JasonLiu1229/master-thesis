@@ -45,3 +45,19 @@ SYSTEM_INSTRUCTION = (
 )
 
 REATTEMPT_SYSTEM_INSTRUCT = SYSTEM_INSTRUCTION
+
+SINGLE_IDENTIFIER_PROMPT = (
+    "Here is single identifier:\n\n"
+    "{identifier}\n\n"
+    "Here is the snippets of code it used for:\n\n"
+    "{code_snippets}\n\n"
+    "Propose more meaningful names for this identifier.\n"
+    "Return a single JSON object mapping originalName -> newName.\n"
+    "Example:\n"
+    "{{ \"func_1\": \"testYearEnd\" }}\n\n"
+    "Important:\n"
+    "- Use ONLY the listed identifier as key.\n"
+    "- Do NOT introduce new identifiers.\n"
+    "- Do NOT include any keys that were not listed.\n"
+    "- Do NOT output anything except the JSON object (no backticks, no text).\n"
+)

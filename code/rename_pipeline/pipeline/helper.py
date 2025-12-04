@@ -397,6 +397,45 @@ def apply_rename_mapping(code: str, mapping: dict[str, str]) -> str:
     return new_code
 
 
+def build_identifier_context_snippets(
+    wrapped_test_case: str,
+    identifier_candidates: list[str],
+    window: int = 2,
+) -> dict[str, str]:
+    lines = wrapped_test_case.splitlines()
+    n = len(lines)
+    
+    contexts: dict[str, str] = {}
+
+    for name in identifier_candidates:
+        first_idx = None
+        pattern = re.compile(rf"\b{name}\b")
+        for i, line in enumerate(lines):
+            if pattern.search(line):
+                first_idx = i
+                break
+
+        if first_idx is None:
+            continue
+
+        start = max(0, first_idx - window)
+        end = min(n, first_idx + window + 1)
+        snippet = "\n".join(lines[start:end])
+        contexts[name] = snippet
+
+    return contexts
+
+def is_max_tokens(code: str):
+    length = len(code)
+    if length >= config["MAX_INLINE_TEST_CHARS"]:
+        logger.warning(
+            f"Test length {length} exceeds MAX_INLINE_TEST_CHARS; "
+            "using per-identifier snippets instead of full code."
+        )
+        return True
+    else:
+        return False
+
 # === Post process functions ===
 def remove_wrap(code: str):
     pattern = (
