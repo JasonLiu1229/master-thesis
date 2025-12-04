@@ -461,64 +461,37 @@ def post_process_file(
     with open(output_file, "w") as f:
         f.write(source_code)
 
+METHOD_NAME_FROM_TEST_RE = re.compile(
+    r"""
+    @Test                
+    (?:\s*\([^)]*\))?    
+    [^{;]*?              
+    \bvoid\s+            
+    (?P<name>[A-Za-z_][A-Za-z0-9_]*)  
+    \s*\(                
+    """,
+    re.DOTALL | re.VERBOSE,
+)
 
 def parse_method_name(test_case: str) -> str:
-    """
-    Parse the wrapped test case and return the *top-level* test method name.
+    header_part = test_case
+    brace_idx = test_case.find("{")
+    if brace_idx != -1:
+        header_part = test_case[: brace_idx + 200]
 
-    - First tries javalang and restricts to methods of the synthetic class.
-    - Ignores methods from anonymous / inner classes.
-    - If parsing fails, falls back to a regex on the source.
-    """
-    try:
-        tree = javalang.parse.parse(test_case)
-
-        class_decls = [
-            t for t in tree.types if isinstance(t, javalang.tree.ClassDeclaration)
-        ]
-        if class_decls:
-            cls = class_decls[0]
-            methods = list(cls.methods)
-        else:
-
-            methods = [node for _, node in tree.filter(javalang.tree.MethodDeclaration)]
-
-        if len(methods) == 1:
-            return methods[0].name
-
-        test_methods = []
-        for m in methods:
-            if getattr(m, "annotations", None):
-                for ann in m.annotations:
-                    if ann.name == "Test":
-                        test_methods.append(m)
-                        break
-
-        if len(test_methods) == 1:
-            return test_methods[0].name
-
-        if methods:
-            logger.warning(
-                f"parse_method_name: multiple methods found; using first one. "
-                f"Candidates: {[m.name for m in methods]}"
-            )
-            return methods[0].name
-
-        logger.warning(
-            "parse_method_name: no methods found via javalang; falling back to regex."
-        )
-    except Exception as e:
-        logger.warning(
-            f"parse_method_name: javalang parse failed; falling back to regex. Error: {e}"
-        )
-
-    m = re.search(
-        r"@Test(?:\s*\([^)]*\))?.*?void\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(",
-        test_case,
-        re.DOTALL,
-    )
+    m = METHOD_NAME_FROM_TEST_RE.search(header_part)
     if m:
-        return m.group(1)
+        return m.group("name")
+
+    m2 = re.search(
+        r"\bvoid\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(",
+        header_part,
+    )
+    if m2:
+        logger.warning(
+            "parse_method_name: falling back to simple 'void name(' pattern."
+        )
+        return m2.group(1)
 
     raise ValueError("parse_method_name: Could not find test method name")
 
