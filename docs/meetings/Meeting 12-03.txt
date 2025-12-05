@@ -8,8 +8,3 @@ Supercomputer access:
 
 Remade obfuscator using AST like parser:
     - Originally used regex to find identifiers, but that was not perfect because some special cases were not handled well
-
-Currently refactoring pipeline because it does not work well with big java test cases.
-    - splitting into smaller parts that can be run separately
-        -  Per id and his context (so what it is used for)
-    - Might start working on RAG implementation
