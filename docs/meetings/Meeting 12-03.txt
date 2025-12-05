@@ -8,3 +8,8 @@ Supercomputer access:
 
 Remade obfuscator using AST like parser:
     - Originally used regex to find identifiers, but that was not perfect because some special cases were not handled well
+
+Some files take a long time for eval:
+    - Optimize for bigger files
+        - maybe split in to different ways of computing for bigger files
+        - extracting only the needed content
