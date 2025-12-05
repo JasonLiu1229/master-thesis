@@ -39,7 +39,7 @@ services:
     build:
       dockerfile: docker/t3_eval.Dockerfile
     volumes:
-      - ./out:/app/code/out/
+      - ./out:/app/out/
     env_file:
       - .env
     profiles: ["t3_eval", "full_local_eval"]

@@ -426,17 +426,53 @@ def apply_rename_mapping(code: str, mapping: dict[str, str]) -> str:
 #     return contexts
 
 # === Post process functions ===
-def remove_wrap(code: str):
-    pattern = (
-        r"@Test(?:\s*\([^)]*\))?\s+"
-        r"public\s+void\s+[A-Za-z_][A-Za-z0-9_]*\s*"  # method name
-        r"\([^)]*\)\s*"
-        r"(?:throws [A-Za-z0-9_.,\s]+)?\s*"
-        r"\{[\s\S]*?\}"
-    )
+def extract_method_source(code: str, method) -> str:
+    """
+    Extracts the exact source of a javalang method node by
+    brace-scanning from the opening '{' that follows the signature.
+    """
+    lines = code.splitlines(keepends=True)
 
-    m = re.search(pattern, code)
-    return m.group(0) if m else ""
+    # Convert (line, column) -> absolute index
+    line, col = method.position
+    abs_start = sum(len(lines[i]) for i in range(line - 1)) + (col - 1)
+
+    brace_start = code.find("{", abs_start)
+    if brace_start == -1:
+        return code
+
+    i = brace_start
+    depth = 0
+    while i < len(code):
+        if code[i] == "{":
+            depth += 1
+        elif code[i] == "}":
+            depth -= 1
+            if depth == 0:
+                return code[method.position[1] - 1 : i + 1]
+
+        i += 1
+
+    return code[method.position[1] - 1 :]
+
+def remove_wrap(code: str) -> str:
+    try:
+        tree = javalang.parse.parse(code)
+    except javalang.parser.JavaSyntaxError:
+        return code
+
+    type_decls = tree.types
+    if not type_decls:
+        return code
+    class_decl = type_decls[0]
+
+    for method in class_decl.methods:
+        if any(
+            ann.name == "Test" or ann.name.endswith(".Test")
+            for ann in method.annotations
+        ):
+            return extract_method_source(code, method)
+    return code
 
 
 def _swap_test_case(source_code: str, new_test_case: JavaTestCase) -> str:
