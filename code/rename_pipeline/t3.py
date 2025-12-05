@@ -159,8 +159,10 @@ def process_folder(root: Path, out: Path, is_eval: bool, force: bool):
             failed_count += count
 
         final_metric = compute_final_metrics(total_metrics)
+        
+        final_metric["failes"] = failed_count
 
-        post_process_eval(final_metric, out, force)
+        post_process_eval(final_metric, force)
 
         logger.info("Folder evaluated")
         return

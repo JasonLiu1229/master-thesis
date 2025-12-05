@@ -269,80 +269,66 @@ def log_colored_diff(
 
 
 def extract_identifier_candidates(wrapped_test_case: str) -> list[str]:
-    """
-    Given a wrapped Java test case,
-    return the list of identifier names we want the LLM to rename.
-
-    We include:
-      - test method name
-      - parameter names
-      - local variable names (only from the top-level test method)
-
-    We exclude:
-      - ALL_CAPS-style names (likely constants)
-    """
     try:
         tree = javalang.parse.parse(wrapped_test_case)
     except Exception as e:
-        logger.warning(
-            f"extract_identifier_candidates: javalang parse failed, "
-            f"no candidates extracted. Error: {e}"
+        logger.error(
+            "extract_identifier_candidates: javalang parse failed, "
+            "no candidates extracted. Error: %s",
+            e,
         )
         return []
 
     class_decls = [
         t for t in tree.types if isinstance(t, javalang.tree.ClassDeclaration)
     ]
-    
+
     if not class_decls:
-        logger.error(
-            "extract_identifier_candidates: no ClassDeclaration found in wrapped test case."
-        )
+        logger.error("extract_identifier_candidates: no ClassDeclaration found.")
         return []
 
     cls = class_decls[0]
     methods = list(cls.methods)
-
     if not methods:
-        logger.error("extract_identifier_candidates: no methods found in TestClass1.")
+        logger.error("extract_identifier_candidates: no methods found in test class.")
         return []
+
+    def is_test_annotation(ann) -> bool:
+        return ann.name == "Test" or ann.name.endswith(".Test")
 
     test_method = None
     if len(methods) == 1:
         test_method = methods[0]
     else:
         for m in methods:
-            if getattr(m, "annotations", None):
-                for ann in m.annotations:
-                    if ann.name == "Test":
-                        test_method = m
-                        break
-            if test_method is not None:
+            if any(is_test_annotation(ann) for ann in getattr(m, "annotations", [])):
+                test_method = m
                 break
 
     if test_method is None:
-        logger.warning(
-            "extract_identifier_candidates: multiple methods in TestClass1, "
-            "but none annotated with @Test; using first method."
+        logger.error(
+            "extract_identifier_candidates: multiple methods, none annotated with @Test;"
         )
-        test_method = methods[0]
+        raise ValueError("No method found with @Test or similar annotations")
 
     names: set[str] = set()
 
+    # method name
     if test_method.name:
         names.add(test_method.name)
 
+    # parameters
     for param in test_method.parameters:
         names.add(param.name)
 
+    # local variables in method body only
     for _, var_decl in test_method.filter(javalang.tree.VariableDeclarator):
         names.add(var_decl.name)
 
     def is_constant_like(name: str) -> bool:
         return name.isupper()
 
-    candidates = sorted(n for n in names if not is_constant_like(n))
-    return candidates
+    return sorted(n for n in names if not is_constant_like(n))  # constants are ignored
 
 
 def apply_rename_mapping(code: str, mapping: dict[str, str]) -> str:
@@ -404,7 +390,7 @@ def apply_rename_mapping(code: str, mapping: dict[str, str]) -> str:
 # ) -> dict[str, str]:
 #     lines = wrapped_test_case.splitlines()
 #     n = len(lines)
-    
+
 #     contexts: dict[str, str] = {}
 
 #     for name in identifier_candidates:
@@ -425,54 +411,40 @@ def apply_rename_mapping(code: str, mapping: dict[str, str]) -> str:
 
 #     return contexts
 
+
 # === Post process functions ===
-def extract_method_source(code: str, method) -> str:
-    """
-    Extracts the exact source of a javalang method node by
-    brace-scanning from the opening '{' that follows the signature.
-    """
-    lines = code.splitlines(keepends=True)
+def remove_wrap(code: str) -> str:
+    header_pattern = (
+        r"@Test(?:\s*\([^)]*\))?\s+"
+        r"public\s+void\s+[A-Za-z_][A-Za-z0-9_]*\s*"
+        r"\([^)]*\)\s*"
+        r"(?:throws [A-Za-z0-9_.,\s]+)?\s*\{"
+    )
 
-    # Convert (line, column) -> absolute index
-    line, col = method.position
-    abs_start = sum(len(lines[i]) for i in range(line - 1)) + (col - 1)
+    m = re.search(header_pattern, code)
+    if not m:
+        return ""
 
-    brace_start = code.find("{", abs_start)
-    if brace_start == -1:
-        return code
+    start = m.start()
+    first_brace = code.find("{", m.start())
+    if first_brace == -1:
+        return ""
 
-    i = brace_start
-    depth = 0
+    brace_count = 0
+    i = first_brace
     while i < len(code):
-        if code[i] == "{":
-            depth += 1
-        elif code[i] == "}":
-            depth -= 1
-            if depth == 0:
-                return code[method.position[1] - 1 : i + 1]
-
+        ch = code[i]
+        if ch == "{":
+            brace_count += 1
+        elif ch == "}":
+            brace_count -= 1
+            if brace_count == 0:
+                # include this closing brace
+                return code[start : i + 1]
         i += 1
 
-    return code[method.position[1] - 1 :]
+    return code[start:]
 
-def remove_wrap(code: str) -> str:
-    try:
-        tree = javalang.parse.parse(code)
-    except javalang.parser.JavaSyntaxError:
-        return code
-
-    type_decls = tree.types
-    if not type_decls:
-        return code
-    class_decl = type_decls[0]
-
-    for method in class_decl.methods:
-        if any(
-            ann.name == "Test" or ann.name.endswith(".Test")
-            for ann in method.annotations
-        ):
-            return extract_method_source(code, method)
-    return code
 
 
 def _swap_test_case(source_code: str, new_test_case: JavaTestCase) -> str:
@@ -525,6 +497,7 @@ def post_process_file(
     with open(output_file, "w") as f:
         f.write(source_code)
 
+
 METHOD_NAME_FROM_TEST_RE = re.compile(
     r"""
     @Test                
@@ -536,6 +509,7 @@ METHOD_NAME_FROM_TEST_RE = re.compile(
     """,
     re.DOTALL | re.VERBOSE,
 )
+
 
 def parse_method_name(test_case: str) -> str:
     header_part = test_case
@@ -571,8 +545,8 @@ def strip_markdown_fences(code: str) -> str:
     return code
 
 
-def post_process_eval(metrics: dict, out: Path, force=False):
-    output_file: Path = out.joinpath(config["EVAL_OUTPUT_FILE_NAME"])
+def post_process_eval(metrics: dict, force=False):
+    output_file: Path = Path(config["EVAL_OUTPUT_FILE_NAME"])
 
     if os.path.exists(output_file):
         if force:
