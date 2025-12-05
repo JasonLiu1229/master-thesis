@@ -2,6 +2,7 @@ import argparse
 import json
 import logging
 import os
+import time
 
 from pathlib import Path
 from typing import List
@@ -153,14 +154,18 @@ def process_folder(root: Path, out: Path, is_eval: bool, force: bool):
         if config["AMOUNT_OF_EVAL_SAMPLES"] != -1:
             limit = config["AMOUNT_OF_EVAL_SAMPLES"]
 
+        start_time = time.time()
+        
         for file in tqdm(jsonl_files[:limit], desc="Oracle files", unit="oracle"):
             metrics, count = process_single_eval(file)
             total_metrics.extend(metrics)
             failed_count += count
 
         final_metric = compute_final_metrics(total_metrics)
-        
+
         final_metric["failes"] = failed_count
+        
+        final_metric["total_time"] = time.time() - start_time
 
         post_process_eval(final_metric, force)
 

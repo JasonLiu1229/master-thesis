@@ -1,6 +1,4 @@
 # Note this file is made using the help of GPT-5.1
-
-import time
 from dataclasses import dataclass
 from typing import Dict, List
 
@@ -16,7 +14,6 @@ class PairMetrics:
     precision: float
     recall: float
     f1: float
-    elapse: float
 
 
 def levenshtein(a: str, b: str) -> int:
@@ -56,7 +53,6 @@ def evaluate(oracle: str, prediction: str):
     """
     Evaluate a single prediction against a single oracle.
     """
-    start_time = time.time()
 
     edit = levenshtein(oracle, prediction)
     total_chars = max(1, len(oracle))
@@ -95,7 +91,6 @@ def evaluate(oracle: str, prediction: str):
         (2 * precision * recall / (precision + recall)) if (precision + recall) else 0.0
     )
 
-    elapse = time.time() - start_time
 
     return PairMetrics(
         cer,
@@ -105,7 +100,6 @@ def evaluate(oracle: str, prediction: str):
         precision,
         recall,
         f1,
-        elapse,
     )
 
 
@@ -121,7 +115,6 @@ def compute_final_metrics(metrics: List[PairMetrics]) -> Dict[str, float]:
       - precision
       - recall
       - f1
-      - execution_time_s (total time over all examples)
     """
     if not metrics:
         return {
@@ -132,7 +125,6 @@ def compute_final_metrics(metrics: List[PairMetrics]) -> Dict[str, float]:
             "precision": 0.0,
             "recall": 0.0,
             "f1": 0.0,
-            "execution_time_s": 0.0,
         }
 
     n = len(metrics)
@@ -144,7 +136,6 @@ def compute_final_metrics(metrics: List[PairMetrics]) -> Dict[str, float]:
     sum_prec = sum(m.precision for m in metrics)
     sum_rec = sum(m.recall for m in metrics)
     sum_f1 = sum(m.f1 for m in metrics)
-    total_time = sum(m.elapse for m in metrics)
 
     return {
         "cer": sum_cer / n,
@@ -154,5 +145,4 @@ def compute_final_metrics(metrics: List[PairMetrics]) -> Dict[str, float]:
         "precision": sum_prec / n,
         "recall": sum_rec / n,
         "f1": sum_f1 / n,
-        "execution_time_s": total_time,
     }
