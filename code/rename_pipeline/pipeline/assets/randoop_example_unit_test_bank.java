@@ -24,7 +24,6 @@ public class BankAccount_RandoopTest {
 
         BankAccount acc1 = new BankAccount(0.0);
 
-        // Invalid withdrawal: should throw IllegalStateException
         try {
             acc1.withdraw(10.0);
             fail("Expected IllegalStateException");
@@ -44,7 +43,6 @@ public class BankAccount_RandoopTest {
     @Test
     public void test3() throws Throwable {
 
-        // Invalid negative balance initialization
         try {
             new BankAccount(-5.0);
             fail("Expected IllegalArgumentException");
@@ -54,7 +52,6 @@ public class BankAccount_RandoopTest {
 
         BankAccount acc2 = new BankAccount(10.0);
 
-        // Negative deposit should be rejected
         try {
             acc2.deposit(-1.0);
             fail("Expected IllegalArgumentException");
@@ -62,7 +59,6 @@ public class BankAccount_RandoopTest {
             // expected
         }
 
-        // Negative withdrawal should be rejected
         try {
             acc2.withdraw(-2.0);
             fail("Expected IllegalArgumentException");

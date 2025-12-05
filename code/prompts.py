@@ -47,10 +47,12 @@ SYSTEM_INSTRUCTION = (
 REATTEMPT_SYSTEM_INSTRUCT = SYSTEM_INSTRUCTION
 
 SINGLE_IDENTIFIER_PROMPT = (
-    "Here is single identifier:\n\n"
+    "Here is single identifier:\n"
     "{identifier}\n\n"
-    "Here is the snippets of code it used for:\n\n"
+    "Here is the snippets of code it used for:\n"
     "{code_snippets}\n\n"
+    "Here is a list of names already taken, so do NOT use these:\n"
+    "{teken_identifiers}\n\n"
     "Propose more meaningful names for this identifier.\n"
     "Return a single JSON object mapping originalName -> newName.\n"
     "Example:\n"

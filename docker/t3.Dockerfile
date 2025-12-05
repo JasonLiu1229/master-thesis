@@ -16,7 +16,7 @@ COPY ../code/prompts.py app/
 WORKDIR /app
 
 # Single
-CMD ["python3", "t3.py", "--mode", "single", "--file", "pipeline/assets/randoop_example_unit_test_calc.java", "--force", "--output", "out/java/"] 
+# CMD ["python3", "t3.py", "--mode", "single", "--file", "pipeline/assets/randoop_example_unit_test_bank.java", "--force", "--output", "out/java/"] 
 
 # # Folder
-# CMD ["python3", "t3.py", "--mode", "dir", "--dir", "pipeline/assets/", "--force", "--output", "out/java/"] 
+CMD ["python3", "t3.py", "--mode", "dir", "--dir", "pipeline/assets/", "--force", "--output", "out/java/"] 
