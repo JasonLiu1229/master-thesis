@@ -40,7 +40,7 @@ It is also [fine-tunable](https://medium.com/@aastha.code/finetuning-codestral-2
 
 It supports instruction-style usage (instruct/“chat” mode) and fill-in-the-middle (FIM) code generation (prefix + suffix → fill).
 
-### Qwen2.5
+### Qwen2.5 (number one for java related code on 7-11-25 on [leaderboard](https://huggingface.co/spaces/bigcode/bigcode-models-leaderboard))
 
 [Qwen2.5](https://ollama.com/library/qwen2.5-coder)
 

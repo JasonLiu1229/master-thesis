@@ -1,10 +1,12 @@
 Went from full file renaming to only renaming the identifiers within the file.
     - so extracting the identifiers -> renaming them -> putting them back in the file
+    - prompt engineering was not helpfull
 
 Supercomputer access:
     - https://docs.vscentrum.be/accounts/vsc_account.html
         Master students can also use the infrastructure for their master thesis work. 
         The promoter of the thesis should first send a motivation to hpc@uantwerpen.be and then the generic procedure should be followed (using your student UAntwerpen id) to request the account.
+    - might still need to look for cloud options
 
 Remade obfuscator using AST like parser:
     - Originally used regex to find identifiers, but that was not perfect because some special cases were not handled well
@@ -13,3 +15,5 @@ Some files take a long time for eval:
     - Optimize for bigger files
         - maybe split in to different ways of computing for bigger files
         - extracting only the needed content
+        - for long var declartion like strings, subsititute the string with temp
+    - find examples for big files, so we can sort it
