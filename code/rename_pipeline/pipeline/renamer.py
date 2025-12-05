@@ -11,14 +11,12 @@ from logger import setup_logging
 from prompts import (
     REATTEMPT_SYSTEM_INSTRUCT,
     RETRY_USER_PROMPT_TEMPLATE,
-    SINGLE_IDENTIFIER_PROMPT,
     SYSTEM_INSTRUCTION,
     USER_PROMPT_TEMPLATE,
 )
 
 from pipeline.helper import (
     apply_rename_mapping,
-    build_identifier_context_snippets,
     extract_identifier_candidates,
     JavaTestCase,
     JavaTestSpan,
@@ -65,39 +63,6 @@ def make_messages(user_message: str, sys_instruction: str = SYSTEM_INSTRUCTION):
 def _format_identifier_list_for_prompt(identifiers: list[str]) -> str:
     return "\n".join(f"- {name}" for name in identifiers)
 
-
-def _build_snippet_test_case_for_prompt(source_code, identifiers):
-    contexts = build_identifier_context_snippets(source_code, identifiers)
-
-    blocks: list[str] = []
-
-    for name in identifiers:
-        ctx = (contexts.get(name) or "").strip()
-        if not ctx:
-            continue
-        blocks.append(
-            SINGLE_IDENTIFIER_PROMPT.format(identifier=name, code_snippets=ctx)
-        )
-
-    if not blocks:
-        logger.warning(
-            "Snippet-based prompt had no context blocks; falling back to full wrapped_source_code."
-        )
-        
-    return blocks
-
-def _rename_single_id():
-    """
-        Return: method name (str), new code (str), clean (bool)
-    """
-    pass
-
-def _rename_full_code():
-    """
-        Return: method name (str), new code (str), clean (bool)
-    """
-    pass
-
 def _rename_process(wrapped_source_code: str, source_code_clean: str):
     original_method_name = parse_method_name(wrapped_source_code)
 
@@ -124,23 +89,6 @@ def _rename_process(wrapped_source_code: str, source_code_clean: str):
             code="",
             clean=False,
         )
-
-    # if len(wrapped_source_code) >= config["MAX_CHARS_LIMIT"]:
-    #     logger.error("Max character/token limits reached, refused renaming")
-    #     return JavaTestCase(
-    #         name=original_method_name,
-    #         original_code=source_code_clean,
-    #         code="",
-    #         clean=False,
-    #     )
-
-    # if len(wrapped_source_code) >= config["MAX_INLINE_TEST_CHARS"]:
-    #     blocks = _build_snippet_test_case_for_prompt(
-    #         wrapped_source_code,
-    #         identifier_candidates,
-    #     )
-    # else:
-    #     prompt_test_case = wrapped_source_code
 
     identifiers_for_prompt = _format_identifier_list_for_prompt(identifier_candidates)
 
@@ -254,26 +202,12 @@ def _rename_process(wrapped_source_code: str, source_code_clean: str):
             clean=False,
         )
 
-    try:
-        wrapped_candidate = wrap_test_case(candidate_code.splitlines())
-        candidate_name = parse_method_name(wrapped_candidate)
-    except Exception as e:
-        logger.warning(
-            f"Failed to parse method name after mapping for {original_method_name}: {e}"
-        )
-        return JavaTestCase(
-            name=original_method_name,
-            original_code=source_code_clean,
-            code="",
-            clean=False,
-        )
-
     logger.info(
-        f"Renamed test method (mapping mode): {original_method_name} -> {candidate_name} (clean={clean})"
+        f"Renamed test method (mapping mode): {original_method_name} -> {best_mapping[original_method_name]} (clean={clean})"
     )
 
     return JavaTestCase(
-        name=candidate_name,
+        name=best_mapping[original_method_name],
         original_code=source_code_clean,
         code=candidate_code,
         clean=clean,
