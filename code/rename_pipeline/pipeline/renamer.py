@@ -86,6 +86,18 @@ def _build_snippet_test_case_for_prompt(source_code, identifiers):
         
     return blocks
 
+def _rename_single_id():
+    """
+        Return: method name (str), new code (str), clean (bool)
+    """
+    pass
+
+def _rename_full_code():
+    """
+        Return: method name (str), new code (str), clean (bool)
+    """
+    pass
+
 def _rename_process(wrapped_source_code: str, source_code_clean: str):
     original_method_name = parse_method_name(wrapped_source_code)
 

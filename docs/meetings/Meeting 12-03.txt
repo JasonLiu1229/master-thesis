@@ -1,7 +1,6 @@
 Went from full file renaming to only renaming the identifiers within the file.
     - so extracting the identifiers -> renaming them -> putting them back in the file
 
-
 Supercomputer access:
     - https://docs.vscentrum.be/accounts/vsc_account.html
         Master students can also use the infrastructure for their master thesis work. 
@@ -9,3 +8,8 @@ Supercomputer access:
 
 Remade obfuscator using AST like parser:
     - Originally used regex to find identifiers, but that was not perfect because some special cases were not handled well
+
+Currently refactoring pipeline because it does not work well with big java test cases.
+    - splitting into smaller parts that can be run separately
+        -  Per id and his context (so what it is used for)
+    - Might start working on RAG implementation
