@@ -125,7 +125,7 @@ def _rename_process(wrapped_source_code: str, source_code_clean: str):
 
         if not isinstance(mapping, dict):
             error_reason = "Response JSON is not an object (expected mapping originalName -> newName)."
-            logger.warning(
+            logger.error(
                 f"{error_reason} for {original_method_name} on attempt {i + 1}: {raw!r}"
             )
             user_message = RETRY_USER_PROMPT_TEMPLATE.format(
@@ -155,7 +155,7 @@ def _rename_process(wrapped_source_code: str, source_code_clean: str):
                 "The mapping did not contain all required identifiers. "
                 f"Missing: {sorted(missing)}"
             )
-            logger.warning(
+            logger.error(
                 f"{error_reason} for {original_method_name} on attempt {i+1}: {mapping}"
             )
 

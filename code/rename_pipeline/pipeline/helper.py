@@ -359,7 +359,7 @@ def apply_rename_mapping(code: str, mapping: dict[str, str]) -> str:
     try:
         tokens = list(jtok.tokenize(code))
     except jtok.LexerError as e:
-        logger.warning(
+        logger.error(
             f"apply_rename_mapping: failed to tokenize code due to LexerError; "
             f"leaving code unchanged. Error: {e}"
         )
