@@ -141,7 +141,8 @@ def process_single_eval(file_path: Path) -> tuple[List[PairMetrics], int]:
 
 def process_folder(root: Path, out: Path, is_eval: bool, force: bool):
     out.mkdir(parents=True, exist_ok=True)
-
+    # TODO: add sub directories feature, recursive walk (creating sub dir to in output folder)
+    
     if is_eval:
         logger.info("Running evaluation")
         jsonl_files = sorted(root.glob("*.jsonl"))

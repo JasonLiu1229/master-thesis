@@ -1,6 +1,9 @@
 import shutil
-from tqdm import tqdm
 from pathlib import Path
+
+from llm_client import LLMClient
+from prompts import SIMPLFY_PROMPT, SIMPLFY_SYSTEM
+from tqdm import tqdm
 
 # File sizes in bytes -> medium is in between small and big
 BIG = 50000
@@ -24,11 +27,11 @@ def sort_files(origin_folder: Path | str, out: Path | str):
     big_path = out / "big"
     medium_path = out / "medium"
     small_path = out / "small"
-    
+
     big_path.mkdir(exist_ok=True)
     medium_path.mkdir(exist_ok=True)
     small_path.mkdir(exist_ok=True)
-    
+
     for file in tqdm(files, desc="JsonL files", unit="file"):
         size = check_size(file)
         if size >= BIG:
@@ -38,11 +41,17 @@ def sort_files(origin_folder: Path | str, out: Path | str):
         else:
             shutil.copy(file, small_path / file.name)
 
+
+def simplify():
+    pass
+
+
 def main():
     test_dir = Path("tools/java-dataset-converter-llm/dataset/test/jsonl/")
     out_dir = Path("out/dataset/")
-    
+
     sort_files(test_dir, out_dir)
+
 
 if __name__ == "__main__":
     main()

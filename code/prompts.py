@@ -63,3 +63,7 @@ SINGLE_IDENTIFIER_PROMPT = (
     "- Do NOT include any keys that were not listed.\n"
     "- Do NOT output anything except the JSON object (no backticks, no text).\n"
 )
+
+SIMPLFY_PROMPT = ()
+
+SIMPLFY_SYSTEM = ()
