@@ -37,7 +37,7 @@ NOTE: **DO NOT** add your enviroment variables to the repository or anywhere pub
 
 #### Paid model, not fine tuned
 
-## Setup steps
+## Setup
 
 ### Prerequirements
 
@@ -94,6 +94,14 @@ After running the preprocess code, three folders will be generated. These will c
 The tuning is done using [QLoRA](https://medium.com/@dillipprasad60/qlora-explained-a-deep-dive-into-parametric-efficient-fine-tuning-in-large-language-models-llms-c1a4794b1766), just know that it is a fine tuning task to tune a model for a specific task or domain. So perfect for us.
 
 Overall you can just run `docker compose --profile tune up` to run the preprocess and tuning simaltainiously. Note in this repo the dataset is already preprocessed for you, so if you want to use a different one, add `--force` in the Dockerfile that can be found in `docker/tuner.Dockerfile`.
+
+## Optional
+
+Here are some additional optional things I added to the code base. These are things like helper code for analysis work, or optimizations or other things.
+
+### Utils
+
+<!-- TODO: write this out -->
 
 ## References
 

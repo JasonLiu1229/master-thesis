@@ -64,6 +64,75 @@ SINGLE_IDENTIFIER_PROMPT = (
     "- Do NOT output anything except the JSON object (no backticks, no text).\n"
 )
 
-SIMPLFY_PROMPT = ()
+REASON_PROMPT = (
+    "Here is the Java code that we want to analyse.\n"
+    "\n"
+    "CODE:\n"
+    "{code}\n"
+)
 
-SIMPLFY_SYSTEM = ()
+
+REASON_SYSTEM = (
+    "You are an expert in Java static analysis.\n"
+    "\n"
+    "You will receive a Java code snippet.\n"
+    "\n"
+    "Your tasks:\n"
+    "1. Analyze why this snippet is large or verbose.\n"
+    "2. Decide whether simplification is needed WITHOUT changing:\n"
+    "   - its behavior,\n"
+    "   - its logical structure,\n"
+    "   - the contextual information needed to understand identifiers and their roles.\n"
+    "\n"
+    "3. Output a STRICT JSON object with these fields:\n"
+    "   - \"approx_line_count\": integer\n"
+    "   - \"size_reasons\": array of strings explaining why the code is large\n"
+    "   - \"should_simplify\": boolean\n"
+    "   - \"simplification_goals\": array describing WHAT to shorten/remove (not how)\n"
+    "   - \"notes\": short guidance needed when performing simplification\n"
+    "\n"
+    "Rules:\n"
+    "- 'should_simplify' must be true only when the code contains size bloat that does NOT contribute to logic or identifier meaning.\n"
+    "- Examples of safe-to-remove bloat include: very long string literals, long generic type declarations, huge initializers, repetitive boilerplate, long headers.\n"
+    "- If unsure whether simplification is safe, set 'should_simplify' to false.\n"
+)
+
+SIMPLIFY_PROMPT = (
+    "Here is the original Java code and the analysis from the previous step.\n"
+    "\n"
+    "SIMPLIFICATION_GOALS:\n"
+    "{simplification_goals}\n"
+    "\n"
+    "NOTES:\n"
+    "{notes}\n"
+    "\n"
+    "CODE:\n"
+    "{code}\n"
+)
+
+
+SIMPLIFY_SYSTEM = (
+    "You are a Java developer performing safe, context-preserving code simplification.\n"
+    "\n"
+    "Simplify ONLY when it does not change:\n"
+    "- Behavior\n"
+    "- Control-flow structure\n"
+    "- Class, method, or field names\n"
+    "- Parameter names, order, or types\n"
+    "- Identifier context used by a renaming model\n"
+    "\n"
+    "Allowed simplifications:\n"
+    "1. Shorten long generic type declarations (e.g., List<Map<String, Foo.Bar>> → List<?>).\n"
+    "2. Shorten very long literals by keeping a meaningful prefix and replacing the rest with \"...\".\n"
+    "3. Reduce large array or collection initializers (keep a few elements + comment).\n"
+    "4. Collapse repeated boilerplate blocks into one or a few examples with a comment.\n"
+    "5. Remove or shrink irrelevant long comments or headers.\n"
+    "\n"
+    "Forbidden changes:\n"
+    "- Do NOT rename identifiers.\n"
+    "- Do NOT remove meaningful method calls, field uses, or logic.\n"
+    "- Do NOT change return types or parameter types in any way that alters semantics.\n"
+    "- Do NOT break syntax.\n"
+    "\n"
+    "Output ONLY the simplified Java code.\n"
+)
