@@ -24,10 +24,10 @@ SMALL = 1000
 @dataclass
 class JavaReason:
     line_count: int
-    need_simplify: bool = False
     notes: List[str]
     size_reasons: List[str]
     simplification_goals: List[str]
+    need_simplify: bool = False
 
 
 def check_size(file: Path):
@@ -72,7 +72,7 @@ def simplify(input: Path, output: Path):
         raise FileNotFoundError(f"{input} does not exist")
     if not input.is_dir():
         raise NotADirectoryError(f"{input} is not a directory")
-    
+
     def _prompt_reason(source_code: str) -> JavaReason:
         pass
 
@@ -103,8 +103,8 @@ def simplify(input: Path, output: Path):
 
 
 def main():
-    test_dir = Path("tools/java-dataset-converter-llm/dataset/test/java/")
-    out_dir = Path("out/dataset/")
+    test_dir = Path("../tools/java-dataset-converter-llm/dataset/test/java/")
+    out_dir = Path("../out/dataset/")
 
     sort_files(test_dir, out_dir)
 
