@@ -500,22 +500,26 @@ def post_process_file(
 
 METHOD_NAME_FROM_TEST_RE = re.compile(
     r"""
-    @Test                
-    (?:\s*\([^)]*\))?    
-    [^{;]*?              
-    \bvoid\s+            
+    @(?:\w+\.)*Test            
+    (?:\s*\([^)]*\))?          
+    [^{;]*?                    
+    \bvoid\s+                  
     (?P<name>[A-Za-z_][A-Za-z0-9_]*)  
-    \s*\(                
+    \s*\(                      
     """,
     re.DOTALL | re.VERBOSE,
 )
 
-
 def parse_method_name(test_case: str) -> str:
-    header_part = test_case
-    brace_idx = test_case.find("{")
-    if brace_idx != -1:
-        header_part = test_case[: brace_idx + 200]
+    test_idx = test_case.find("@Test")
+    if test_idx != -1:
+        brace_idx = test_case.find("{", test_idx)
+        if brace_idx != -1:
+            header_part = test_case[test_idx:brace_idx]
+        else:
+            header_part = test_case[test_idx:]
+    else:
+        header_part = test_case
 
     m = METHOD_NAME_FROM_TEST_RE.search(header_part)
     if m:
@@ -525,6 +529,7 @@ def parse_method_name(test_case: str) -> str:
         r"\bvoid\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(",
         header_part,
     )
+    
     if m2:
         logger.warning(
             "parse_method_name: falling back to simple 'void name(' pattern."
@@ -532,6 +537,7 @@ def parse_method_name(test_case: str) -> str:
         return m2.group(1)
 
     raise ValueError("parse_method_name: Could not find test method name")
+
 
 
 def strip_markdown_fences(code: str) -> str:
