@@ -64,7 +64,18 @@ def _format_identifier_list_for_prompt(identifiers: list[str]) -> str:
     return "\n".join(f"- {name}" for name in identifiers)
 
 def _rename_process(wrapped_source_code: str, source_code_clean: str):
-    original_method_name = parse_method_name(wrapped_source_code)
+    try:
+        original_method_name = parse_method_name(wrapped_source_code)
+    except Exception as e:
+        logger.error(
+            f"Failed to extract method name: {e}"
+        )
+        return JavaTestCase(
+            name=None,
+            original_code=source_code_clean,
+            code="",
+            clean=False,
+        )
 
     try:
         identifier_candidates = extract_identifier_candidates(wrapped_source_code)

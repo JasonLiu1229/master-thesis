@@ -2,8 +2,10 @@ TRIES: 3 # number of times to retry each failed example
 
 EVAL_OUTPUT_FILE_NAME: out/benchmark/t3_benchmark_results.json
 
-AMOUNT_OF_EVAL_SAMPLES: 100 # set to -1 to use all eval samples
+AMOUNT_OF_EVAL_SAMPLES: -1 # set to -1 to use all eval samples
 
 MAX_INLINE_TEST_CHARS: 10000 # 4 chars ~= 1 token
 
 MAX_CHARS_LIMIT: 25000
+
+EVAL_FAILED_FILE: out/logs/eval_failed

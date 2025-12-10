@@ -6,6 +6,7 @@ import time
 
 from pathlib import Path
 from typing import List
+from datetime import datetime
 
 import yaml
 
@@ -27,6 +28,7 @@ with open("pipeline/config.yml", "r") as f:
     config = yaml.safe_load(f)
 
 MODE = None
+TIMESTAMP_RUN = datetime.now().strftime("%Y%m%d_%H%M%S")
 
 
 def argument_parser():
@@ -131,8 +133,14 @@ def process_single_eval(file_path: Path) -> tuple[List[PairMetrics], int]:
 
         predicted_code, clean = rename_eval(obf_code)
 
-        if not clean:  # do not evaluate failed code
+        if not clean:
             failed_count += 1
+            eval_file_failed = Path(config["EVAL_FAILED_FILE"])
+            eval_file_failed.mkdir(parents=True, exist_ok=True)
+            eval_file_failed = f"{eval_file_failed}_{TIMESTAMP_RUN}.txt"
+            with open(eval_file_failed, "w", encoding="utf-8") as f:
+                f.write(f"file_path: {file_path.name}")
+                
         else:
             metrics.append(evaluate(oracle_code, predicted_code))
 
