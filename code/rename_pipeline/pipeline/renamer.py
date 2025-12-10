@@ -65,7 +65,7 @@ def _format_identifier_list_for_prompt(identifiers: list[str]) -> str:
 
 def _rename_process(wrapped_source_code: str, source_code_clean: str):
     try:
-        original_method_name = parse_method_name(wrapped_source_code)
+        original_method_name = parse_method_name(source_code_clean)
     except Exception as e:
         logger.error(
             f"Failed to extract method name: {e}"
