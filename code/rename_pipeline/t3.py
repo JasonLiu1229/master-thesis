@@ -4,9 +4,10 @@ import logging
 import os
 import time
 
+from concurrent.futures import as_completed, ThreadPoolExecutor
+from datetime import datetime
 from pathlib import Path
 from typing import List
-from datetime import datetime
 
 import yaml
 
@@ -18,7 +19,9 @@ from pipeline.helper import (
     post_process_file,
 )
 from pipeline.renamer import rename, rename_eval
+
 from tqdm import tqdm
+
 
 setup_logging("pipeline")
 logger = logging.getLogger("pipeline")
@@ -105,11 +108,10 @@ def process_single(file: Path, out: Path, force: bool):
     logger.info(f"Renamed and outputed file: {file.name} to {output_file}")
 
 
-def process_single_eval(file_path: Path) -> tuple[List[PairMetrics], int]:
+def process_single_eval(file_path: Path) -> tuple[List[PairMetrics], int, list[str]]:
     logger.info(f"\nProcessing file: {file_path.name}")
 
-    items = []  # in case more than one oracle in one file
-
+    items = []
     with open(file_path, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -118,8 +120,8 @@ def process_single_eval(file_path: Path) -> tuple[List[PairMetrics], int]:
             items.append(json.loads(line))
 
     metrics: List[PairMetrics] = []
-
     failed_count = 0
+    failed_files: list[str] = []
 
     for item in items:
         obf_code = item.get("prompt", "")
@@ -135,56 +137,81 @@ def process_single_eval(file_path: Path) -> tuple[List[PairMetrics], int]:
 
         if not clean:
             failed_count += 1
-            eval_file_failed = Path(config["EVAL_FAILED_FILE"])
-            eval_file_failed.mkdir(parents=True, exist_ok=True)
-            eval_file_failed = f"{eval_file_failed}_{TIMESTAMP_RUN}.txt"
-            with open(eval_file_failed, "w", encoding="utf-8") as f:
-                f.write(f"file_path: {file_path.name}")
-                
+            failed_files.append(file_path.name)
         else:
             metrics.append(evaluate(oracle_code, predicted_code))
 
-    return metrics, failed_count
+    return metrics, failed_count, failed_files
 
 
 def process_folder(root: Path, out: Path, is_eval: bool, force: bool):
     out.mkdir(parents=True, exist_ok=True)
     # TODO: add sub directories feature, recursive walk (creating sub dir to in output folder)
-    
+    workers = config["AMT_WORKERS"]
+
+    if workers == -1:
+        workers = os.cpu_count()
+
     if is_eval:
         logger.info("Running evaluation")
         jsonl_files = sorted(root.glob("*.jsonl"))
 
-        failed_count = 0
-        total_metrics: List[PairMetrics] = []
-
         limit = len(jsonl_files)
-
         if config["AMOUNT_OF_EVAL_SAMPLES"] != -1:
             limit = config["AMOUNT_OF_EVAL_SAMPLES"]
 
+        jsonl_files = jsonl_files[:limit]
+
+        failed_count = 0
+        total_metrics: List[PairMetrics] = []
+        failed_files_all: list[str] = []
+
         start_time = time.time()
-        
-        for file in tqdm(jsonl_files[:limit], desc="Oracle files", unit="oracle"):
-            metrics, count = process_single_eval(file)
-            total_metrics.extend(metrics)
-            failed_count += count
+
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            futures = {
+                executor.submit(process_single_eval, file): file
+                for file in jsonl_files
+            }
+
+            for fut in tqdm(as_completed(futures), total=len(futures),
+                            desc="Oracle files", unit="oracle"):
+                file = futures[fut]
+                try:
+                    metrics, count, failed_files = fut.result()
+                except Exception as e:
+                    logger.error(f"Error in eval for {file}: {e}")
+                    continue
+
+                total_metrics.extend(metrics)
+                failed_count += count
+                failed_files_all.extend(failed_files)
 
         final_metric = compute_final_metrics(total_metrics)
-
         final_metric["failes"] = failed_count
-        
         final_metric["total_time"] = time.time() - start_time
+        final_metric["failed_files"] = sorted(set(failed_files_all))
 
         post_process_eval(final_metric, force)
-
         logger.info("Folder evaluated")
         return
 
     java_files = sorted(root.glob("*.java"))
 
-    for file in tqdm(java_files, desc="Files", unit="file"):
-        process_single(file, out, force)
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        futures = {
+            executor.submit(process_single, file, out, force): file
+            for file in java_files
+        }
+
+        for fut in tqdm(
+            as_completed(futures), total=len(futures), desc="Files", unit="file"
+        ):
+            file = futures[fut]
+            try:
+                fut.result()
+            except Exception as e:
+                logger.error(f"Error processing {file}: {e}")
 
     logger.info("Folder processed")
 

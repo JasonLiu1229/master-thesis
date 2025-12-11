@@ -9,3 +9,5 @@ MAX_INLINE_TEST_CHARS: 10000 # 4 chars ~= 1 token
 MAX_CHARS_LIMIT: 25000
 
 EVAL_FAILED_FILE: out/logs/eval_failed
+
+AMT_WORKERS: 2 # set to -1 to use all workers available
