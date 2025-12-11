@@ -8,3 +8,4 @@ Bug fixes:
 VSC:
     - Trying to figure out how it works
     - Running my first job in the weekend
+    - Contact info: hpc@uantwerpen.be
