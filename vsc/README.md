@@ -26,7 +26,7 @@ $VSC_SCRATCH/
 
 ## Initial one-time setup
 
-### Log in 
+### Log in
 
 ```bash
     ssh vscXXXXX@login1.calcua.uantwerpen.be
