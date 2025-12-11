@@ -15,7 +15,7 @@
 # -----------------------------
 module --force purge
 module load calcua/2024a           
-module load Python/3.13.1-GCCcore-14.2.0
+module load Python/3.12.3-GCCcore-13.3.0
 
 # Base project layout
 PROJECT_ROOT="$VSC_DATA/thesis_llm"
