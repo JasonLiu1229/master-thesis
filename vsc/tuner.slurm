@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH --job-name=thesis-llm
-#SBATCH -A ap_vsc21168           
+#SBATCH -A ap_vsc21168
 #SBATCH --partition=ampere_gpu         # Tier-2 Vaughan GPU partition
 #SBATCH --gres=gpu:1                   # number of GPUs
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem-per-cpu=4G
+#SBATCH --mem-per-task=4G
 #SBATCH --time=12:00:00
 #SBATCH --output=logs/%x-%j.out
 #SBATCH --error=logs/%x-%j.err
@@ -14,10 +14,13 @@
 # 1. Modules & basic setup
 # -----------------------------
 module --force purge
-module load calcua/2024a           
+module load calcua/2024a
+# Check with "module avail Python" on the cluster if this exact version exists:
 module load Python/3.12.3-GCCcore-13.3.0
 
-# Base project layout
+# -----------------------------
+# 2. Project paths
+# -----------------------------
 PROJECT_ROOT="$VSC_DATA/thesis_llm"
 CODE_DIR="$PROJECT_ROOT/code"
 VENV_DIR="$PROJECT_ROOT/venv"
@@ -28,7 +31,7 @@ FINAL_MODELS_DIR="$PROJECT_ROOT/models"
 
 # Scratch paths for this job
 RUN_ROOT="$VSC_SCRATCH/thesis_llm/run_${SLURM_JOB_ID}"
-OUTPUT_DIR="$RUN_ROOT/output"
+OUTPUT_DIR="$RUN_ROOT/out"
 CHECKPOINT_DIR="$RUN_ROOT/checkpoints"
 ADAPTER_DIR="$RUN_ROOT/adapters"
 HF_CACHE_DIR="$VSC_SCRATCH/thesis_llm/hf_cache"
@@ -42,7 +45,7 @@ mkdir -p "$CODE_DIR" "$DATA_DIR" "$RAW_DATA_DIR" "$ARROW_DIR" \
 cd "$CODE_DIR"
 
 # -----------------------------
-# 2. Python virtual environment
+# 3. Python virtual environment
 # -----------------------------
 if [ ! -d "$VENV_DIR" ]; then
     echo ">>> Creating virtual environment in $VENV_DIR"
@@ -56,12 +59,15 @@ else
 fi
 
 # -----------------------------
-# 3. Environment variables for your code
+# 4. Environment variables for your code
 # -----------------------------
+# These MUST match the keys you use in config.yml
 export INPUT_DIR="$ARROW_DIR"
 export OUTPUT_DIR="$OUTPUT_DIR"
 export SAVE_MODEL_PATH="$CHECKPOINT_DIR"
 export ADAPTER_SAVE_PATH="$ADAPTER_DIR"
+export LOG_DIR="$OUTPUT_DIR"    
+export ARROW_DIR="$ARROW_DIR"
 
 export TRANSFORMERS_CACHE="$HF_CACHE_DIR"
 export HF_DATASETS_CACHE="$HF_DATASETS_DIR"
@@ -73,23 +79,25 @@ echo "INPUT_DIR         = $INPUT_DIR"
 echo "OUTPUT_DIR        = $OUTPUT_DIR"
 echo "SAVE_MODEL_PATH   = $SAVE_MODEL_PATH"
 echo "ADAPTER_SAVE_PATH = $ADAPTER_SAVE_PATH"
+echo "LOG_DIR           = $LOG_DIR"
+echo "ARROW_DIR         = $ARROW_DIR"
 
 # -----------------------------
-# 4. Run your pipeline
+# 5. Run your pipeline
 # -----------------------------
 
-# (Optional) Preprocessing step – uncomment if you have one
+# Optional: if you have a preprocessing step
 # echo '>>> Running preprocessing'
 # python main.py --preprocess
 
 echo '>>> Starting training'
-# Replace the arguments below with how you normally start training locally
+# If you actually start from tuner.py directly, change this:
 python main.py --tune
 
 TRAIN_EXIT_CODE=$?
 
 # -----------------------------
-# 5. Copy final model to persistent storage
+# 6. Copy final model to persistent storage
 # -----------------------------
 if [ $TRAIN_EXIT_CODE -eq 0 ]; then
     echo ">>> Training finished successfully, copying final model to \$VSC_DATA"

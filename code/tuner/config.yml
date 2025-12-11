@@ -6,6 +6,8 @@ TEST_DIR: test
 OUTPUT_DIR: out/data_preprocessed
 INPUT_DIR: in
 
+ARROW_DIR: out/data_preprocessed # in our case not moved but if you processed it somewhere else
+
 # Model save path
 SAVE_MODEL_PATH: out/model
 ADAPTER_SAVE_PATH: out/adapter

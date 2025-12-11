@@ -67,5 +67,5 @@ If you still have to process the data, and you want to do this in the vsc space.
 ### Arrow data
 
 ```bash
-    scp -r path/to/arrow_files vscXXXXX@login1.calcua.uantwerpen.be:$VSC_DATA/thesis_llm/data/arrow
+    scp -r out/data_preprocessed/ vscXXXXX@login1.calcua.uantwerpen.be:$VSC_DATA/thesis_llm/data/arrow
 ```

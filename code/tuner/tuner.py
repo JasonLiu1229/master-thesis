@@ -32,19 +32,13 @@ config = {}
 with open("config.yml", "r") as f:
     config = yaml.safe_load(f)
 
-
-# class Heartbeat(TrainerCallback):
-#     def on_step_end(self, args, state, control, **kwargs):
-#         if state.global_step % 100 == 0:  # every 10 steps
-#             logging.info(
-#                 f"[HB] Step {state.global_step} completed. loss = {state.log_history[-1].get('loss', 'N/A')}"
-#             )
-
-# VSC
+# VSC overide the files with env vars
 config["INPUT_DIR"] = os.environ.get("INPUT_DIR", config["INPUT_DIR"])
-config["OUTPUT_DIR"] = os.environ.get("OUTPUT_DIR", config["OUTPUT_DIR"])
+config["ARROW_DIR"] = os.environ.get("ARROW_DIR", config["ARROW_DIR"])
 config["SAVE_MODEL_PATH"] = os.environ.get("SAVE_MODEL_PATH", config["SAVE_MODEL_PATH"])
-config["ADAPTER_SAVE_PATH"] = os.environ.get("ADAPTER_SAVE_PATH", config["ADAPTER_SAVE_PATH"])
+config["ADAPTER_SAVE_PATH"] = os.environ.get(
+    "ADAPTER_SAVE_PATH", config["ADAPTER_SAVE_PATH"]
+)
 config["LOG_DIR"] = os.environ.get("LOG_DIR", config["LOG_DIR"])
 
 
@@ -91,13 +85,13 @@ def define_base():
         tokenizer.pad_token = tokenizer.eos_token
 
     tokenizer.padding_side = "right"
-    
+
     def base_model_load():
         return AutoModelForCausalLM.from_pretrained(
             config["MODEL_ID"],
             device_map="auto",
             torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
-            attn_implementation="flash_attention_2"
+            attn_implementation="flash_attention_2",
         )
 
     if config["USE_QLORA"]:
@@ -120,7 +114,7 @@ def define_base():
                 quantization_config=bnb_config,
                 device_map="auto",
                 torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
-                attn_implementation="flash_attention_2"
+                attn_implementation="flash_attention_2",
             )
 
             base_model = prepare_model_for_kbit_training(base_model)
@@ -196,8 +190,8 @@ def make_args(val_ds: Dataset | None) -> TrainingArguments:
         "report_to": ["tensorboard"],
         "load_best_model_at_end": True if val_ds is not None else False,
         "disable_tqdm": False,
-        "group_by_length": True,          
-        "dataloader_num_workers": 4,  
+        "group_by_length": True,
+        "dataloader_num_workers": 4,
     }
 
     try:
@@ -217,9 +211,9 @@ def make_args(val_ds: Dataset | None) -> TrainingArguments:
 
 
 def tune():
-    output_dir = config["OUTPUT_DIR"]
-    train_data_path = os.path.join(output_dir, config["TRAIN_DIR"])
-    val_data_path = os.path.join(output_dir, config["VAL_DIR"])
+    arrow_dir = config["ARROW_DIR"]
+    train_data_path = os.path.join(arrow_dir, config["TRAIN_DIR"])
+    val_data_path = os.path.join(arrow_dir, config["VAL_DIR"])
 
     train_ds = load_ds(train_data_path)
     val_ds = load_ds(val_data_path)
@@ -233,7 +227,7 @@ def tune():
     )
 
     args = make_args(val_ds)
-    
+
     last_ckpt = None
     if os.path.isdir(args.output_dir):
         last_ckpt = get_last_checkpoint(args.output_dir)
@@ -248,7 +242,7 @@ def tune():
         logger.info(
             f"Using smaller dataset fraction: {fraction}. Train size: {train_size}, Val size: {val_size}"
         )
-    
+
     trainer = Trainer(
         model=model,
         args=args,
@@ -259,7 +253,7 @@ def tune():
     )
 
     logger.info("Starting training...")
-    
+
     if config.get("RESUME_FROM_LAST_CP", False) and last_ckpt is not None:
         logger.info(f"Resuming training from checkpoint: {last_ckpt}")
         trainer.train(resume_from_checkpoint=last_ckpt)
