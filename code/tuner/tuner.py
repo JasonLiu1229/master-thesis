@@ -33,7 +33,6 @@ with open("config.yml", "r") as f:
     config = yaml.safe_load(f)
 
 # VSC overide the files with env vars
-config["INPUT_DIR"] = os.environ.get("INPUT_DIR", config["INPUT_DIR"])
 config["ARROW_DIR"] = os.environ.get("ARROW_DIR", config["ARROW_DIR"])
 config["SAVE_MODEL_PATH"] = os.environ.get("SAVE_MODEL_PATH", config["SAVE_MODEL_PATH"])
 config["ADAPTER_SAVE_PATH"] = os.environ.get(

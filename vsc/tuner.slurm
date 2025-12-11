@@ -61,8 +61,6 @@ fi
 # -----------------------------
 # 4. Environment variables for your code
 # -----------------------------
-# These MUST match the keys you use in config.yml
-export INPUT_DIR="$ARROW_DIR"
 export OUTPUT_DIR="$OUTPUT_DIR"
 export SAVE_MODEL_PATH="$CHECKPOINT_DIR"
 export ADAPTER_SAVE_PATH="$ADAPTER_DIR"
@@ -75,7 +73,6 @@ export HF_DATASETS_CACHE="$HF_DATASETS_DIR"
 echo ">>> ENVIRONMENT"
 echo "PROJECT_ROOT      = $PROJECT_ROOT"
 echo "CODE_DIR          = $CODE_DIR"
-echo "INPUT_DIR         = $INPUT_DIR"
 echo "OUTPUT_DIR        = $OUTPUT_DIR"
 echo "SAVE_MODEL_PATH   = $SAVE_MODEL_PATH"
 echo "ADAPTER_SAVE_PATH = $ADAPTER_SAVE_PATH"
@@ -86,12 +83,7 @@ echo "ARROW_DIR         = $ARROW_DIR"
 # 5. Run your pipeline
 # -----------------------------
 
-# Optional: if you have a preprocessing step
-# echo '>>> Running preprocessing'
-# python main.py --preprocess
-
 echo '>>> Starting training'
-# If you actually start from tuner.py directly, change this:
 python main.py --tune
 
 TRAIN_EXIT_CODE=$?
@@ -105,7 +97,6 @@ if [ $TRAIN_EXIT_CODE -eq 0 ]; then
     JOB_MODEL_DIR="$FINAL_MODELS_DIR/run_${SLURM_JOB_ID}"
     mkdir -p "$JOB_MODEL_DIR"
 
-    # Adjust this if your script saves with different names/structure
     cp -r "$CHECKPOINT_DIR" "$JOB_MODEL_DIR/"
 
     echo ">>> Final model stored in: $JOB_MODEL_DIR"
