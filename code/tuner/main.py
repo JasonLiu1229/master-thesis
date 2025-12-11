@@ -16,6 +16,12 @@ config = {}
 with open("config.yml", "r") as f:
     config = yaml.safe_load(f)
 
+# VSC
+config["INPUT_DIR"] = os.environ.get("INPUT_DIR", config["INPUT_DIR"])
+config["OUTPUT_DIR"] = os.environ.get("OUTPUT_DIR", config["OUTPUT_DIR"])
+config["SAVE_MODEL_PATH"] = os.environ.get("SAVE_MODEL_PATH", config["SAVE_MODEL_PATH"])
+config["ADAPTER_SAVE_PATH"] = os.environ.get("ADAPTER_SAVE_PATH", config["ADAPTER_SAVE_PATH"])
+config["LOG_DIR"] = os.environ.get("LOG_DIR", config["LOG_DIR"])
 
 def _preprocess_dataset(force: bool = False):
     llm_model = get_llm_model()

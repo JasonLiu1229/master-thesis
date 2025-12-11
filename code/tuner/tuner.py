@@ -40,6 +40,13 @@ with open("config.yml", "r") as f:
 #                 f"[HB] Step {state.global_step} completed. loss = {state.log_history[-1].get('loss', 'N/A')}"
 #             )
 
+# VSC
+config["INPUT_DIR"] = os.environ.get("INPUT_DIR", config["INPUT_DIR"])
+config["OUTPUT_DIR"] = os.environ.get("OUTPUT_DIR", config["OUTPUT_DIR"])
+config["SAVE_MODEL_PATH"] = os.environ.get("SAVE_MODEL_PATH", config["SAVE_MODEL_PATH"])
+config["ADAPTER_SAVE_PATH"] = os.environ.get("ADAPTER_SAVE_PATH", config["ADAPTER_SAVE_PATH"])
+config["LOG_DIR"] = os.environ.get("LOG_DIR", config["LOG_DIR"])
+
 
 def load_ds(path: str) -> Dataset:
     if not os.path.exists(path):
