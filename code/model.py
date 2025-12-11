@@ -11,13 +11,15 @@ from transformers import (
 
 from prompts import SYSTEM_INSTRUCTION
 
+import threading
+
 class ModelStyle(Enum):
     LlamaInstruct = "inst"
     Plain = "plain"
 
 
 _llm_model = None  # singleton
-
+_model_lock = threading.Lock()
 
 def _enable_speed_flags():
     if torch.cuda.is_available():
@@ -47,32 +49,33 @@ class LLM_Model:
         do_sample=False,
         sys_instruction: str = SYSTEM_INSTRUCTION,
     ):
-        assert self.model is not None, "Model not loaded."
-        assert self.tokenizer is not None, "Tokenizer not loaded."
+        with _model_lock:
+            assert self.model is not None, "Model not loaded."
+            assert self.tokenizer is not None, "Tokenizer not loaded."
 
-        formatted_prompt = self._build_model_input(
-            prompt, sys_instruction=sys_instruction
-        )
-        inputs = self.tokenizer(formatted_prompt, return_tensors="pt")
+            formatted_prompt = self._build_model_input(
+                prompt, sys_instruction=sys_instruction
+            )
+            inputs = self.tokenizer(formatted_prompt, return_tensors="pt")
 
-        gen_config = GenerationConfig(
-            do_sample=do_sample,
-            temperature=temperature,
-            top_p=top_p,
-            top_k=top_k,
-        )
+            gen_config = GenerationConfig(
+                do_sample=do_sample,
+                temperature=temperature,
+                top_p=top_p,
+                top_k=top_k,
+            )
 
-        outputs = self.model.generate(
-            **inputs.to(self.model.device),
-            max_new_tokens=max_new_tokens,
-            generation_config=gen_config,
-            pad_token_id=self.tokenizer.pad_token_id,
-            eos_token_id=self.tokenizer.eos_token_id,
-        )
+            outputs = self.model.generate(
+                **inputs.to(self.model.device),
+                max_new_tokens=max_new_tokens,
+                generation_config=gen_config,
+                pad_token_id=self.tokenizer.pad_token_id,
+                eos_token_id=self.tokenizer.eos_token_id,
+            )
 
-        generated_ids = outputs[0][inputs["input_ids"].shape[1] :]
-        text = self.tokenizer.decode(generated_ids, skip_special_tokens=True)
-        return text.strip()
+            generated_ids = outputs[0][inputs["input_ids"].shape[1] :]
+            text = self.tokenizer.decode(generated_ids, skip_special_tokens=True)
+            return text.strip()
 
     def get_model(self):
         return self.model
