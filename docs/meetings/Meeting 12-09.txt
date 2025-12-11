@@ -1,3 +1,10 @@
 Analysis: 
     - Some are just a list of asserts, no variable identifiers to rename
     - Some are big var declerations
+
+Bug fixes:
+    - Some files couldnt be parsed because of bugs in code
+
+VSC:
+    - Trying to figure out how it works
+    - Running my first job in the weekend
