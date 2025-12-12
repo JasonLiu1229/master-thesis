@@ -21,11 +21,13 @@ from pipeline.helper import (
     JavaTestCase,
     JavaTestSpan,
     log_colored_diff,
+    looks_stringified,
     only_identifier_renames,
     parse_method_name,
     parse_test_case,
     remove_wrap,
     strip_markdown_fences,
+    unescape_java_stringified_source,
     wrap_test_case,
 )
 
@@ -63,13 +65,12 @@ def make_messages(user_message: str, sys_instruction: str = SYSTEM_INSTRUCTION):
 def _format_identifier_list_for_prompt(identifiers: list[str]) -> str:
     return "\n".join(f"- {name}" for name in identifiers)
 
+
 def _rename_process(wrapped_source_code: str, source_code_clean: str):
     try:
         original_method_name = parse_method_name(source_code_clean)
     except Exception as e:
-        logger.error(
-            f"Failed to extract method name: {e}"
-        )
+        logger.error(f"Failed to extract method name: {e}")
         return JavaTestCase(
             name=None,
             original_code=source_code_clean,
@@ -225,6 +226,9 @@ def _rename_process(wrapped_source_code: str, source_code_clean: str):
     )
 
 
+# TODO: split renaming in two parts, variable and function, so we can have different templating schemes for them
+
+
 def rename(java_test_span: JavaTestSpan):
     assert os.path.exists(
         java_test_span.file_path
@@ -234,10 +238,17 @@ def rename(java_test_span: JavaTestSpan):
     source_code_clean = "\n".join(source_code_lines)
 
     wrapped_source_code = wrap_test_case(source_code_lines)
+
+    if looks_stringified(wrapped_source_code):
+        wrapped_source_code = unescape_java_stringified_source(wrapped_source_code)
+
     return _rename_process(wrapped_source_code, source_code_clean)
 
 
 def rename_eval(src: str):
+    if looks_stringified(src):
+        src = unescape_java_stringified_source(src)
+
     source_code_clean = remove_wrap(src)
     java_test_case = _rename_process(src, source_code_clean)
 

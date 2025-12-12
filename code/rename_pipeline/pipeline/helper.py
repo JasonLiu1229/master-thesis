@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import re
+import codecs
 
 from dataclasses import dataclass
 from pathlib import Path
@@ -267,8 +268,16 @@ def log_colored_diff(
             Fore.MAGENTA + "\n--- original ---\n" + original_code + Style.RESET_ALL
         )
 
+def looks_stringified(text: str) -> bool:
+    return '\\"' in text or '\\\\n' in text
 
-def extract_identifier_candidates(wrapped_test_case: str) -> list[str]:
+def unescape_java_stringified_source(text: str) -> str:
+    try:
+        return codecs.decode(text, "unicode_escape")
+    except Exception:
+        return text
+
+def extract_identifier_candidates(wrapped_test_case: str) -> list[str]: # TODO: replace this with something else because does not work for all test files to extract identifiers
     try:
         tree = javalang.parse.parse(wrapped_test_case)
     except Exception as e:
@@ -279,10 +288,7 @@ def extract_identifier_candidates(wrapped_test_case: str) -> list[str]:
         )
         return []
 
-    class_decls = [
-        t for t in tree.types if isinstance(t, javalang.tree.ClassDeclaration)
-    ]
-
+    class_decls = [t for t in tree.types if isinstance(t, javalang.tree.ClassDeclaration)]
     if not class_decls:
         logger.error("extract_identifier_candidates: no ClassDeclaration found.")
         return []
@@ -296,39 +302,47 @@ def extract_identifier_candidates(wrapped_test_case: str) -> list[str]:
     def is_test_annotation(ann) -> bool:
         return ann.name == "Test" or ann.name.endswith(".Test")
 
-    test_method = None
     if len(methods) == 1:
         test_method = methods[0]
     else:
-        for m in methods:
-            if any(is_test_annotation(ann) for ann in getattr(m, "annotations", [])):
-                test_method = m
-                break
+        test_method = next(
+            (m for m in methods if any(is_test_annotation(a) for a in getattr(m, "annotations", []))),
+            None,
+        )
 
     if test_method is None:
-        logger.error(
-            "extract_identifier_candidates: multiple methods, none annotated with @Test;"
-        )
-        raise ValueError("No method found with @Test or similar annotations")
+        logger.error("extract_identifier_candidates: multiple methods, none annotated with @Test;")
+        return []
 
     names: set[str] = set()
 
-    # method name
-    if test_method.name:
-        names.add(test_method.name)
+    for p in getattr(test_method, "parameters", []) or []:
+        if getattr(p, "name", None):
+            names.add(p.name)
 
-    # parameters
-    for param in test_method.parameters:
-        names.add(param.name)
-
-    # local variables in method body only
     for _, var_decl in test_method.filter(javalang.tree.VariableDeclarator):
-        names.add(var_decl.name)
+        if getattr(var_decl, "name", None):
+            names.add(var_decl.name)
+
+    for _, enhanced in test_method.filter(javalang.tree.EnhancedForControl):
+        var = getattr(enhanced, "var", None)
+        if var is not None and getattr(var, "name", None):
+            names.add(var.name)
+
+    for _, catch_param in test_method.filter(javalang.tree.CatchClauseParameter):
+        if getattr(catch_param, "name", None):
+            names.add(catch_param.name)
+
+    for _, lam in test_method.filter(javalang.tree.LambdaExpression):
+        for p in getattr(lam, "parameters", []) or []:
+            name = getattr(p, "name", None)
+            if name:
+                names.add(name)
 
     def is_constant_like(name: str) -> bool:
         return name.isupper()
 
-    return sorted(n for n in names if not is_constant_like(n))  # constants are ignored
+    return sorted(n for n in names if n and not is_constant_like(n))  # constants are ignored
 
 
 def apply_rename_mapping(code: str, mapping: dict[str, str]) -> str:

@@ -29,7 +29,7 @@ RAW_DATA_DIR="$DATA_DIR/raw"
 ARROW_DIR="$DATA_DIR/arrow"
 FINAL_MODELS_DIR="$PROJECT_ROOT/models"
 
-# Scratch paths for this job
+# Scratch paths for this job (cach)
 RUN_ROOT="$VSC_SCRATCH/thesis_llm/run_${SLURM_JOB_ID}"
 OUTPUT_DIR="$RUN_ROOT/out"
 CHECKPOINT_DIR="$RUN_ROOT/checkpoints"
