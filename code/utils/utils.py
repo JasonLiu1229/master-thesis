@@ -1,10 +1,16 @@
+from __future__ import annotations
+
 import codecs
 import logging
+
+import multiprocessing as mp
+import os
 import shutil
+from concurrent.futures import as_completed, ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 
-from typing import List, Tuple
+from typing import Any, List, Optional, Tuple
 
 import javalang
 
@@ -20,6 +26,14 @@ logger = logging.getLogger("utils")
 # File sizes in bytes -> medium is in between small and big
 BIG = 30000
 SMALL = 1000
+
+
+@dataclass
+class ParseResult:
+    ok: bool
+    tree: Optional[Any] = None
+    error: Optional[str] = None
+    timed_out: bool = False
 
 
 @dataclass
@@ -63,14 +77,45 @@ def sort_files(origin_folder: Path | str, out: Path | str):
             shutil.copy(file, small_path / file.name)
 
 
-def extract_identifier_candidates(wrapped_test_case: str) -> Tuple[List[str], bool]:
+def _parse_worker(code: str, q: mp.Queue) -> None:
     try:
-        tree = javalang.parse.parse(wrapped_test_case)
+        tree = javalang.parse.parse(code)
+        q.put(("ok", tree))
     except Exception as e:
-        logger.error("Parse failed: %r", e)
-        if hasattr(e, "position"):
-            logger.error("At position: %s", e.position)
+        q.put(("err", repr(e)))
+
+
+def parse_with_timeout(code: str, timeout_s: float = 2.0) -> ParseResult:
+    q: mp.Queue = mp.Queue(maxsize=1)
+    p = mp.Process(target=_parse_worker, args=(code, q), daemon=True)
+    p.start()
+    p.join(timeout_s)
+
+    if p.is_alive():
+        p.terminate()
+        p.join()
+        return ParseResult(
+            ok=False, timed_out=True, error=f"timeout after {timeout_s}s"
+        )
+
+    if q.empty():
+        return ParseResult(
+            ok=False, error="parse worker finished but no result returned"
+        )
+
+    status, payload = q.get()
+    if status == "ok":
+        return ParseResult(ok=True, tree=payload)
+    return ParseResult(ok=False, error=payload)
+
+
+def extract_identifier_candidates(wrapped_test_case: str) -> Tuple[List[str], bool]:
+    res = parse_with_timeout(wrapped_test_case)
+
+    if not res.ok:
         return [], False
+
+    tree = res.tree
 
     class_decls = [
         t for t in tree.types if isinstance(t, javalang.tree.ClassDeclaration)
@@ -115,8 +160,10 @@ def extract_identifier_candidates(wrapped_test_case: str) -> Tuple[List[str], bo
 
     return sorted(n for n in names if n and not is_constant_like(n)), True
 
+
 def looks_stringified(text: str) -> bool:
-    return '\\"' in text or '\\\\n' in text
+    return '\\"' in text or "\\\\n" in text
+
 
 def unescape_java_stringified_source(text: str) -> str:
     try:
@@ -124,7 +171,32 @@ def unescape_java_stringified_source(text: str) -> str:
     except Exception:
         return text
 
-def sort_identifiers_tests(input: Path, output: Path):
+
+def classify_and_copy(
+    file: Path, no_id_dir: Path, parse_fail_dir: Path, parsed_ok_dir: Path
+) -> Tuple[Path, str]:
+    """
+    Returns (file, category) where category in {"parse_failed", "no_id", "parse_ok"}.
+    """
+    text = file.read_text(encoding="utf-8", errors="replace")
+
+    if looks_stringified(text):
+        text = unescape_java_stringified_source(text)
+
+    candidates, parsed_ok = extract_identifier_candidates(text)
+
+    if not parsed_ok:
+        shutil.copy2(file, parse_fail_dir / file.name)
+        return file, "parse_failed"
+    elif len(candidates) == 0:
+        shutil.copy2(file, no_id_dir / file.name)
+        return file, "no_id"
+    else:
+        shutil.copy2(file, parsed_ok_dir / file.name)
+        return file, "parse_ok"
+
+
+def sort_identifiers_tests(input: Path, output: Path, workers: int | None = None):
     files = [f for f in input.iterdir() if f.is_file()]
     output.mkdir(parents=True, exist_ok=True)
 
@@ -136,20 +208,19 @@ def sort_identifiers_tests(input: Path, output: Path):
     parse_fail_dir.mkdir(exist_ok=True)
     parsed_ok_dir.mkdir(exist_ok=True)
 
-    for file in tqdm(files, desc="files", unit="file"):
-        text = file.read_text(encoding="utf-8", errors="replace")
-        
-        if looks_stringified(text):
-            text = unescape_java_stringified_source(text)
-            
-        candidates, parsed_ok = extract_identifier_candidates(text)
+    if workers is None:
+        workers = os.cpu_count()
 
-        if not parsed_ok:
-            shutil.copy(file, parse_fail_dir / file.name)
-        elif len(candidates) == 0:
-            shutil.copy(file, no_id_dir / file.name)
-        else:
-            shutil.copy(file, dst=parsed_ok_dir / file.name)
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        futures = [
+            ex.submit(classify_and_copy, f, no_id_dir, parse_fail_dir, parsed_ok_dir)
+            for f in files
+        ]
+
+        for _ in tqdm(
+            as_completed(futures), total=len(futures), desc="files", unit="file"
+        ):
+            _.result()
 
 
 def simplify(input: Path, output: Path):
@@ -193,10 +264,10 @@ def simplify(input: Path, output: Path):
 
 
 def main():
-    test_dir = Path("../tools/java-dataset-converter-llm/dataset/test/java/")
+    input_dir = Path("../tools/java-dataset-converter-llm/dataset/val/java/")
     out_dir = Path("../out/dataset/")
 
-    sort_identifiers_tests(test_dir, out_dir)
+    sort_identifiers_tests(input_dir, out_dir)
 
 
 if __name__ == "__main__":
