@@ -1,6 +1,8 @@
 Analysis: 
     - Some are just a list of asserts, no variable identifiers to rename
     - Some are big var declerations
+    - Maybe discard some files
+    - Make analysis tooling Maybe
 
 Bug fixes:
     - Some files couldnt be parsed because of bugs in code

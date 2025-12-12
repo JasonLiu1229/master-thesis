@@ -15,3 +15,4 @@ out/model/data_preprocessed/cache-*
 out/java/*
 
 .pytest_cache/*
+tools/randoop-*
