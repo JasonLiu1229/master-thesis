@@ -1,0 +1,4 @@
+Different methodoligies discussed in that paper, mainly focussed on function naming
+- templating, where the name follows a certain format 
+- code convention rules, so LLM names based on those code conventions 
+- Coverage goal based naming, look at the test and see what goal it tries to cover
