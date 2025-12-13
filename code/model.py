@@ -1,17 +1,19 @@
 import os
+
+import threading
 from enum import Enum
 
 import torch
+
+from prompts import SYSTEM_INSTRUCTION
 from transformers import (
     AutoConfig,
     AutoModelForCausalLM,
     AutoTokenizer,
+    BitsAndBytesConfig,
     GenerationConfig,
 )
 
-from prompts import SYSTEM_INSTRUCTION
-
-import threading
 
 class ModelStyle(Enum):
     LlamaInstruct = "inst"
@@ -20,6 +22,7 @@ class ModelStyle(Enum):
 
 _llm_model = None  # singleton
 _model_lock = threading.Lock()
+
 
 def _enable_speed_flags():
     if torch.cuda.is_available():
@@ -37,6 +40,7 @@ class LLM_Model:
         self.tokenizer = None
         self.model_id = None
         self.model_style: ModelStyle = None
+        self._gen_config = None
 
     @torch.inference_mode()
     def generate(
@@ -58,17 +62,18 @@ class LLM_Model:
             )
             inputs = self.tokenizer(formatted_prompt, return_tensors="pt")
 
-            gen_config = GenerationConfig(
-                do_sample=do_sample,
-                temperature=temperature,
-                top_p=top_p,
-                top_k=top_k,
-            )
+            if not self._gen_config:
+                self._gen_config = GenerationConfig(
+                    do_sample=do_sample,
+                    temperature=temperature,
+                    top_p=top_p,
+                    top_k=top_k,
+                )
 
             outputs = self.model.generate(
                 **inputs.to(self.model.device),
                 max_new_tokens=max_new_tokens,
-                generation_config=gen_config,
+                generation_config=self._gen_config.clone(),
                 pad_token_id=self.tokenizer.pad_token_id,
                 eos_token_id=self.tokenizer.eos_token_id,
             )
@@ -85,18 +90,61 @@ class LLM_Model:
 
     def get_device(self):
         return self.device
+    
+    def _tokenize_prompt(self, user_prompt: str, sys_instruction: str):
+    # Qwen chat template path: tokenize directly
+        if "qwen" in self.model_id.lower() and getattr(self.tokenizer, "chat_template", None):
+            messages = [
+                {"role": "system", "content": sys_instruction},
+                {"role": "user", "content": user_prompt.strip()},
+            ]
+            try:
+                # fast path: returns input_ids/attention_mask directly
+                return self.tokenizer.apply_chat_template(
+                    messages,
+                    add_generation_prompt=True,
+                    tokenize=True,
+                    return_tensors="pt",
+                )
+            except TypeError:
+                # fallback for older tokenizer APIs
+                text = self.tokenizer.apply_chat_template(
+                    messages, add_generation_prompt=True, tokenize=False
+                )
+                return self.tokenizer(text, return_tensors="pt")
 
-    def load_model(self, model_path):
+        # non-template models: your current behavior
+        formatted = self._build_model_input(user_prompt, sys_instruction=sys_instruction)
+        return self.tokenizer(formatted, return_tensors="pt")
+
+    def load_model(self, model_path, quantize: str = "int4"):
         _enable_speed_flags()
 
         torch_dtype = torch.bfloat16 if torch.cuda.is_available() else torch.float32
 
+        quantization_config = None
+        if torch.cuda.is_available() and quantize == "int4":
+            quantization_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_quant_type="nf4",
+                bnb_4bit_use_double_quant=True,
+                bnb_4bit_compute_dtype=torch.bfloat16,  
+            )
+        elif torch.cuda.is_available() and quantize == "int8":
+            quantization_config = BitsAndBytesConfig(load_in_8bit=True)
+
         load_kwargs = dict(
-            torch_dtype=torch_dtype, device_map="auto", low_cpu_mem_usage=True
+            device_map="auto",
+            low_cpu_mem_usage=True,
         )
 
-        self.model = AutoModelForCausalLM.from_pretrained(model_path, **load_kwargs)
-        self.model.eval()
+
+        if quantization_config is None:
+            load_kwargs["torch_dtype"] = torch_dtype
+        else:
+            load_kwargs["quantization_config"] = quantization_config
+
+        self.model = AutoModelForCausalLM.from_pretrained(model_path, **load_kwargs).eval()
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)
 
