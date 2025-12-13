@@ -264,7 +264,7 @@ def simplify(input: Path, output: Path):
 
 
 def main():
-    input_dir = Path("../tools/java-dataset-converter-llm/dataset/val/java/")
+    input_dir = Path("../tools/java-dataset-converter-llm/dataset/train/java/")
     out_dir = Path("../out/dataset/")
 
     sort_identifiers_tests(input_dir, out_dir)
