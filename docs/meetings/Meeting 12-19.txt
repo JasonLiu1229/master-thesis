@@ -7,3 +7,18 @@ Different methodoligies discussed in that paper, mainly focussed on function nam
 
 Many smaller files consists of no identifiers as tests:
     - made a script that checks for them
+
+Dataset:
+    - test: 78388
+        - valid: 
+        - failed:
+        - no identifiers in code:
+    - val: 78534
+        - valid: 
+        - failed:
+        - no identifiers in code: 
+    - train: 624022
+        - valid: 
+        - failed:
+        - no identifiers in code:
+    
