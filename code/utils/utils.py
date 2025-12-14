@@ -183,20 +183,26 @@ def classify_and_copy(
     if looks_stringified(text):
         text = unescape_java_stringified_source(text)
 
-    candidates, parsed_ok = extract_identifier_candidates(text)
-
+    candidates, parsed_ok = extract_identifier_candidates(text)    
+    
     if not parsed_ok:
+        if (parse_fail_dir / file.name).exists():
+            return file, "parse_failed"
         shutil.copy2(file, parse_fail_dir / file.name)
         return file, "parse_failed"
     elif len(candidates) == 0:
+        if (no_id_dir / file.name).exists():
+            return file, "no_id"
         shutil.copy2(file, no_id_dir / file.name)
         return file, "no_id"
     else:
+        if (parsed_ok_dir / file.name).exists():
+            return file, "parse_ok"
         shutil.copy2(file, parsed_ok_dir / file.name)
         return file, "parse_ok"
 
 
-def sort_identifiers_tests(input: Path, output: Path, workers: int | None = None):
+def sort_identifiers_tests(input: Path, output: Path, workers: int | None = 2):
     files = [f for f in input.iterdir() if f.is_file()]
     output.mkdir(parents=True, exist_ok=True)
 
@@ -264,15 +270,15 @@ def simplify(input: Path, output: Path):
 
 
 def main():
-    input_dir = Path("../tools/java-dataset-converter-llm/dataset/test/java_temp/")
-    out_dir = Path("../out/dataset/test/")
+    # input_dir = Path("../tools/java-dataset-converter-llm/dataset/test/java_temp/")
+    # out_dir = Path("../out/dataset/test/")
 
-    sort_identifiers_tests(input_dir, out_dir)
+    # sort_identifiers_tests(input_dir, out_dir)
     
-    input_dir = Path("../tools/java-dataset-converter-llm/dataset/val/java_temp/")
-    out_dir = Path("../out/dataset/val/")
+    # input_dir = Path("../tools/java-dataset-converter-llm/dataset/val/java_temp/")
+    # out_dir = Path("../out/dataset/val/")
 
-    sort_identifiers_tests(input_dir, out_dir)
+    # sort_identifiers_tests(input_dir, out_dir)
     
     input_dir = Path("../tools/java-dataset-converter-llm/dataset/train/java_temp/")
     out_dir = Path("../out/dataset/train/")

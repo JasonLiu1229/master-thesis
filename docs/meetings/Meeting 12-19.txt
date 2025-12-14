@@ -10,15 +10,15 @@ Many smaller files consists of no identifiers as tests:
 
 Dataset:
     - test: 78388
-        - valid: 
-        - failed:
-        - no identifiers in code:
+        - valid: 53593
+        - failed: 5367
+        - no identifiers in code: 19428
     - val: 78534
-        - valid: 
-        - failed:
-        - no identifiers in code: 
+        - valid: 51935
+        - failed: 6153
+        - no identifiers in code: 20446
     - train: 624022
         - valid: 
-        - failed:
+        - failed: 
         - no identifiers in code:
     
