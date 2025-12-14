@@ -1,4 +1,4 @@
-Different methodoligies discussed in that paper, mainly focussed on function naming
+Different methodoligies discussed in that paper, mainly focussed on function naming (llm_restapi.pdf, )
     - templating, where the name follows a certain format (really good)
     - code convention rules, so LLM names based on those code conventions (similar to 1)
     - Coverage goal based naming, look at the test and see what goal it tries to cover (have to run the code and need full code, so not possible)
@@ -25,3 +25,6 @@ Dataset:
         - failed: 
         - no identifiers in code:
     
+Converted the slurm file to Apptainer files:
+    - Had to make a custom .def file to run the nvidia image, because i need custom dependencies
+    - Remade the slurm so it matches a docker container
