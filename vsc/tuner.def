@@ -5,10 +5,12 @@ From: nvcr.io/nvidia/pytorch:25.06-py3
     # matches common transformer env usage
     export TOKENIZERS_PARALLELISM=false
 
+%files
+    requirements_tuner.txt /opt/requirements_tuner.txt
+
 %post
     set -eux
 
-    # --- system deps (Dockerfile apt-get equivalent) ---
     apt-get update
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         git \
@@ -17,22 +19,12 @@ From: nvcr.io/nvidia/pytorch:25.06-py3
         ca-certificates \
         && rm -rf /var/lib/apt/lists/*
 
-    # --- python deps (Dockerfile pip equivalent) ---
     python3 -m pip install --upgrade pip setuptools wheel packaging ninja psutil
 
-    # If you have a requirements file, bake it in:
-    if [ -f /opt/requirements_tuner.txt ]; then
-        python3 -m pip install -r /opt/requirements_tuner.txt
-    fi
+    python3 -m pip install -r /opt/requirements_tuner.txt
 
-    # Flash-attn install (as in your docker build logic)
     python3 -m pip install flash_attn --no-build-isolation
 
-%files
-    # bake requirements into the image (optional but recommended)
-    requirements_tuner.txt /opt/requirements_tuner.txt
-
 %runscript
-    # default run behavior (like Docker CMD)
     cd /app
-    exec python3 main.py --preprocess --tune
+    exec python3 main.py --tune

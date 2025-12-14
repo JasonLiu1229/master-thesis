@@ -5,67 +5,67 @@ This directory consists of files needed to run on the VSC infrastruture for clou
 ## Folder layout on CalcUA
 
 ```txt
-$VSC_DATA/
-  thesis_llm/
-    code/        # git repository with this project
-    venv/        # Python virtual environment
-    data/
-      raw/       # original/raw data
-      arrow/     # Arrow / preprocessed datasets
-    models/      # final/best models per job
+$VSC_HOME/project/
+├── code/
+│   ├── main.py
+│   ├── tuner.py
+│   ├── data_preprocess.py
+│   ├── config.yml
+│   └── ... (any other .py modules)
+├── requirements_tuner.txt
+└── containers/
+    ├── tuner.def
+    ├── requirements_tuner.txt   # copy of requirements used for image build
+    ├── build_tuner_sif.slurm
+    ├── tuner_run.slurm
+    └── tuner.sif                # produced by the build job
+
+
+$VSC_DATA/tuner_dataset/arrow/
+├── train/
+├── val/
+└── test/    # optional (not really needed)
 
 $VSC_SCRATCH/
-  thesis_llm/
-    run_<JOBID>/
-      output/        # logs, metrics, etc.
-      checkpoints/   # training checkpoints
-      adapters/      # LoRA / PEFT adapters if applicable
-    hf_cache/        # HuggingFace transformers cache
-    hf_datasets/     # HuggingFace datasets cache
+├── appt_cache/                   # apptainer cache
+└── tuner_runs/
+    └── <jobid>/
+        ├── model/
+        ├── adapter/
+        └── logs/
+
 ```
 
-## Initial one-time setup
+## Needed files
 
-### Log in
+Files you need to create/add manually
+
+Put these files in $VSC_HOME/project/containers/:
+
+1. tuner.def
+2. build_tuner_sif.slurm
+3. tuner_run.slurm
+4. requirements_tuner.txt (copy of your project requirements used for the image build)
+
+Your existing code stays in:
+
+- $VSC_HOME/project/code/…
+- $VSC_HOME/project/requirements_tuner.txt (optional to keep both; the one in containers is what build uses)
+
+Your dataset must exist in:
+
+- $VSC_DATA/tuner_dataset/arrow/{train,val,test}
+
+## Commands
+
+1. Build the Apptainer sif image
 
 ```bash
-    ssh vscXXXXX@login1.calcua.uantwerpen.be
+sbatch build_tuner_sif.slurm
 ```
 
-### Create base dir
+2. Submit the run jon
 
 ```bash
-    mkdir -p "$VSC_DATA/thesis_llm"
-    mkdir -p "$VSC_DATA/thesis_llm/code"
-    mkdir -p "$VSC_DATA/thesis_llm/data/raw"
-    mkdir -p "$VSC_DATA/thesis_llm/data/arrow"
-    mkdir -p "$VSC_DATA/thesis_llm/models"
-    mkdir -p "$VSC_SCRATCH/thesis_llm"
-```
-
-### Copy your project into `code/`
-
-```bash
-    scp -r code/tuner/ vscXXXXX@login1.calcua.uantwerpen.be:$VSC_DATA/thesis_llm/code
-    scp -r code/model.py vscXXXXX@login1.calcua.uantwerpen.be:$VSC_DATA/thesis_llm/code
-    scp -r code/prompts.py vscXXXXX@login1.calcua.uantwerpen.be:$VSC_DATA/thesis_llm/code
-    scp -r code/logger.py vscXXXXX@login1.calcua.uantwerpen.be:$VSC_DATA/thesis_llm/code
-```
-
-### Requirements file
-
-```bash
-    scp -r requirements/requirements_tuner.txt vscXXXXX@login1.calcua.uantwerpen.be:$VSC_DATA/thesis_llm/code/requirements.txt
-```
-
-## Copy data / Arrow files to the cluster
-
-### Raw data
-
-If you still have to process the data, and you want to do this in the vsc space. We will not cover this and this will also not be included in the `.slum` file.
-
-### Arrow data
-
-```bash
-    scp -r out/data_preprocessed/ vscXXXXX@login1.calcua.uantwerpen.be:$VSC_DATA/thesis_llm/data/arrow
+sbatch tuner_run.slurm
 ```

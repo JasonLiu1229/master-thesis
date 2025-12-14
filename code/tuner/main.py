@@ -22,6 +22,7 @@ config["OUTPUT_DIR"] = os.environ.get("OUTPUT_DIR", config["OUTPUT_DIR"])
 config["SAVE_MODEL_PATH"] = os.environ.get("SAVE_MODEL_PATH", config["SAVE_MODEL_PATH"])
 config["ADAPTER_SAVE_PATH"] = os.environ.get("ADAPTER_SAVE_PATH", config["ADAPTER_SAVE_PATH"])
 config["LOG_DIR"] = os.environ.get("LOG_DIR", config["LOG_DIR"])
+config["ARROW_DIR"] = os.environ.get("ARROW_DIR", config["ARROW_DIR"])
 
 def _preprocess_dataset(force: bool = False):
     llm_model = get_llm_model()
@@ -111,7 +112,7 @@ def _preprocess_dataset(force: bool = False):
 
 
 def tune_model():
-    tune()
+    tune(config["ARROW_DIR"])
 
 
 def argument_parser():
@@ -136,12 +137,22 @@ def argument_parser():
         action="store_true",
         help="Tune the LLM model.",
     )
+    
+    parser.add_argument(
+        "--arrow_dir",
+        default=None,
+        type=str,
+        help="Path to preprocessed Arrow dataset directory (contains train/val/test). Overrides ARROW_DIR."
+    )
     return parser
 
 
 if __name__ == "__main__":
     parser = argument_parser()
     args = parser.parse_args()
+    
+    if args.arrow_dir:
+        config["ARROW_DIR"] = args.arrow_dir
 
     if args.preprocess:
         logger.info("Preprocessing dataset...")

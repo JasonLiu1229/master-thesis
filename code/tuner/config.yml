@@ -31,7 +31,7 @@ SAVE_TOTAL_LIMIT: 3
 
 # QLoRA parameters (https://datawizz.ai/blog/understanding-lora-adapters-rank-and-alpha-parameters)
 USE_QLORA: true # If not using QLoRA, we will do regular fine-tuning LoRA.
-RANK: 16 # The rank determines the dimensionality of the low-rank decomposition. High R -> higher adaptation capacity but more memory and compute cost.
+RANK: 8 # The rank determines the dimensionality of the low-rank decomposition. High R -> higher adaptation capacity but more memory and compute cost.
 LORA_ALPHA: 32 # is a scaling factor that controls the contribution of the LoRA adaptation to the original weights.
 LORA_DROPOUT: 0.05 # in LoRA randomly zeros out some of the activations before the low-rank adapters during training, just like regular dropout.
 RESUME_FROM_LAST_CP: true # Whether to resume training from the last checkpoint in the output directory.

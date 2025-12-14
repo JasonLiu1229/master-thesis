@@ -209,8 +209,8 @@ def make_args(val_ds: Dataset | None) -> TrainingArguments:
     return TrainingArguments(**kw)
 
 
-def tune():
-    arrow_dir = config["ARROW_DIR"]
+def tune(input_arrow_dir: str | None = None):
+    arrow_dir = input_arrow_dir or config["ARROW_DIR"]
     train_data_path = os.path.join(arrow_dir, config["TRAIN_DIR"])
     val_data_path = os.path.join(arrow_dir, config["VAL_DIR"])
 
