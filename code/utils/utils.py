@@ -172,6 +172,15 @@ def unescape_java_stringified_source(text: str) -> str:
         return text
 
 
+def collect_existing_filenames(*dirs: Path) -> set[str]:
+    existing = set()
+    for d in dirs:
+        if not d.exists():
+            continue
+        existing.update(f.name for f in d.iterdir() if f.is_file())
+    return existing
+
+
 def classify_and_copy(
     file: Path, no_id_dir: Path, parse_fail_dir: Path, parsed_ok_dir: Path
 ) -> Tuple[Path, str]:
@@ -183,27 +192,20 @@ def classify_and_copy(
     if looks_stringified(text):
         text = unescape_java_stringified_source(text)
 
-    candidates, parsed_ok = extract_identifier_candidates(text)    
-    
+    candidates, parsed_ok = extract_identifier_candidates(text)
+
     if not parsed_ok:
-        if (parse_fail_dir / file.name).exists():
-            return file, "parse_failed"
         shutil.copy2(file, parse_fail_dir / file.name)
         return file, "parse_failed"
     elif len(candidates) == 0:
-        if (no_id_dir / file.name).exists():
-            return file, "no_id"
         shutil.copy2(file, no_id_dir / file.name)
         return file, "no_id"
     else:
-        if (parsed_ok_dir / file.name).exists():
-            return file, "parse_ok"
         shutil.copy2(file, parsed_ok_dir / file.name)
         return file, "parse_ok"
 
 
 def sort_identifiers_tests(input: Path, output: Path, workers: int | None = 2):
-    files = [f for f in input.iterdir() if f.is_file()]
     output.mkdir(parents=True, exist_ok=True)
 
     no_id_dir = output / "no_id_tests"
@@ -214,6 +216,11 @@ def sort_identifiers_tests(input: Path, output: Path, workers: int | None = 2):
     parse_fail_dir.mkdir(exist_ok=True)
     parsed_ok_dir.mkdir(exist_ok=True)
 
+
+    already_done = collect_existing_filenames(no_id_dir, parse_fail_dir, parsed_ok_dir)
+
+    files = [f for f in input.iterdir() if f.is_file() and f.name not in already_done]
+
     if workers is None:
         workers = os.cpu_count()
 
@@ -223,10 +230,13 @@ def sort_identifiers_tests(input: Path, output: Path, workers: int | None = 2):
             for f in files
         ]
 
-        for _ in tqdm(
-            as_completed(futures), total=len(futures), desc="files", unit="file"
+        for fut in tqdm(
+            as_completed(futures),
+            total=len(futures),
+            desc="files",
+            unit="file",
         ):
-            _.result()
+            fut.result()
 
 
 def simplify(input: Path, output: Path):
@@ -274,12 +284,12 @@ def main():
     # out_dir = Path("../out/dataset/test/")
 
     # sort_identifiers_tests(input_dir, out_dir)
-    
+
     # input_dir = Path("../tools/java-dataset-converter-llm/dataset/val/java_temp/")
     # out_dir = Path("../out/dataset/val/")
 
     # sort_identifiers_tests(input_dir, out_dir)
-    
+
     input_dir = Path("../tools/java-dataset-converter-llm/dataset/train/java_temp/")
     out_dir = Path("../out/dataset/train/")
 
