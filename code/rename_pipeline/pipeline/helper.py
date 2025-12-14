@@ -315,6 +315,9 @@ def extract_identifier_candidates(wrapped_test_case: str) -> list[str]: # TODO: 
         return []
 
     names: set[str] = set()
+    
+    # if test_method.name:
+    #     names.add(test_method.name)
 
     for p in getattr(test_method, "parameters", []) or []:
         if getattr(p, "name", None):

@@ -31,6 +31,8 @@ from pipeline.helper import (
     wrap_test_case,
 )
 
+from typing import List
+
 
 config = {}
 with open("pipeline/config.yml", "r") as f:
@@ -65,6 +67,11 @@ def make_messages(user_message: str, sys_instruction: str = SYSTEM_INSTRUCTION):
 def _format_identifier_list_for_prompt(identifiers: list[str]) -> str:
     return "\n".join(f"- {name}" for name in identifiers)
 
+def _rename_function(func_name: str, code: str):
+    pass
+
+def _rename_variables(variable_names: List[str], code: str):
+    pass
 
 def _rename_process(wrapped_source_code: str, source_code_clean: str):
     try:
@@ -102,6 +109,8 @@ def _rename_process(wrapped_source_code: str, source_code_clean: str):
             clean=False,
         )
 
+    identifier_candidates.append(original_method_name)
+    
     identifiers_for_prompt = _format_identifier_list_for_prompt(identifier_candidates)
 
     user_message = USER_PROMPT_TEMPLATE.format(

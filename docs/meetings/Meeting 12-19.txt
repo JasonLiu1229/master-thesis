@@ -1,9 +1,12 @@
 Different methodoligies discussed in that paper, mainly focussed on function naming
-    - templating, where the name follows a certain format 
-    - code convention rules, so LLM names based on those code conventions 
-    - Coverage goal based naming, look at the test and see what goal it tries to cover
-    - Assertion backword tracing, so only looking at what affects the assert to see what is tested and determine naming
-    - LLM assisted with guardrails, so use some things of the code, like assertions and inputs and what error it raises to determine function naming
+    - templating, where the name follows a certain format (really good)
+    - code convention rules, so LLM names based on those code conventions (similar to 1)
+    - Coverage goal based naming, look at the test and see what goal it tries to cover (have to run the code and need full code, so not possible)
+    - Assertion backword tracing, so only looking at what affects the assert to see what is tested and determine naming (Viable for variable naming, but have to add cross variable check to not rename the same name)
+    - LLM assisted with guardrails, so use some things of the code, like assertions and inputs and what error it raises to determine function naming (similar to the one above, but more for function naming)
+
+So if I use templating:
+    - this will go against the LLM finetuning, because then the naming for the function names will be completely different then the orical. Then the metrics are rather useless.
 
 Many smaller files consists of no identifiers as tests:
     - made a script that checks for them

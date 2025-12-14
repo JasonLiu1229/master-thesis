@@ -14,10 +14,11 @@ from typing import Any, List, Optional, Tuple
 
 import javalang
 
-from llm_client import LLMClient
+# from llm_client import LLMClient
 
 from logger import setup_logging
-from prompts import REASON_PROMPT, REASON_SYSTEM, SIMPLIFY_PROMPT, SIMPLIFY_SYSTEM
+
+# from prompts import REASON_PROMPT, REASON_SYSTEM, SIMPLIFY_PROMPT, SIMPLIFY_SYSTEM
 from tqdm import tqdm
 
 setup_logging("utils")
@@ -215,7 +216,6 @@ def sort_identifiers_tests(input: Path, output: Path, workers: int | None = 2):
     no_id_dir.mkdir(exist_ok=True)
     parse_fail_dir.mkdir(exist_ok=True)
     parsed_ok_dir.mkdir(exist_ok=True)
-
 
     already_done = collect_existing_filenames(no_id_dir, parse_fail_dir, parsed_ok_dir)
 
