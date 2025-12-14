@@ -15,7 +15,6 @@
 # -----------------------------
 module --force purge
 module load calcua/2024a
-# Check with "module avail Python" on the cluster if this exact version exists:
 module load Python/3.12.3-GCCcore-13.3.0
 
 # -----------------------------
