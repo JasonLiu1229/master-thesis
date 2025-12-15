@@ -34,4 +34,3 @@ Note: in the docker compose file you will see, t3 and t3_eval. As you can guess 
 The pipeline can handle multi-threading but this also depends if the model that you are using can handle multi-threading. For local computing, the`Qwen` model, we make use of a lock, so it is the same as single threading.
 
 If you would use a seperate server, this would be the most optimal because, here you can optimize it so it can handle multithreading. (vLLM, Ollama, ...)
-

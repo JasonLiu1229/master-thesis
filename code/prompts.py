@@ -46,6 +46,18 @@ SYSTEM_INSTRUCTION = (
 
 REATTEMPT_SYSTEM_INSTRUCT = SYSTEM_INSTRUCTION
 
+SYSTEM_INSTRUCTION_FUNCTION_FORCED_TEMPLATE = (
+    "You are a code refactoring assistant for Java unit tests.\n"
+    "You will be given:\n"
+    "- A Java test method (wrapped in a dummy class), and\n"
+    "- A method name.\n\n"
+    "Your job is to propose a meaningful name for this method.\n"
+    "You are forced to use the following template:\n"
+    "- <MethodName>_<StateUnderTest>_<ExpectedBehavior>\n\n"
+    "You MUST ONLY respond with a JSON object mapping originalName -> newName.\n"
+    "You MUST NOT output code or comments or markdown.\n"
+)
+
 SINGLE_IDENTIFIER_PROMPT = (
     "Here is single identifier:\n"
     "{identifier}\n\n"

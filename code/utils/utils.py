@@ -206,7 +206,7 @@ def classify_and_copy(
         return file, "parse_ok"
 
 
-def sort_identifiers_tests(input: Path, output: Path, workers: int | None = 2):
+def sort_identifiers_tests(input: Path, output: Path, workers: int | None = 4):
     output.mkdir(parents=True, exist_ok=True)
 
     no_id_dir = output / "no_id_tests"
@@ -222,6 +222,9 @@ def sort_identifiers_tests(input: Path, output: Path, workers: int | None = 2):
     files = [f for f in input.iterdir() if f.is_file() and f.name not in already_done]
 
     if workers is None:
+        workers = os.cpu_count()
+    
+    if workers > os.cpu_count():
         workers = os.cpu_count()
 
     with ThreadPoolExecutor(max_workers=workers) as ex:
