@@ -399,6 +399,13 @@ def apply_rename_mapping(code: str, mapping: dict[str, str]) -> str:
 
     return new_code
 
+def list_files(folder):
+    files = set()
+    for root, _, filenames in os.walk(folder):
+        for name in filenames:
+            relative_path = os.path.relpath(os.path.join(root, name), folder)
+            files.add(relative_path)
+    return files
 
 # def build_identifier_context_snippets(
 #     wrapped_test_case: str,

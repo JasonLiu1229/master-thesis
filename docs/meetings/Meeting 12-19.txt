@@ -21,9 +21,9 @@ Dataset:
         - failed: 6153
         - no identifiers in code: 20446
     - train: 624022
-        - valid: 
-        - failed: 
-        - no identifiers in code:
+        - valid: 422987
+        - failed: 42604
+        - no identifiers in code: 158431
     
 Converted the slurm file to Apptainer files:
     - Had to make a custom .def file to run the nvidia image, because i need custom dependencies

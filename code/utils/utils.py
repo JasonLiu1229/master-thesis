@@ -182,18 +182,18 @@ def collect_existing_filenames(*dirs: Path) -> set[str]:
     return existing
 
 
-def classify_and_copy(
-    file: Path, no_id_dir: Path, parse_fail_dir: Path, parsed_ok_dir: Path
-) -> Tuple[Path, str]:
-    """
-    Returns (file, category) where category in {"parse_failed", "no_id", "parse_ok"}.
-    """
+def classify_and_copy(file: Path, no_id_dir: Path, parse_fail_dir: Path, parsed_ok_dir: Path):
     text = file.read_text(encoding="utf-8", errors="replace")
 
     if looks_stringified(text):
         text = unescape_java_stringified_source(text)
 
     candidates, parsed_ok = extract_identifier_candidates(text)
+
+    for d in (no_id_dir, parse_fail_dir, parsed_ok_dir):
+        p = d / file.name
+        if p.exists():
+            p.unlink()
 
     if not parsed_ok:
         shutil.copy2(file, parse_fail_dir / file.name)
@@ -204,6 +204,7 @@ def classify_and_copy(
     else:
         shutil.copy2(file, parsed_ok_dir / file.name)
         return file, "parse_ok"
+
 
 
 def sort_identifiers_tests(input: Path, output: Path, workers: int | None = 4):
