@@ -19,7 +19,7 @@ from transformers import AutoTokenizer
 USER_PROMPT_TEMPLATE = (
     "Here is the obfuscated test:\n\n"
     "```java\n"
-    "{test_case}\n"
+    "{obf}\n"
     "```\n\n"
     "Return ONLY the improved code block, nothing else."
 )

@@ -28,5 +28,5 @@ COPY ../tools/java-dataset-converter-llm/dataset/test/jsonl  /app/in/test
 
 WORKDIR /app
 
-CMD ["python3", "main.py", "--preprocess", "--tune"]
-# CMD ["python3", "main.py", "--preprocess"]
+# CMD ["python3", "main.py", "--preprocess", "--tune"]
+CMD ["python3", "main.py", "--preprocess"]
