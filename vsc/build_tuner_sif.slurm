@@ -15,9 +15,11 @@ module load calcua/all
 
 export APPTAINER_TMPDIR="$VSC_SCRATCH_NODE/$USER/appt_tmp"
 export APPTAINER_CACHEDIR="$VSC_SCRATCH/appt_cache"
-mkdir -p "$APPTAINER_TMPDIR" "$APPTAINER_CACHEDIR"
+export APPTAINER_TMPDIR="$VSC_SCRATCH/appt_tmp"
+mkdir -p "$APPTAINER_CACHEDIR" "$APPTAINER_TMPDIR"
 
-cd "$SLURM_SUBMIT_DIR"
+touch "$APPTAINER_TMPDIR/.write_test" && rm -f "$APPTAINER_TMPDIR/.write_test"
+touch "$APPTAINER_CACHEDIR/.write_test" && rm -f "$APPTAINER_CACHEDIR/.write_test"
 
 apptainer build --fakeroot tuner.sif tuner.def
 

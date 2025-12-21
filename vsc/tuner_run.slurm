@@ -5,7 +5,7 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --time=01:00:00
-#SBATCH --account=ap_vsc21168
+#SBATCH --account=ap_ansymo_sd_thesis
 #SBATCH --output=stdout.%j
 #SBATCH --error=stderr.%j
 
