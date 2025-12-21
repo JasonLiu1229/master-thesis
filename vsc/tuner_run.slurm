@@ -1,10 +1,11 @@
 #!/bin/bash -l
 #SBATCH --job-name=tuner
-#SBATCH --partition=arcturus_gpu
+#SBATCH --partition=ampere_gpu
 #SBATCH --gpus=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
-#SBATCH --time=72:00:00
+#SBATCH --time=01:00:00
+#SBATCH --account=ap_vsc21168
 #SBATCH --output=stdout.%j
 #SBATCH --error=stderr.%j
 
