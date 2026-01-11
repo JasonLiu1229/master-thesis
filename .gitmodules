@@ -2,3 +2,6 @@
 [submodule "tools/java-dataset-converter-llm"]
 	path = tools/java-dataset-converter-llm
 	url = git@github.com:JasonLiu1229/java-dataset-converter-llm.git
+[submodule "tools/CodeReader"]
+	path = tools/CodeReader
+	url = git@github.com:JasonLiu1229/CodeReader.git

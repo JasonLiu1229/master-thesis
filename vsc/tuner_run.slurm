@@ -2,7 +2,6 @@
 #SBATCH --job-name=tuner
 #SBATCH --partition=ampere_gpu
 #SBATCH --gpus=1
-#SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --time=72:00:00
 #SBATCH --account=ap_ansymo_sd_thesis
@@ -29,7 +28,7 @@ RUN_ID="model_v1_141225" # 14-12-2025
 RUN_OUT="$VSC_SCRATCH/tuner_runs/${RUN_ID}"
 mkdir -p "$RUN_OUT"/{model,adapter,logs}
 
-SIF="$SLURM_SUBMIT_DIR/tuner.sif"
+SIF="$VSC_SCRATCH/containers/tuner.sif"
 
 echo "PROJECT_ROOT   : $PROJECT_ROOT"
 echo "HOST_CODE_DIR  : $HOST_CODE_DIR"

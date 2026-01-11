@@ -16,20 +16,26 @@ From: nvidia/cuda:12.4.0-devel-ubuntu22.04
     mkdir -p "$TMPDIR" /tmp
     chmod 1777 "$TMPDIR" /tmp
 
-    apt-get -o Dir::Tmp=/var/tmp update
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        python3 \
-        python3-pip \
-        python3-venv \
-        python3-dev \
-        git \
-        ca-certificates \
-        curl \
-        build-essential \
-        ninja-build \
-        pkg-config \
-        libssl-dev \
-        && rm -rf /var/lib/apt/lists/*
+    export APT_CACHE="$TMPDIR/apt-cache"
+    export APT_LISTS="$TMPDIR/apt-lists"
+    mkdir -p "$APT_CACHE/archives/partial" "$APT_LISTS/partial"
+
+    apt-get \
+      -o Dir::Tmp="$TMPDIR" \
+      -o Dir::Cache="$APT_CACHE" \
+      -o Dir::Cache::archives="$APT_CACHE/archives" \
+      -o Dir::State::lists="$APT_LISTS" \
+      update
+
+    DEBIAN_FRONTEND=noninteractive apt-get \
+      -o Dir::Tmp="$TMPDIR" \
+      -o Dir::Cache="$APT_CACHE" \
+      -o Dir::Cache::archives="$APT_CACHE/archives" \
+      -o Dir::State::lists="$APT_LISTS" \
+      install -y --no-install-recommends \
+        python3 python3-pip python3-venv python3-dev \
+        git ca-certificates curl \
+        build-essential ninja-build pkg-config libssl-dev
 
     python3 -m pip install --upgrade pip setuptools wheel packaging ninja psutil
 
@@ -42,6 +48,9 @@ From: nvidia/cuda:12.4.0-devel-ubuntu22.04
     python3 -m pip install --no-cache-dir -r /opt/requirements_tuner.txt
 
     python3 -m pip install --no-cache-dir flash-attn --no-build-isolation
+
+    rm -rf "$APT_LISTS"/*
+
 
 %runscript
     cd /app

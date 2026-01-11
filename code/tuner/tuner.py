@@ -52,6 +52,43 @@ def load_ds(path: str) -> Dataset:
         raise RuntimeError(f"Failed to load dataset from {path}: {e}")
 
 
+def pick_attn_implementation() -> str | None:
+    """
+    Choose the best attention backend available on this machine.
+
+    Returns:
+        "flash_attention_2" if it should work,
+        "sdpa" as a safe GPU/CPU fallback when available,
+        None to let Transformers choose its default.
+    """
+    if not torch.cuda.is_available():
+        logger.info("CUDA not available -> not using flash attention.")
+        return "sdpa"  # works on CPU too (falls back internally)
+
+    try:
+        major, minor = torch.cuda.get_device_capability()
+        if major < 8:
+            logger.warning(
+                f"GPU compute capability is {major}.{minor} (< 8.0). "
+                "FlashAttention-2 not supported -> falling back to sdpa."
+            )
+            return "sdpa"
+    except Exception as e:
+        logger.warning(
+            f"Could not read CUDA device capability: {e}. Falling back to sdpa."
+        )
+        return "sdpa"
+
+    try:
+        import flash_attn
+
+        logger.info("flash_attn import OK -> using flash_attention_2.")
+        return "flash_attention_2"
+    except Exception as e:
+        logger.warning(f"flash_attn not available ({e!r}) -> falling back to sdpa.")
+        return "sdpa"
+
+
 def set_llm_model(model, model_name, tokenizer) -> LLM_Model:
     global _llm_model
     if _llm_model is None:
@@ -85,13 +122,17 @@ def define_base():
 
     tokenizer.padding_side = "right"
 
+    attn_impl = pick_attn_implementation()
+
     def base_model_load():
-        return AutoModelForCausalLM.from_pretrained(
-            config["MODEL_ID"],
+        kwargs = dict(
             device_map="auto",
             torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
-            attn_implementation="flash_attention_2",
         )
+        if attn_impl is not None:
+            kwargs["attn_implementation"] = attn_impl
+
+        return AutoModelForCausalLM.from_pretrained(config["MODEL_ID"], **kwargs)
 
     if config["USE_QLORA"]:
         if not torch.cuda.is_available():
@@ -113,7 +154,7 @@ def define_base():
                 quantization_config=bnb_config,
                 device_map="auto",
                 torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
-                attn_implementation="flash_attention_2",
+                **({"attn_implementation": attn_impl} if attn_impl is not None else {}),
             )
 
             base_model = prepare_model_for_kbit_training(base_model)

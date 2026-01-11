@@ -16,3 +16,9 @@ out/java/*
 
 .pytest_cache/*
 tools/randoop-*
+
+# downloads
+*.crdownload
+
+# sif
+*.sif

@@ -13,6 +13,9 @@ set -euo pipefail
 module --force purge
 module load calcua/all
 
+OUT="$VSC_SCRATCH/containers"
+mkdir -p "$OUT"
+
 export APPTAINER_TMPDIR="$VSC_SCRATCH_NODE/$USER/appt_tmp"
 export APPTAINER_CACHEDIR="$VSC_SCRATCH/appt_cache"
 export APPTAINER_TMPDIR="$VSC_SCRATCH/appt_tmp"
@@ -21,6 +24,6 @@ mkdir -p "$APPTAINER_CACHEDIR" "$APPTAINER_TMPDIR"
 touch "$APPTAINER_TMPDIR/.write_test" && rm -f "$APPTAINER_TMPDIR/.write_test"
 touch "$APPTAINER_CACHEDIR/.write_test" && rm -f "$APPTAINER_CACHEDIR/.write_test"
 
-apptainer build --fakeroot tuner.sif tuner.def
+apptainer build "$OUT/tuner.sif" tuner.def
 
-echo "Built: $SLURM_SUBMIT_DIR/tuner.sif"
+echo "Built: $OUT/tuner.sif"
