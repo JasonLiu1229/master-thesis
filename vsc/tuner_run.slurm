@@ -39,14 +39,13 @@ echo "RUN_OUT        : $RUN_OUT"
 # Run the container
 apptainer exec --nv \
   --bind "$HOST_CODE_DIR:/app" \
-  --bind "$HOST_ARROW_DIR:/data/arrow" \
+  --bind "$HOST_ARROW_DIR:/mnt" \
   --bind "$RUN_OUT:/out" \
   --pwd /app \
   "$SIF" \
   bash -lc '
     set -euo pipefail
-
-    export ARROW_DIR=/data/arrow
+    export ARROW_DIR=/mnt
 
     export SAVE_MODEL_PATH=/out/model
     export ADAPTER_SAVE_PATH=/out/adapter
