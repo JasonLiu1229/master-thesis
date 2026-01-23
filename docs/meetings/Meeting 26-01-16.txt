@@ -1,3 +1,29 @@
-Ran my first job on 21-12-25
+Ran my first job on 21-12-25 - run actually started running on the 27-12-25
+
+New run on 12-1-25, still in queue 16-01-26
 
 Queueing tuning takes so long
+
+Working on CodeReader - current task while I wait for the model to be tuned
+	- Currently still in development
+	- LLM readability tester 
+	- needs to be verified to actually be reliable
+	+ Provide right argumentation 
+	+ The scores are not really valuable for the current scoring that is why LLM
+	+ LLM already trained so they can already reason in some sense
+	+ Look at LLM evaluation frameworks
+		- Non determinism - so multiple solutions are correct
+		- To compare output to expected output - giving some scoring
+		- G-Eval - LOOK IN TO THIS - motivation
+			- https://deepeval.com/docs/metrics-llm-evals
+
+Current LLM-renamer
+	- Can be improved by adding templating
+		- so forced formats for Java
+	- Can be improved by dividing steps in to two runs but increases processing time
+
+GPT
+	- API key is fixed
+
+What tasks do I need to focus on?
+	- CodeReader
