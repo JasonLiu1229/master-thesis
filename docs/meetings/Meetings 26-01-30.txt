@@ -1,0 +1,23 @@
+Codereader is done and uploaded to pypi
+    - show example
+
+Read four papers about readability
+    - First paper: Cognitive design elements to support the construction of a mental model during software exploration
+        - "Software comprehension depends on the construction of mental models, not on surface-level features of the code."
+        - So meaning that it is about how easy it is to understand something and not about just oracle based metrics
+
+    - Second paper: Re-evaluating the Role of BLEU in Machine Translation Research
+        - Callison-Burch et al. (2006) show that BLEU:
+            - is neither necessary nor sufficient for quality,
+            - assigns identical scores to outputs humans judge very differently,
+            - fails when multiple valid expressions exist.
+
+    - Third paper: Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena
+        - Strong LLM judges align with human judgments at human-level agreement rates
+        - LLMs can reason to why something is named like that or why we choose a certain structure
+    
+    - Fourth paper: G-Eval: NLG Evaluation using GPT-4 with Better Human Alignment
+        - From this paper we see that G-Eval works simmalarly to what we want to do with our own tooling
+        - G-Eval outperforms BLEU/ROUGE on alignment.
+            - "Evaluation improves when we move from surface overlap to semantic reasoning."
+
