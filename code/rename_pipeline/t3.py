@@ -138,6 +138,7 @@ def process_single_eval(file_path: Path) -> tuple[List[PairMetrics], int, list[s
         if not clean:
             failed_count += 1
             failed_files.append(file_path.name)
+            logger.warning(f"{file_path.name} added to the failed files")
         else:
             metrics.append(evaluate(oracle_code, predicted_code))
 

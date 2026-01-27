@@ -1,11 +1,16 @@
 {
-  "cer": 115.99877958819789,
-  "correct_ordered": 0.004347826086956522,
-  "correct_unordered": 0.0020833333333333333,
-  "edit_distance": 4776.2,
-  "execution_time_s": 0.8269193172454834,
-  "f1": 0.004081632653061224,
-  "failes": 0,
-  "precision": 0.002857142857142857,
-  "recall": 0.007142857142857143
+  "cer": 21.60026362442456,
+  "correct_ordered": 0.6605431393160609,
+  "correct_unordered": 0.5597328482931627,
+  "edit_distance": 101.27835051546391,
+  "f1": 0.6922597679799137,
+  "failed_files": [
+    "TestClass100.java.jsonl",
+    "TestClass10059.java.jsonl",
+    "TestClass101.java.jsonl"
+  ],
+  "failes": 3,
+  "precision": 0.6916753686397376,
+  "recall": 0.6928875585117213,
+  "total_time": 266.8149654865265
 }

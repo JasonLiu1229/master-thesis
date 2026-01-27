@@ -73,7 +73,7 @@ if __name__ == "__main__":
     client = LLMClient(API_KEY, API_URL)
 
     reply = client.chat(
-        "gpt-4o-mini",
+        "gpt-5-mini",
         [
             {"role": "user", "content": "Give me the time of today."},
             {"role": "system", "content": "You are a helpful assistant"},

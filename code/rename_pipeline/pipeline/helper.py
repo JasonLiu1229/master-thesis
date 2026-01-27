@@ -1,9 +1,9 @@
+import codecs
 import difflib
 import json
 import logging
 import os
 import re
-import codecs
 
 from dataclasses import dataclass
 from pathlib import Path
@@ -52,7 +52,7 @@ class JavaTestCase:
 
 
 # === Preprocess helper functions ===
-def wrap_test_case(test_case: str) -> str:
+def wrap_test_case(test_case) -> str:
     """
     Wrap the test case so it matches as similar as the original training data
 
@@ -61,10 +61,12 @@ def wrap_test_case(test_case: str) -> str:
         public void func_1() { ... }
     }
     """
-    wrapped = []
-    wrapped.append("public class TestClass1 {")
-    wrapped.extend(test_case)
-    wrapped.append("}")
+    if isinstance(test_case, str):
+        lines = test_case.splitlines()
+    else:
+        lines = list(test_case)
+
+    wrapped = ["public class TestClass1 {", *lines, "}"]
     return "\n".join(wrapped)
 
 
@@ -183,47 +185,45 @@ def pre_process_file(file_path: Path) -> List[str]:
     return pre_processed_tests
 
 
-def _normalize_java_tokens(code: str):  # Made using GPT
-    """
-    Tokenize Java code and normalize identifiers to placeholders (ID0, ID1, ...).
-    Non-identifier tokens keep their exact value.
-    The resulting sequence can be compared between original and transformed code
-    to see if only identifiers changed.
-    """
-    tokens = list(jtok.tokenize(code))
-    id_map = {}
-    next_id = 0
-    normalized = []
-
-    for tok in tokens:
-        ttype = type(tok).__name__
-
-        if isinstance(tok, jtok.Identifier):
-            name = tok.value
-            if name not in id_map:
-                id_map[name] = f"ID{next_id}"
-                next_id += 1
-            normalized.append((ttype, id_map[name]))
-        else:
-            normalized.append((ttype, tok.value))
-
-    return normalized
-
-
 def only_identifier_renames(original: str, transformed: str) -> bool:  # Made using GPT
-    """
-    Return True if the only differences between original and transformed code
-    are identifier renamings (variable/method/class names).
-
-    If tokenization fails or structural tokens differ, return False.
-    """
     try:
-        orig_norm = _normalize_java_tokens(original)
-        new_norm = _normalize_java_tokens(transformed)
+        otoks = list(jtok.tokenize(original))
+        ttoks = list(jtok.tokenize(transformed))
     except jtok.LexerError:
         return False
 
-    return orig_norm == new_norm
+    if len(otoks) != len(ttoks):
+        return False
+
+    forward = {}  # orig_name -> new_name
+    backward = {}  # new_name -> orig_name (optional, for bijection)
+
+    for o, t in zip(otoks, ttoks):
+        otype, ttype = type(o).__name__, type(t).__name__
+        if otype != ttype:
+            return False
+
+        if isinstance(o, jtok.Identifier):
+            on, tn = o.value, t.value
+
+            # structure: both must be identifiers
+            if not isinstance(t, jtok.Identifier):
+                return False
+
+            # enforce consistent mapping
+            if on in forward and forward[on] != tn:
+                return False
+            if tn in backward and backward[tn] != on:
+                return False
+
+            forward[on] = tn
+            backward[tn] = on
+        else:
+            # non-identifiers must match exactly
+            if o.value != t.value:
+                return False
+
+    return True
 
 
 def log_colored_diff(
@@ -268,8 +268,10 @@ def log_colored_diff(
             Fore.MAGENTA + "\n--- original ---\n" + original_code + Style.RESET_ALL
         )
 
+
 def looks_stringified(text: str) -> bool:
-    return '\\"' in text or '\\\\n' in text
+    return '\\"' in text or "\\\\n" in text
+
 
 def unescape_java_stringified_source(text: str) -> str:
     try:
@@ -277,7 +279,12 @@ def unescape_java_stringified_source(text: str) -> str:
     except Exception:
         return text
 
-def extract_identifier_candidates(wrapped_test_case: str) -> list[str]: # TODO: replace this with something else because does not work for all test files to extract identifiers
+
+def extract_identifier_candidates(
+    wrapped_test_case: str,
+) -> list[
+    str
+]:  # TODO: replace this with something else because does not work for all test files to extract identifiers
     try:
         tree = javalang.parse.parse(wrapped_test_case)
     except Exception as e:
@@ -288,7 +295,9 @@ def extract_identifier_candidates(wrapped_test_case: str) -> list[str]: # TODO: 
         )
         return []
 
-    class_decls = [t for t in tree.types if isinstance(t, javalang.tree.ClassDeclaration)]
+    class_decls = [
+        t for t in tree.types if isinstance(t, javalang.tree.ClassDeclaration)
+    ]
     if not class_decls:
         logger.error("extract_identifier_candidates: no ClassDeclaration found.")
         return []
@@ -306,16 +315,22 @@ def extract_identifier_candidates(wrapped_test_case: str) -> list[str]: # TODO: 
         test_method = methods[0]
     else:
         test_method = next(
-            (m for m in methods if any(is_test_annotation(a) for a in getattr(m, "annotations", []))),
+            (
+                m
+                for m in methods
+                if any(is_test_annotation(a) for a in getattr(m, "annotations", []))
+            ),
             None,
         )
 
     if test_method is None:
-        logger.error("extract_identifier_candidates: multiple methods, none annotated with @Test;")
+        logger.error(
+            "extract_identifier_candidates: multiple methods, none annotated with @Test;"
+        )
         return []
 
     names: set[str] = set()
-    
+
     # if test_method.name:
     #     names.add(test_method.name)
 
@@ -345,7 +360,9 @@ def extract_identifier_candidates(wrapped_test_case: str) -> list[str]: # TODO: 
     def is_constant_like(name: str) -> bool:
         return name.isupper()
 
-    return sorted(n for n in names if n and not is_constant_like(n))  # constants are ignored
+    return sorted(
+        n for n in names if n and not is_constant_like(n)
+    )  # constants are ignored
 
 
 def apply_rename_mapping(code: str, mapping: dict[str, str]) -> str:
@@ -399,6 +416,7 @@ def apply_rename_mapping(code: str, mapping: dict[str, str]) -> str:
 
     return new_code
 
+
 def list_files(folder):
     files = set()
     for root, _, filenames in os.walk(folder):
@@ -406,6 +424,7 @@ def list_files(folder):
             relative_path = os.path.relpath(os.path.join(root, name), folder)
             files.add(relative_path)
     return files
+
 
 # def build_identifier_context_snippets(
 #     wrapped_test_case: str,
@@ -470,7 +489,6 @@ def remove_wrap(code: str) -> str:
     return code[start:]
 
 
-
 def _swap_test_case(source_code: str, new_test_case: JavaTestCase) -> str:
     """
     Replace the original test case with the new one in the given Java source.
@@ -524,19 +542,28 @@ def post_process_file(
 
 METHOD_NAME_FROM_TEST_RE = re.compile(
     r"""
-    @(?:\w+\.)*Test            
-    (?:\s*\([^)]*\))?          
-    [^{;]*?                    
-    \bvoid\s+                  
-    (?P<name>[A-Za-z_][A-Za-z0-9_]*)  
-    \s*\(                      
+    @(?:\w+\.)*(?:Test|ParameterizedTest|RepeatedTest|TestFactory|TestTemplate)
+    (?:\s*\([^)]*\))?
+    [^{;]*?
+    \b(?:void|[\w$.<>\[\]]+)\s+
+    (?P<name>[A-Za-z_][A-Za-z0-9_]*)
+    \s*\(
     """,
     re.DOTALL | re.VERBOSE,
 )
 
+TEST_ANNOT_START_RE = re.compile(
+    r"@(?:\w+\.)*(?:Test|ParameterizedTest|RepeatedTest|TestFactory|TestTemplate)\b"
+)
+
+
 def parse_method_name(test_case: str) -> str:
-    test_idx = test_case.find("@Test")
-    if test_idx != -1:
+    logger.warning("DEBUG contains @Test? %s", "@Test" in test_case)
+    logger.warning("DEBUG head=%r", test_case[:120])
+        
+    m_annot = TEST_ANNOT_START_RE.search(test_case)
+    if m_annot:
+        test_idx = m_annot.start()
         brace_idx = test_case.find("{", test_idx)
         if brace_idx != -1:
             header_part = test_case[test_idx:brace_idx]
@@ -549,19 +576,14 @@ def parse_method_name(test_case: str) -> str:
     if m:
         return m.group("name")
 
-    m2 = re.search(
-        r"\bvoid\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(",
-        header_part,
-    )
-    
+    m2 = re.search(r"\bvoid\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(", header_part)
     if m2:
         logger.warning(
             "parse_method_name: falling back to simple 'void name(' pattern."
         )
         return m2.group(1)
-
+    
     raise ValueError("parse_method_name: Could not find test method name")
-
 
 
 def strip_markdown_fences(code: str) -> str:

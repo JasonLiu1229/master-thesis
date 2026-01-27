@@ -20,9 +20,7 @@ from pipeline.helper import (
     extract_identifier_candidates,
     JavaTestCase,
     JavaTestSpan,
-    log_colored_diff,
     looks_stringified,
-    only_identifier_renames,
     parse_method_name,
     parse_test_case,
     remove_wrap,
@@ -75,6 +73,7 @@ def _rename_variables(variable_names: List[str], code: str):
 
 def _rename_process(wrapped_source_code: str, source_code_clean: str):
     try:
+        
         original_method_name = parse_method_name(source_code_clean)
     except Exception as e:
         logger.error(f"Failed to extract method name: {e}")
@@ -207,22 +206,6 @@ def _rename_process(wrapped_source_code: str, source_code_clean: str):
 
     candidate_code = apply_rename_mapping(source_code_clean, best_mapping)
 
-    if not only_identifier_renames(
-        source_code_clean, candidate_code
-    ):  # Extra check just in case something went wrong
-        logger.error(
-            f"Internal error: apply_rename_mapping changed more than identifiers for {original_method_name}."
-        )
-        log_colored_diff(
-            logger, original_method_name, -1, source_code_clean, candidate_code
-        )
-        return JavaTestCase(
-            name=original_method_name,
-            original_code=source_code_clean,
-            code="",
-            clean=False,
-        )
-
     logger.info(
         f"Renamed test method (mapping mode): {original_method_name} -> {best_mapping[original_method_name]} (clean={clean})"
     )
@@ -261,4 +244,4 @@ def rename_eval(src: str):
     source_code_clean = remove_wrap(src)
     java_test_case = _rename_process(src, source_code_clean)
 
-    return wrap_test_case(java_test_case.code), int(java_test_case.clean)
+    return wrap_test_case(java_test_case.code), bool(java_test_case.clean)

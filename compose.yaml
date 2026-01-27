@@ -48,6 +48,18 @@ services:
         condition: service_healthy
     networks:
       - pipeline
+  
+  t3_eval_openai:
+    container_name: t3_eval_openai
+    build:
+      dockerfile: docker/t3_eval.Dockerfile
+    volumes:
+      - ./out:/app/out/
+    env_file:
+      - .env
+    profiles: ["t3_eval_openai"]
+    networks:
+      - pipeline
 
   benchmark:
     container_name: benchmark
