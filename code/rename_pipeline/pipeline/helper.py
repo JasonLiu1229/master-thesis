@@ -458,20 +458,23 @@ def list_files(folder):
 # === Post process functions ===
 def remove_wrap(code: str) -> str:
     header_pattern = (
-        r"@Test(?:\s*\([^)]*\))?\s+"
-        r"public\s+void\s+[A-Za-z_][A-Za-z0-9_]*\s*"
+        r"@(?:\w+\.)*(?:Test|ParameterizedTest|RepeatedTest|TestFactory|TestTemplate)"
+        r"(?:\s*\([^)]*\))?\s+"
+        r"(?:(?:public|protected|private)\s+)?"
+        r"(?:(?:static|final|abstract|synchronized)\s+)*"
+        r"(?:void|[\w$.<>\[\]]+)\s+[A-Za-z_][A-Za-z0-9_]*\s*"
         r"\([^)]*\)\s*"
         r"(?:throws [A-Za-z0-9_.,\s]+)?\s*\{"
     )
 
     m = re.search(header_pattern, code)
     if not m:
-        return ""
+        return code.strip()
 
     start = m.start()
     first_brace = code.find("{", m.start())
     if first_brace == -1:
-        return ""
+        return code.strip()
 
     brace_count = 0
     i = first_brace
@@ -482,11 +485,10 @@ def remove_wrap(code: str) -> str:
         elif ch == "}":
             brace_count -= 1
             if brace_count == 0:
-                # include this closing brace
                 return code[start : i + 1]
         i += 1
 
-    return code[start:]
+    return code[start:].strip()
 
 
 def _swap_test_case(source_code: str, new_test_case: JavaTestCase) -> str:
@@ -560,7 +562,7 @@ TEST_ANNOT_START_RE = re.compile(
 def parse_method_name(test_case: str) -> str:
     logger.warning("DEBUG contains @Test? %s", "@Test" in test_case)
     logger.warning("DEBUG head=%r", test_case[:120])
-        
+
     m_annot = TEST_ANNOT_START_RE.search(test_case)
     if m_annot:
         test_idx = m_annot.start()
@@ -582,7 +584,7 @@ def parse_method_name(test_case: str) -> str:
             "parse_method_name: falling back to simple 'void name(' pattern."
         )
         return m2.group(1)
-    
+
     raise ValueError("parse_method_name: Could not find test method name")
 
 
