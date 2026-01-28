@@ -1,16 +1,16 @@
 {
-  "cer": 21.60026362442456,
-  "correct_ordered": 0.6605431393160609,
-  "correct_unordered": 0.5597328482931627,
-  "edit_distance": 101.27835051546391,
-  "f1": 0.6922597679799137,
+  "cer": 20.858525493862263,
+  "correct_ordered": 0.6698454169825959,
+  "correct_unordered": 0.5659288385062187,
+  "edit_distance": 97.37113402061856,
+  "f1": 0.6967816948677692,
   "failed_files": [
     "TestClass100.java.jsonl",
     "TestClass10059.java.jsonl",
     "TestClass101.java.jsonl"
   ],
   "failes": 3,
-  "precision": 0.6916753686397376,
-  "recall": 0.6928875585117213,
-  "total_time": 266.8149654865265
+  "precision": 0.6961735960371321,
+  "recall": 0.697434877710785,
+  "total_time": 292.5353915691376
 }
