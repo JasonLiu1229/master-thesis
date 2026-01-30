@@ -507,8 +507,6 @@ def _swap_test_case(source_code: str, new_test_case: JavaTestCase) -> str:
         )
         return source_code
 
-    # logger.info(f"new source code: {new}, to be replaced: {old}")
-
     if old not in source_code:
         raise ValueError(
             f"Original test case for {new_test_case.name!r} not found in source_code"
