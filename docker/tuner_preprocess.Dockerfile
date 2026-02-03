@@ -22,8 +22,10 @@ COPY ../code/model.py /app
 COPY ../code/logger.py /app
 COPY ../code/prompts.py /app
 
-RUN mkdir -p /app/in/train /app/in/val /app/in/test
+COPY ../tools/java-dataset-converter-llm/dataset/train/jsonl /app/in/train
+COPY ../tools/java-dataset-converter-llm/dataset/val/jsonl   /app/in/val
+COPY ../tools/java-dataset-converter-llm/dataset/test/jsonl  /app/in/test
 
 WORKDIR /app
 
-CMD ["python3", "main.py","--tune"]
+CMD ["python3", "main.py", "--preprocess"]

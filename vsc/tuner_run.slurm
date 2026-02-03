@@ -12,6 +12,15 @@ set -euo pipefail
 
 module --force purge
 module load calcua/all
+CACHE_ROOT="$VSC_SCRATCH/hf_cache"
+mkdir -p "$CACHE_ROOT"/{hf,transformers,torch,xdg,tmp}
+
+export HF_HOME="$CACHE_ROOT/hf"
+export HUGGINGFACE_HUB_CACHE="$CACHE_ROOT/hf/hub"
+export TRANSFORMERS_CACHE="$CACHE_ROOT/transformers"
+export TORCH_HOME="$CACHE_ROOT/torch"
+export XDG_CACHE_HOME="$CACHE_ROOT/xdg"
+export TMPDIR="$CACHE_ROOT/tmp"
 
 export APPTAINER_CACHEDIR="$VSC_SCRATCH/appt_cache"
 mkdir -p "$APPTAINER_CACHEDIR"
@@ -41,15 +50,24 @@ apptainer exec --nv \
   --bind "$HOST_CODE_DIR:/app" \
   --bind "$HOST_ARROW_DIR:/mnt" \
   --bind "$RUN_OUT:/out" \
+  --bind "$CACHE_ROOT:/cache" \
   --pwd /app \
   "$SIF" \
   bash -lc '
     set -euo pipefail
-    export ARROW_DIR=/mnt
 
+    export ARROW_DIR=/mnt
     export SAVE_MODEL_PATH=/out/model
     export ADAPTER_SAVE_PATH=/out/adapter
     export LOG_DIR=/out/logs
+
+    # ensure cache is used inside container too
+    export HF_HOME=/cache/hf
+    export HUGGINGFACE_HUB_CACHE=/cache/hf/hub
+    export TRANSFORMERS_CACHE=/cache/transformers
+    export TORCH_HOME=/cache/torch
+    export XDG_CACHE_HOME=/cache/xdg
+    export TMPDIR=/cache/tmp
 
     python3 main.py --tune
   '
@@ -59,6 +77,6 @@ echo "Done. Outputs in: $RUN_OUT"
 FINAL_MODEL_DIR="$VSC_DATA/trained_models/tuner_${SLURM_JOB_ID}"
 mkdir -p "$FINAL_MODEL_DIR"
 
-cp -r "$RUN_OUT/model" "$FINAL_MODEL_DIR"
+cp -r "$RUN_OUT/model/." "$FINAL_MODEL_DIR/"
 
 echo "Done. Final model also saved in: $FINAL_MODEL_DIR"

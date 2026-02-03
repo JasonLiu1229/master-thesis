@@ -1,5 +1,6 @@
 Codereader is done and uploaded to pypi
     - show example
+    - adding api based runner
 
 Read four papers about readability
     - First paper: Cognitive design elements to support the construction of a mental model during software exploration
@@ -21,3 +22,11 @@ Read four papers about readability
         - G-Eval outperforms BLEU/ROUGE on alignment.
             - "Evaluation improves when we move from surface overlap to semantic reasoning."
 
+Ran a small scale eval using openai api to demonstrate that fixed statistics are useless
+
+Cloud proposal:
+    - Benifits for why we need cloud compared to vsc
+    - Make a business case that we can not refuse
+    - Not long, just one paragraph
+
+Recreate my plan

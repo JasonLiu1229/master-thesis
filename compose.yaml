@@ -120,6 +120,30 @@ services:
         hard: -1
     ipc: host
 
+  tuner_preprocess:
+    container_name: tuner_preprocess
+    build:
+      dockerfile: docker/tuner_preprocess.Dockerfile
+    volumes:
+      - ./out:/app/out/
+      - hf_cache:/root/.cache/huggingface/
+      - ./tools/java-dataset-converter-llm/dataset/train/jsonl:/app/in/train:ro
+      - ./tools/java-dataset-converter-llm/dataset/val/jsonl:/app/in/val:ro
+      - ./tools/java-dataset-converter-llm/dataset/test/jsonl:/app/in/test:ro
+    working_dir: /app
+    gpus: all
+    profiles: ["tune_process"]
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+      nproc: 16384
+      stack: 67108864
+      memlock:
+        soft: -1
+        hard: -1
+    ipc: host
+
 volumes:
   hf_cache:
   model_cache:
