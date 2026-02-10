@@ -1,9 +1,15 @@
-# Note this file is made using the help of GPT-5.1
+import subprocess
+
 from dataclasses import dataclass
 from typing import Dict, List
 
 import javalang.tokenizer as jtok
 
+import yaml
+
+config = {}
+with open("pipeline/config.yml", "r") as f:
+    config = yaml.safe_load(f)
 
 @dataclass
 class PairMetrics:
@@ -49,7 +55,16 @@ def extract_identifiers(java_code: str):
         return []
 
 
-def evaluate(oracle: str, prediction: str):
+def llm_readability_score(prediction: str):
+    codereader = {}
+    
+    with open(config["CODEREADER_CONFIG_FILE"], "r") as f:
+        codereader = yaml.safe_load(f)
+        
+    pass
+
+
+def evaluate(oracle: str, prediction: str):  # function partially made using GPT
     """
     Evaluate a single prediction against a single oracle.
     """
@@ -81,16 +96,15 @@ def evaluate(oracle: str, prediction: str):
     else:
         correct_unordered = 0.0
 
-    tp = len(oracle_set & pred_set)
-    fp = len(pred_set - oracle_set)
-    fn = len(oracle_set - pred_set)
+    tp = len(oracle_set & pred_set) # true positives
+    fp = len(pred_set - oracle_set) # false positives
+    fn = len(oracle_set - pred_set) # false negatives
 
     precision = tp / (tp + fp) if (tp + fp) else 0.0
     recall = tp / (tp + fn) if (tp + fn) else 0.0
     f1 = (
         (2 * precision * recall / (precision + recall)) if (precision + recall) else 0.0
     )
-
 
     return PairMetrics(
         cer,

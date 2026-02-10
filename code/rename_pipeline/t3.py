@@ -155,7 +155,7 @@ def process_folder(root: Path, out: Path, is_eval: bool, force: bool):
 
     if is_eval:
         logger.info("Running evaluation")
-        jsonl_files = sorted(root.glob("*.jsonl"))
+        jsonl_files = root.glob("*.jsonl")
 
         limit = len(jsonl_files)
         if config["AMOUNT_OF_EVAL_SAMPLES"] != -1:
