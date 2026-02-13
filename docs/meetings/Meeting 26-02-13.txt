@@ -1,6 +1,23 @@
 Cloud proposal feedback:
-    - 
+    - if we do full dataset, we should do everything with the full dataset
+    - decide if i go parrallel or serial
+        - serial and then continue based on the results that we see
+        - incremental planning and cheaper
+        - add this to the proposal
+
+We need to compare:
+    - Arno's data vs mine
+    - Add other base model so we can compare with more than only Arno
+    - Find models that are better at naming things like coding
+        - Claude (last year)
+        - GPT family (worst case)
 
 Ran Arno's thing with full new test dataset
 
 Implementing LLM scoring in my own thing
+
+To add testing with local models
+    - split pipeline in local runner and api based
+
+Also add partition save for tuner
+    - 25%, 50% and 100%

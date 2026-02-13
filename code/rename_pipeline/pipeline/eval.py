@@ -11,6 +11,7 @@ config = {}
 with open("pipeline/config.yml", "r") as f:
     config = yaml.safe_load(f)
 
+
 @dataclass
 class PairMetrics:
     cer: float
@@ -56,7 +57,15 @@ def extract_identifiers(java_code: str):
 
 
 def llm_readability_score(prediction: str):
-    pass
+    cmd = (
+        f'codereader grade -c {config["CODEREADER_CONFIG_FILE"]} --text "{prediction}"'
+    )
+
+    with subprocess.Popen(
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1
+    ) as p:
+        assert p.stdout is not None
+        ...
 
 
 def evaluate(oracle: str, prediction: str):  # function partially made using GPT
@@ -91,9 +100,9 @@ def evaluate(oracle: str, prediction: str):  # function partially made using GPT
     else:
         correct_unordered = 0.0
 
-    tp = len(oracle_set & pred_set) # true positives
-    fp = len(pred_set - oracle_set) # false positives
-    fn = len(oracle_set - pred_set) # false negatives
+    tp = len(oracle_set & pred_set)  # true positives
+    fp = len(pred_set - oracle_set)  # false positives
+    fn = len(oracle_set - pred_set)  # false negatives
 
     precision = tp / (tp + fp) if (tp + fp) else 0.0
     recall = tp / (tp + fn) if (tp + fn) else 0.0
