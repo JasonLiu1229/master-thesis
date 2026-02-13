@@ -1,0 +1,6 @@
+Cloud proposal feedback:
+    - 
+
+Ran Arno's thing with full new test dataset
+
+Implementing LLM scoring in my own thing

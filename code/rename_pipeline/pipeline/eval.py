@@ -56,11 +56,6 @@ def extract_identifiers(java_code: str):
 
 
 def llm_readability_score(prediction: str):
-    codereader = {}
-    
-    with open(config["CODEREADER_CONFIG_FILE"], "r") as f:
-        codereader = yaml.safe_load(f)
-        
     pass
 
 
