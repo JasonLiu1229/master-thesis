@@ -1,7 +1,7 @@
 import subprocess
 
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Dict, Iterable, List, Tuple
 
 import javalang.tokenizer as jtok
 
@@ -21,6 +21,8 @@ class PairMetrics:
     precision: float
     recall: float
     f1: float
+    codereader_avg: float
+    codereader_wavg: float
 
 
 def levenshtein(a: str, b: str) -> int:
@@ -56,16 +58,42 @@ def extract_identifiers(java_code: str):
         return []
 
 
-def llm_readability_score(prediction: str):
-    cmd = (
-        f'codereader grade -c {config["CODEREADER_CONFIG_FILE"]} --text "{prediction}"'
-    )
+def _llm_formatter(stdout) -> Iterable[str]:
+    for line in stdout:
+        yield line
 
+
+def _llm_parser(lines: Iterable[str]) -> Tuple[float, float]:
+    avg = None
+    wavg = None
+
+    for line in lines:
+        line = line.strip()
+
+        if line.startswith("Average:"):
+            avg = float(line.split(":", 1)[1].strip())
+
+        elif line.startswith("Weighted average:"):
+            wavg = float(line.split(":", 1)[1].strip())
+
+    if avg is None or wavg is None:
+        raise ValueError(
+            f"Could not parse expected averages from output:\n{''.join(lines)}"
+        )
+
+    return avg, wavg
+
+
+def llm_readability_score(prediction: str):
+    cmd = f'codereader grade -c {config["CODEREADER_CONFIG_FILE"]} --text "{prediction}" --simple'
+    avg, wavg = 0.0, 0.0
     with subprocess.Popen(
         cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1
     ) as p:
         assert p.stdout is not None
-        ...
+        lines = list(_llm_formatter(p.stdout))
+        avg, wavg = _llm_parser(lines)
+    return avg, wavg
 
 
 def evaluate(oracle: str, prediction: str):  # function partially made using GPT
@@ -110,6 +138,8 @@ def evaluate(oracle: str, prediction: str):  # function partially made using GPT
         (2 * precision * recall / (precision + recall)) if (precision + recall) else 0.0
     )
 
+    codereader_avg, codereader_wavg = llm_readability_score(prediction)
+
     return PairMetrics(
         cer,
         float(edit),
@@ -118,6 +148,8 @@ def evaluate(oracle: str, prediction: str):  # function partially made using GPT
         precision,
         recall,
         f1,
+        codereader_avg,
+        codereader_wavg,
     )
 
 
@@ -143,6 +175,8 @@ def compute_final_metrics(metrics: List[PairMetrics]) -> Dict[str, float]:
             "precision": 0.0,
             "recall": 0.0,
             "f1": 0.0,
+            "llm_score_avg": 0.0,
+            "llm_score_wavg": 0.0,
         }
 
     n = len(metrics)
@@ -154,6 +188,8 @@ def compute_final_metrics(metrics: List[PairMetrics]) -> Dict[str, float]:
     sum_prec = sum(m.precision for m in metrics)
     sum_rec = sum(m.recall for m in metrics)
     sum_f1 = sum(m.f1 for m in metrics)
+    sum_llm_avg = sum(m.codereader_avg for m in metrics)
+    sum_llm_wavg = sum(m.codereader_wavg for m in metrics)
 
     return {
         "cer": sum_cer / n,
@@ -163,4 +199,6 @@ def compute_final_metrics(metrics: List[PairMetrics]) -> Dict[str, float]:
         "precision": sum_prec / n,
         "recall": sum_rec / n,
         "f1": sum_f1 / n,
+        "llm_score_avg": sum_llm_avg / n,
+        "llm_score_wavg": sum_llm_wavg / n,
     }

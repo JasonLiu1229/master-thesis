@@ -559,7 +559,7 @@ TEST_ANNOT_START_RE = re.compile(
 
 def parse_method_name(test_case: str) -> str:
     logger.warning("DEBUG contains @Test? %s", "@Test" in test_case)
-    logger.warning("DEBUG head=%r", test_case[:120])
+    logger.warning("DEBUG head=%r", test_case)
 
     m_annot = TEST_ANNOT_START_RE.search(test_case)
     if m_annot:

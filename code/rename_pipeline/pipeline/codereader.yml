@@ -5,7 +5,7 @@ settings:
   health_timeout_seconds: 900
   max_concurrency: 1
   fail_on_no_active_models: true
-  log_path: readability_results.txt
+  log_path: out/temp/readability_results.txt
   debug_jsonl_path: responses.jsonl
 
 tags: # Context clues for models

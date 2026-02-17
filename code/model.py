@@ -4,6 +4,7 @@ import threading
 from enum import Enum
 
 import torch
+import copy
 
 from prompts import SYSTEM_INSTRUCTION
 from transformers import (
@@ -73,7 +74,7 @@ class LLM_Model:
             outputs = self.model.generate(
                 **inputs.to(self.model.device),
                 max_new_tokens=max_new_tokens,
-                generation_config=self._gen_config.clone(),
+                generation_config=copy.deepcopy(self._gen_config),
                 pad_token_id=self.tokenizer.pad_token_id,
                 eos_token_id=self.tokenizer.eos_token_id,
             )

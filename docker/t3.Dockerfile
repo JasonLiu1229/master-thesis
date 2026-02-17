@@ -1,8 +1,10 @@
 FROM python:3.13.9-slim-bookworm
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git build-essential \
+    git build-essential curl ca-certificates zstd\
     && rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL https://ollama.com/install.sh | sh
 
 COPY requirements/requirements_t3.txt /tmp/requirements.txt
 
@@ -16,7 +18,7 @@ COPY ../code/prompts.py app/
 WORKDIR /app
 
 # Single
-# CMD ["python3", "t3.py", "--mode", "single", "--file", "pipeline/assets/randoop_example_unit_test_bank.java", "--force", "--output", "out/java/"] 
+# CMD ["bash", "-lc", "ollama serve & python3", "t3.py", "--mode", "single", "--file", "pipeline/assets/randoop_example_unit_test_bank.java", "--force", "--output", "out/java/"] 
 
 # # Folder
-CMD ["python3", "t3.py", "--mode", "dir", "--dir", "pipeline/assets/", "--force", "--output", "out/java/"] 
+CMD ["bash", "-lc", "ollama serve & python3", "t3.py", "--mode", "dir", "--dir", "pipeline/assets/", "--force", "--output", "out/java/"] 

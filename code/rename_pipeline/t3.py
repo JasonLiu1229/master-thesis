@@ -31,6 +31,7 @@ with open("pipeline/config.yml", "r") as f:
     config = yaml.safe_load(f)
 
 MODE = None
+LOCAL = False
 TIMESTAMP_RUN = datetime.now().strftime("%Y%m%d_%H%M%S")
 
 
@@ -155,7 +156,7 @@ def process_folder(root: Path, out: Path, is_eval: bool, force: bool):
 
     if is_eval:
         logger.info("Running evaluation")
-        jsonl_files = root.glob("*.jsonl")
+        jsonl_files = list(root.glob("*.jsonl"))
 
         limit = len(jsonl_files)
         if config["AMOUNT_OF_EVAL_SAMPLES"] != -1:
@@ -171,12 +172,15 @@ def process_folder(root: Path, out: Path, is_eval: bool, force: bool):
 
         with ThreadPoolExecutor(max_workers=workers) as executor:
             futures = {
-                executor.submit(process_single_eval, file): file
-                for file in jsonl_files
+                executor.submit(process_single_eval, file): file for file in jsonl_files
             }
 
-            for fut in tqdm(as_completed(futures), total=len(futures),
-                            desc="Oracle files", unit="oracle"):
+            for fut in tqdm(
+                as_completed(futures),
+                total=len(futures),
+                desc="Oracle files",
+                unit="oracle",
+            ):
                 file = futures[fut]
                 try:
                     metrics, count, failed_files = fut.result()

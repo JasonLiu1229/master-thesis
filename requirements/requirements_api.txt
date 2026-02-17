@@ -7,3 +7,4 @@ pydantic==2.12.3
 hf-xet==1.2.0 # faster downloads from huggingface
 transformers==4.55.2 
 accelerate==1.10.0
+bitsandbytes==0.47.0
