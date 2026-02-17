@@ -1,15 +1,16 @@
-import subprocess
-
 from dataclasses import dataclass
 from typing import Dict, Iterable, List, Tuple
 
 import javalang.tokenizer as jtok
+import requests
 
 import yaml
 
 config = {}
 with open("pipeline/config.yml", "r") as f:
     config = yaml.safe_load(f)
+
+CODEREADER_URL = "http://codereader_ollama:8080"
 
 
 @dataclass
@@ -84,16 +85,19 @@ def _llm_parser(lines: Iterable[str]) -> Tuple[float, float]:
     return avg, wavg
 
 
-def llm_readability_score(prediction: str):
-    cmd = f'codereader grade -c {config["CODEREADER_CONFIG_FILE"]} --text "{prediction}" --simple'
-    avg, wavg = 0.0, 0.0
-    with subprocess.Popen(
-        cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1
-    ) as p:
-        assert p.stdout is not None
-        lines = list(_llm_formatter(p.stdout))
-        avg, wavg = _llm_parser(lines)
-    return avg, wavg
+def llm_readability_score(prediction: str) -> Tuple[float, float]:
+    r = requests.post(f"{CODEREADER_URL}/grade", json={"text": prediction}, timeout=120)
+    if not r.ok:
+        try:
+            detail = r.json().get("detail", r.text)
+        except Exception:
+            detail = r.text
+        raise RuntimeError(f"codereader request failed ({r.status_code}):\n{detail}")
+
+    raw = r.json()["output"]  
+
+    lines = _llm_formatter(raw.splitlines(True))
+    return _llm_parser(lines)
 
 
 def evaluate(oracle: str, prediction: str):  # function partially made using GPT

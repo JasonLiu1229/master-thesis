@@ -6,8 +6,6 @@ MAX_CHARS_LIMIT: 25000
 
 AMT_WORKERS: 1 # set to -1 to use all workers available, check if your api allows multi threading else set to 1
 
-LOCAL: false # make use of local model instead of api
-
 # Eval
 EVAL_OUTPUT_FILE_NAME: out/benchmark/t3_benchmark_results.json
 

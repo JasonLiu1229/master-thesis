@@ -46,6 +46,11 @@ services:
     depends_on:
       api:
         condition: service_healthy
+      codereader_ollama:
+        condition: service_healthy
+    environment:
+      CODEREADER_URL: http://codereader_ollama:8080
+      OLLAMA_HOST: http://codereader_ollama:11434
     networks:
       - pipeline
   
@@ -144,9 +149,33 @@ services:
         hard: -1
     ipc: host
 
+  codereader_ollama:
+    container_name: codereader_ollama
+    build:
+      dockerfile: docker/codereader_ollama_gpu.Dockerfile
+    gpus: all
+    profiles: ["full_local_eval", "t3_eval"]
+    networks:
+      - pipeline
+    ports:
+      - "11434:11434"   
+      - "8080:8080"     
+    volumes:
+      - ollama_cache:/root/.ollama
+    environment:
+      CODEREADER_CONFIG_FILE: /configs/codereader.yml
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+
 volumes:
   hf_cache:
   model_cache:
+  ollama_cache:
 
 networks:
   pipeline:

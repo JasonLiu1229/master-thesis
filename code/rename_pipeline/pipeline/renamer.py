@@ -234,8 +234,6 @@ def rename(java_test_span: JavaTestSpan):
     if looks_stringified(wrapped_source_code):
         wrapped_source_code = unescape_java_stringified_source(wrapped_source_code)
 
-    if config["LOCAL"]:
-        return _rename_process_local(wrapped_source_code, source_code_clean)
     return _rename_process(wrapped_source_code, source_code_clean)
 
 
@@ -244,10 +242,7 @@ def rename_eval(src: str):
         src = unescape_java_stringified_source(src)
 
     source_code_clean = remove_wrap(src)
-    
-    if config["LOCAL"]:
-        java_test_case = _rename_process_local(src, source_code_clean)
-    else:
-        java_test_case = _rename_process(src, source_code_clean)
+
+    java_test_case = _rename_process(src, source_code_clean)
 
     return wrap_test_case(java_test_case.code), bool(java_test_case.clean)

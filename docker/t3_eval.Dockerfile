@@ -1,10 +1,8 @@
 FROM python:3.13.9-slim-bookworm
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git build-essential curl ca-certificates\
+    git build-essential\
     && rm -rf /var/lib/apt/lists/*
-
-RUN curl -fsSL https://ollama.com/install.sh | sh
 
 COPY requirements/requirements_t3.txt /tmp/requirements.txt
 
