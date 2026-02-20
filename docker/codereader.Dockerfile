@@ -10,9 +10,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN curl -fsSL https://ollama.com/install.sh | sh
 
-RUN python3 -m pip install --no-cache-dir -U pip setuptools wheel
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-RUN python3 -m pip install --no-cache-dir \
+RUN python -m pip install --no-cache-dir -U pip setuptools wheel
+
+RUN python -m pip install --no-cache-dir \
     codereader \
     fastapi uvicorn pydantic
 
