@@ -17,6 +17,23 @@ class GradeResponse(BaseModel):
     
 @app.get("/health")
 async def health():
+    cmd = ["codereader", "init", "-c", "codereader.yml"]
+    
+    try:
+        p = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            check=False,
+        )
+    except FileNotFoundError:
+        raise HTTPException(status_code=500, detail="codereader binary not found in container.")
+    
+    raw = p.stdout or ""
+    if p.returncode != 0:
+        raise HTTPException(status_code=500, detail=raw)
+    
     return {"status": "ok"}
 
 @app.post("/grade", response_model=GradeResponse)

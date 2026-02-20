@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from typing import Dict, Iterable, List, Tuple
 
@@ -5,12 +6,16 @@ import javalang.tokenizer as jtok
 import requests
 
 import yaml
+from logger import setup_logging
 
 config = {}
 with open("pipeline/config.yml", "r") as f:
     config = yaml.safe_load(f)
 
 CODEREADER_URL = "http://codereader_ollama:8080"
+
+setup_logging("pipeline")
+logger = logging.getLogger("pipeline")
 
 
 @dataclass
@@ -94,7 +99,7 @@ def llm_readability_score(prediction: str) -> Tuple[float, float]:
             detail = r.text
         raise RuntimeError(f"codereader request failed ({r.status_code}):\n{detail}")
 
-    raw = r.json()["output"]  
+    raw = r.json()["output"]
 
     lines = _llm_formatter(raw.splitlines(True))
     return _llm_parser(lines)
@@ -142,7 +147,11 @@ def evaluate(oracle: str, prediction: str):  # function partially made using GPT
         (2 * precision * recall / (precision + recall)) if (precision + recall) else 0.0
     )
 
-    codereader_avg, codereader_wavg = llm_readability_score(prediction)
+    try:
+        codereader_avg, codereader_wavg = llm_readability_score(prediction)
+    except Exception as e:
+        codereader_avg, codereader_wavg = 0, 0
+        logger.error(f"Code not evaluated using codereader: {e}")
 
     return PairMetrics(
         cer,

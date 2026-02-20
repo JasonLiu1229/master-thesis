@@ -2,6 +2,8 @@ FROM nvidia/cuda:13.1.1-cudnn-runtime-ubuntu24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV OLLAMA_HOST=0.0.0.0:11434
+ENV OLLAMA_DEBUG=ERROR
+ENV OLLAMA_NUM_PARALLEL=1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 python3-pip python3-venv \
