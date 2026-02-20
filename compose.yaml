@@ -8,6 +8,8 @@ services:
     working_dir: /app/code
     gpus: all
     profiles: ["t1", "arno", "test"]
+    networks:
+      - codereader
 
   t2:
     container_name: t2
@@ -18,6 +20,8 @@ services:
     working_dir: /app/code
     gpus: all
     profiles: ["t2", "arno", "test"]
+    networks:
+      - codereader
 
   t3:
     container_name: t3
@@ -53,6 +57,7 @@ services:
       OLLAMA_HOST: http://codereader_ollama:11434
     networks:
       - pipeline
+      - codereader
 
   t3_eval_openai:
     container_name: t3_eval_openai
@@ -63,8 +68,15 @@ services:
     env_file:
       - .env
     profiles: ["t3_eval_openai"]
+    depends_on:
+      codereader_ollama:
+        condition: service_healthy
+    environment:
+      CODEREADER_URL: http://codereader_ollama:8080
+      OLLAMA_HOST: http://codereader_ollama:11434
     networks:
       - pipeline
+      - codereader
 
   benchmark:
     container_name: benchmark
@@ -152,11 +164,11 @@ services:
   codereader_ollama:
     container_name: codereader_ollama
     build:
-      dockerfile: docker/codereader_ollama_gpu.Dockerfile
+      dockerfile: docker/codereader.Dockerfile
     gpus: all
     profiles: ["full_local_eval", "t3_eval", "codereader"]
     networks:
-      - pipeline
+      - codereader
     ports:
       - "11434:11434"
       - "8080:8080"
@@ -184,4 +196,6 @@ volumes:
 
 networks:
   pipeline:
+    driver: bridge
+  codereader:
     driver: bridge
