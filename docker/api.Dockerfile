@@ -2,7 +2,7 @@ FROM python:3.13.9-slim-bookworm
 
 # ---- system prerequisites ----
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    bash zip unzip ca-certificates git build-essential gcc g++ \
+    bash zip unzip ca-certificates git build-essential gcc g++ curl\
     && rm -rf /var/lib/apt/lists/*
 
 # ---- Python dependencies ----

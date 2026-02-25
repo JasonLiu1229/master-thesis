@@ -6,8 +6,8 @@ ENV OLLAMA_DEBUG=ERROR
 ENV OLLAMA_NUM_PARALLEL=1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 python3-pip python3-venv \
-    curl ca-certificates zstd \
+  python3 python3-pip python3-venv \
+  curl ca-certificates zstd \
   && rm -rf /var/lib/apt/lists/*
 
 RUN curl -fsSL https://ollama.com/install.sh | sh
@@ -19,12 +19,21 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN python -m pip install --no-cache-dir -U pip setuptools wheel
 
 RUN python -m pip install --no-cache-dir \
-    codereader \
-    fastapi uvicorn pydantic
+  codereader \
+  fastapi uvicorn pydantic
 
 WORKDIR /app
 COPY ../code/codereader_app/main.py /app/api.py
 COPY ../code/codereader_app/codereader.yml /app
 
 EXPOSE 11434 8080
-CMD ["bash", "-lc", "ollama serve & uvicorn api:app --host 0.0.0.0 --port 8080"]
+
+CMD ["bash", "-lc", "\
+  set -euo pipefail; \
+  ollama serve & \
+  until ollama list >/dev/null 2>&1; do sleep 1; done; \
+  if [ ! -f /root/.ollama/.codereader_inited ]; then \
+    codereader init -c ${CODEREADER_CONFIG_FILE} && touch /root/.ollama/.codereader_inited; \
+  fi; \
+  exec uvicorn api:app --host 0.0.0.0 --port 8080 \
+"]

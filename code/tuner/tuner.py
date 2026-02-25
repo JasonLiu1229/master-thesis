@@ -17,7 +17,7 @@ from transformers import (
     BitsAndBytesConfig,
     DataCollatorForLanguageModeling,
     Trainer,
-    # TrainerCallback,
+    TrainerCallback,
     TrainingArguments,
 )
 
@@ -52,7 +52,7 @@ def load_ds(path: str) -> Dataset:
         raise RuntimeError(f"Failed to load dataset from {path}: {e}")
 
 
-def pick_attn_implementation() -> str | None:
+def pick_attn_implementation() -> str | None:  # gpt generated
     """
     Choose the best attention backend available on this machine.
 
@@ -80,8 +80,6 @@ def pick_attn_implementation() -> str | None:
         return "sdpa"
 
     try:
-        import flash_attn
-
         logger.info("flash_attn import OK -> using flash_attention_2.")
         return "flash_attention_2"
     except Exception as e:
@@ -250,6 +248,32 @@ def make_args(val_ds: Dataset | None) -> TrainingArguments:
     return TrainingArguments(**kw)
 
 
+class AdapterSnapshotCallback(TrainerCallback):
+    def __init__(self, model, tokenizer, adapter_root, percentages=(0.25, 0.5, 1.0)):
+        self.model = model
+        self.tokenizer = tokenizer
+        self.adapter_root = adapter_root
+        self.percentages = percentages
+        self.saved = set()
+
+    def on_step_end(self, args, state, control, **kwargs):
+        if not state.max_steps:
+            return
+
+        progress = state.global_step / state.max_steps
+
+        for p in self.percentages:
+            if progress >= p and p not in self.saved:
+                out_dir = os.path.join(self.adapter_root, f"adapter_{int(p*100)}pct")
+                os.makedirs(out_dir, exist_ok=True)
+
+                self.model.save_pretrained(out_dir)
+                self.tokenizer.save_pretrained(out_dir)
+
+                logger.info(f"Saved adapter snapshot at {int(p*100)}% -> {out_dir}")
+                self.saved.add(p)
+
+
 def tune(input_arrow_dir: str | None = None):
     arrow_dir = input_arrow_dir or config["ARROW_DIR"]
     train_data_path = os.path.join(arrow_dir, config["TRAIN_DIR"])
@@ -289,7 +313,14 @@ def tune(input_arrow_dir: str | None = None):
         data_collator=collator,
         train_dataset=train_ds,
         eval_dataset=val_ds,
-        # callbacks=[Heartbeat()],
+        callbacks=[
+            AdapterSnapshotCallback(
+                model=model,
+                tokenizer=tokenizer,
+                adapter_root=config["ADAPTER_SAVE_PATH"],
+                percentages=(0.25, 0.5, 1.0),
+            ),
+        ],
     )
 
     logger.info("Starting training...")
@@ -300,8 +331,8 @@ def tune(input_arrow_dir: str | None = None):
     else:
         trainer.train()
 
-    adapter_dir = config["ADAPTER_SAVE_PATH"]
-    os.makedirs(adapter_dir, exist_ok=True)
-    model.save_pretrained(adapter_dir)
-    tokenizer.save_pretrained(adapter_dir)
-    logger.info(f"Adapter model saved to {adapter_dir}")
+    # adapter_dir = config["ADAPTER_SAVE_PATH"]
+    # os.makedirs(adapter_dir, exist_ok=True)
+    # model.save_pretrained(adapter_dir)
+    # tokenizer.save_pretrained(adapter_dir)
+    # logger.info(f"Adapter model saved to {adapter_dir}")
