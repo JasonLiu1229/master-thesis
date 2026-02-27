@@ -12,7 +12,7 @@ RUN pip install --upgrade pip setuptools wheel packaging ninja
 
 RUN pip install psutil
 
-RUN pip install flash_attn --no-build-isolation
+RUN pip install flash_attn --no-build-isolation || echo "flash_attn install failed; continuing without it"
 
 COPY requirements/requirements_tuner.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt

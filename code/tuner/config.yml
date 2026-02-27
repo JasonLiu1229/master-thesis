@@ -37,5 +37,5 @@ LORA_DROPOUT: 0.05 # in LoRA randomly zeros out some of the activations before t
 RESUME_FROM_LAST_CP: false # Whether to resume training from the last checkpoint in the output directory.
 
 # smaller dataset config
-USE_SMALLER_DATASET: true
+USE_SMALLER_DATASET: false
 SMALLER_FRACTION: 0.001 # Fraction of the dataset to use if USE_SMALLER_DATASET is true.
