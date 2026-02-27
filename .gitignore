@@ -22,3 +22,6 @@ tools/randoop-*
 
 # sif
 *.sif
+
+# IDE
+.vscode
