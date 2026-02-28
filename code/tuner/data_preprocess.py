@@ -152,7 +152,6 @@ def preprocess( # fixed using GPT-5.2
         logging.error(f"Input directory {input_dir} does not exist.")
     assert os.path.exists(input_dir), f"Input directory {input_dir} does not exist."
 
-    # Make sure output dir is clean
     if os.path.exists(output_dir) and os.listdir(output_dir):
         logger.warning(
             f"Output directory {output_dir} already exists and is not empty. Overwriting contents."
@@ -208,7 +207,7 @@ def preprocess( # fixed using GPT-5.2
                             entry = json.loads(line)
                         except Exception as e:
                             skipped_json += 1
-                            logger.warning(
+                            logger.exception(
                                 f"Skipping bad JSON in {input_path}:{line_idx} "
                                 f"({type(e).__name__}: {e})"
                             )
@@ -225,7 +224,7 @@ def preprocess( # fixed using GPT-5.2
                             )
                         except Exception as e:
                             skipped_feat += 1
-                            logger.warning(
+                            logger.exception(
                                 f"Skipping example (preprocess_single failed) at {input_path}:{line_idx} "
                                 f"({type(e).__name__}: {e})"
                             )
@@ -256,7 +255,7 @@ def preprocess( # fixed using GPT-5.2
                             "labels": feat["labels"],
                         }
             except Exception as e:
-                logger.warning(
+                logger.exception(
                     f"Failed to read file {input_path} ({type(e).__name__}: {e}) - skipping file"
                 )
                 continue
