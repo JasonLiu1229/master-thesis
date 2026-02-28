@@ -1,0 +1,2 @@
+Vast ai instance created on 28-02-26
+    - It works pretty easy, bu just making a private template and then just using the provision script and a on start up script to run the provision script

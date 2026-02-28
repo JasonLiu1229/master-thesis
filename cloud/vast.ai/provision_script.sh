@@ -14,17 +14,31 @@ BRANCH="${BRANCH:-main}"
 PROFILE="${PROFILE:-tune}"
 
 # Sparse-checkout paths (space-separated).
-#   SPARSE_PATHS="docker code requirements compose.yaml" ./provision_script.sh
 SPARSE_PATHS="${SPARSE_PATHS:-docker/tuner.Dockerfile code/tuner code/logger.py code/model.py code/prompts.py requirements/requirements_tuner.txt compose.yaml out/data_preprocessed}"
 
-# If you want compose to keep running after provisioning returns,
+# Git LFS: which LFS paths to materialize (comma-separated for git lfs include/exclude syntax)
+LFS_INCLUDE="${LFS_INCLUDE:-out/data_preprocessed/**}"
+LFS_EXCLUDE="${LFS_EXCLUDE:-}"
+
 USE_TMUX="${USE_TMUX:-1}"
 TMUX_SESSION="${TMUX_SESSION:-tuning}"
 
+ensure_pkg() {
+  local pkg="$1"
+  if ! dpkg -s "$pkg" >/dev/null 2>&1; then
+    sudo apt-get update
+    sudo apt-get install -y "$pkg"
+  fi
+}
+
 if ! command -v git >/dev/null 2>&1; then
   log "Installing git..."
-  sudo apt-get update
-  sudo apt-get install -y git
+  ensure_pkg git
+fi
+
+if ! command -v git-lfs >/dev/null 2>&1; then
+  log "Installing git-lfs..."
+  ensure_pkg git-lfs
 fi
 
 if ! command -v docker >/dev/null 2>&1; then
@@ -64,6 +78,8 @@ if [ ! -d "$REPO_DIR/.git" ]; then
   git clone --filter=blob:none --no-checkout --branch "$BRANCH" "$REPO_URL" "$REPO_DIR"
   cd "$REPO_DIR"
 
+  # Make sure LFS is enabled in this repo before checkout/pull
+  git lfs install --local || true
 
   git sparse-checkout init --no-cone
   # shellcheck disable=SC2086
@@ -74,10 +90,13 @@ if [ ! -d "$REPO_DIR/.git" ]; then
 else
   cd "$REPO_DIR"
 
-  # If the repo existed from a previous run, enforce sparse paths again
   if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     log "Updating repo..."
     git fetch --all --prune
+
+    # Ensure LFS is enabled even on re-runs
+    git lfs install --local || true
+
     git sparse-checkout init --no-cone || true
     # shellcheck disable=SC2086
     git sparse-checkout set $SPARSE_PATHS
@@ -89,12 +108,21 @@ else
   fi
 fi
 
+# --- NEW: pull LFS objects for the sparse paths you care about ---
+log "Pulling Git LFS files (include: '$LFS_INCLUDE'${LFS_EXCLUDE:+, exclude: '$LFS_EXCLUDE'})..."
+if [ -n "$LFS_EXCLUDE" ]; then
+  git lfs pull --include="$LFS_INCLUDE" --exclude="$LFS_EXCLUDE"
+else
+  git lfs pull --include="$LFS_INCLUDE"
+fi
+
 mkdir -p out
 
 CMD="sudo docker compose --profile $PROFILE up --build"
 
 log "Running: $CMD"
 log "Sparse paths: $SPARSE_PATHS"
+log "LFS include: $LFS_INCLUDE"
 
 if [ "$USE_TMUX" = "1" ]; then
   sudo apt-get update && sudo apt-get install -y tmux || true
