@@ -25,8 +25,6 @@ config["LOG_DIR"] = os.environ.get("LOG_DIR", config["LOG_DIR"])
 config["ARROW_DIR"] = os.environ.get("ARROW_DIR", config["ARROW_DIR"])
 
 def _preprocess_dataset(force: bool = False):
-    llm_model = get_llm_model()
-
     os.makedirs(config["OUTPUT_DIR"], exist_ok=True)
 
     # train dataset
@@ -51,7 +49,6 @@ def _preprocess_dataset(force: bool = False):
         preprocess(
             input_dir=train_path,
             output_dir=train_output_path,
-            llm=llm_model,
             shuffle=True,
             seed=42,
         )
@@ -78,7 +75,6 @@ def _preprocess_dataset(force: bool = False):
         preprocess(
             input_dir=val_path,
             output_dir=val_output_path,
-            llm=llm_model,
             shuffle=False,
             seed=42,
         )
@@ -105,7 +101,6 @@ def _preprocess_dataset(force: bool = False):
         preprocess(
             input_dir=test_path,
             output_dir=test_output_path,
-            llm=llm_model,
             shuffle=False,
             seed=42,
         )

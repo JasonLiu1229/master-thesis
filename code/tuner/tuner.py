@@ -283,13 +283,13 @@ def tune(input_arrow_dir: str | None = None):
     train_ds = load_ds(train_data_path)
     val_ds = load_ds(val_data_path)
     
-    for ds_name, ds in [("train", train_ds), ("val", val_ds)]:
-        if ds is not None and "labels" in ds.column_names:
-            logger.warning(f"Removing 'labels' column from {ds_name} dataset (was ragged).")
-            if ds_name == "train":
-                train_ds = train_ds.remove_columns(["labels"])
-            else:
-                val_ds = val_ds.remove_columns(["labels"])
+    # for ds_name, ds in [("train", train_ds), ("val", val_ds)]:
+    #     if ds is not None and "labels" in ds.column_names:
+    #         logger.warning(f"Removing 'labels' column from {ds_name} dataset (was ragged).")
+    #         if ds_name == "train":
+    #             train_ds = train_ds.remove_columns(["labels"])
+    #         else:
+    #             val_ds = val_ds.remove_columns(["labels"])
 
     model, tokenizer = define_base()
 
