@@ -25,3 +25,6 @@ tools/randoop-*
 
 # IDE
 .vscode
+
+# venv
+*venv*

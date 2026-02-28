@@ -161,7 +161,8 @@ def define_base():
         base_model = base_model_load()
 
     try:
-        base_model.gradient_checkpointing_enable()
+        if config["GRADIENT_CHECKPOINTING"]:
+            base_model.gradient_checkpointing_enable()
         base_model.enable_input_require_grads()
     except Exception:
         pass
@@ -224,12 +225,12 @@ def make_args(val_ds: Dataset | None) -> TrainingArguments:
         "save_steps": config["EVAL_STEPS"],
         "save_total_limit": config["MAX_SAVE_TOTAL"],
         "bf16": False,
-        "gradient_checkpointing": True,
+        "gradient_checkpointing": config["GRADIENT_CHECKPOINTING"],
         "report_to": ["tensorboard"],
         "load_best_model_at_end": True if val_ds is not None else False,
         "disable_tqdm": False,
         "group_by_length": True,
-        "dataloader_num_workers": 4,
+        "dataloader_num_workers": 8,
     }
 
     try:

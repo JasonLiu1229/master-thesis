@@ -18,9 +18,9 @@ LOG_DIR: out/logs
 # Model parameters
 MODEL_ID: Qwen/Qwen2.5-Coder-7B-Instruct
 
-MAX_LENGTH: 2048
-BATCH_SIZE_PER_DEVICE: 1
-GRAD_ACCUM_STEPS: 4
+MAX_LENGTH: 4096
+BATCH_SIZE_PER_DEVICE: 6
+GRAD_ACCUM_STEPS: 1
 NUM_EPOCHS: 1
 LEARNING_RATE: 0.0001
 MAX_SAVE_TOTAL: 1
@@ -28,6 +28,7 @@ LOGGING_STEPS: 200
 EVAL_STEPS: 2000
 SAVE_STEPS: 2000
 SAVE_TOTAL_LIMIT: 3
+GRADIENT_CHECKPOINTING: false
 
 # QLoRA parameters (https://datawizz.ai/blog/understanding-lora-adapters-rank-and-alpha-parameters)
 USE_QLORA: true # If not using QLoRA, we will do regular fine-tuning LoRA.

@@ -21,14 +21,12 @@ SPARSE_PATHS="${SPARSE_PATHS:-docker/tuner.Dockerfile code/tuner code/logger.py 
 USE_TMUX="${USE_TMUX:-1}"
 TMUX_SESSION="${TMUX_SESSION:-tuning}"
 
-# ===== 0) Base deps =====
 if ! command -v git >/dev/null 2>&1; then
   log "Installing git..."
   sudo apt-get update
   sudo apt-get install -y git
 fi
 
-# ===== 1) Docker + compose plugin =====
 if ! command -v docker >/dev/null 2>&1; then
   log "Installing Docker + compose plugin..."
   sudo apt-get update
@@ -50,7 +48,6 @@ else
   log "Docker already installed."
 fi
 
-# ===== 2) NVIDIA container toolkit (for GPU in docker) =====
 if ! docker info 2>/dev/null | grep -qi nvidia; then
   log "Installing NVIDIA container toolkit (best-effort)..."
   sudo apt-get update
@@ -61,7 +58,6 @@ else
   log "Docker already reports NVIDIA runtime."
 fi
 
-# ===== 3) Sparse clone/pull repo =====
 log "Ensuring repo exists with sparse checkout..."
 if [ ! -d "$REPO_DIR/.git" ]; then
   log "Cloning repo (filtered, no checkout)..."
@@ -93,10 +89,8 @@ else
   fi
 fi
 
-# ===== 4) Optional: create out/ so volume mount always works =====
 mkdir -p out
 
-# ===== 5) Run compose with profile =====
 CMD="sudo docker compose --profile $PROFILE up --build"
 
 log "Running: $CMD"
