@@ -231,6 +231,7 @@ def make_args(val_ds: Dataset | None) -> TrainingArguments:
         "disable_tqdm": False,
         "group_by_length": True,
         "dataloader_num_workers": 8,
+        "optim": "paged_adamw_8bit",
     }
 
     try:
