@@ -263,6 +263,7 @@ class AdapterSnapshotCallback(TrainerCallback):
             return
 
         progress = state.global_step / state.max_steps
+        logger.info(f"Current progress: {state.global_step} / {state.max_steps} = {progress}")
 
         for p in self.percentages:
             if progress >= p and p not in self.saved:
