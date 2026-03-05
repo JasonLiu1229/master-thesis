@@ -222,7 +222,7 @@ def make_args(val_ds: Dataset | None) -> TrainingArguments:
         "weight_decay": 0.0,
         "logging_steps": config["LOGGING_STEPS"],
         "eval_steps": config["EVAL_STEPS"],
-        "save_steps": config["EVAL_STEPS"],
+        "save_steps": config["SAVE_STEPS"],
         "save_total_limit": config["MAX_SAVE_TOTAL"],
         "bf16": False,
         "gradient_checkpointing": config["GRADIENT_CHECKPOINTING"],
