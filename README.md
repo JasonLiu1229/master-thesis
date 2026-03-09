@@ -27,7 +27,11 @@ NOTE: **DO NOT** add your enviroment variables to the repository or anywhere pub
 
 ### T1 (GNN)
 
+T1 uses a Graph Neural Network (GNN) to predict meaningful identifier names by exploiting the structural information of source code. The code is represented as a graph derived from the program structure (e.g., the AST), and the GNN propagates information between related nodes to learn contextual representations of identifiers. These representations are then used to predict appropriate identifier names.
+
 ### T2 (RefBert)
+
+T2 is based on RefBERT, a transformer model inspired by BERT. It processes code as a sequence of tokens and uses self-attention to capture contextual relationships. The model learns to predict identifier names from surrounding code by masking them during training and reconstructing them from context.
 
 ### T3
 
@@ -51,6 +55,7 @@ NOTE: **DO NOT** add your enviroment variables to the repository or anywhere pub
 - For benchmarking, additionally you need Arno's setup. See references for more info.
   - Note that database generation is not performed inside Docker; you must generate the database manually if you want to reproduce the benchmarking.
   - Additionally, some files must be edited manually to resolve incompatibilities.
+- **Important** install git lfs for arrow and other files.
 
 Note: Windows might need seperate compilers to make some things work. This is needed for `pybind11` and other libraries. Additionally if using docker, some things do not have to be directly installed, like Python.
 

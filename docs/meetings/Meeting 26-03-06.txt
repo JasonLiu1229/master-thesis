@@ -1,2 +1,43 @@
 Vast ai instance created on 28-02-26
     - It works pretty easy, bu just making a private template and then just using the provision script and a on start up script to run the provision script
+
+Baseline research:
+    - Redo arno baseline on Cloud
+        - Best solution to run full solution on cloud
+    - Legacy baseline code2Seq
+    - LLM baseline Deepseek-Coder
+    - GPT 
+        - Can be run (it is okay)
+
+Find publications to check what is a good size to test on, like how many is enough. 
+    - First this and then decide
+    - How datasets are split
+
+ALso log token use, timing, cost of things
+    - Both input and output
+    - Energy use can be approximated based on the LLM
+
+50k is a bit to large
+
+
+When will I get paid?
+    - Maybe next week
+
+Look for models that help with setting up baselines:
+    - Special purpose models 
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+Working on testing 25pct model
+
+Raw evaluation:
+    - instead of retries we try raw. 
+    - extended pipeline
+    - see why errors happen
+        - log it
+
+
+Undecided:
+    - Full dataset arno's work 
+    - Which LLM baseline 
+    - Testing dataset size 

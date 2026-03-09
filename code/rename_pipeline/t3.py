@@ -19,6 +19,7 @@ from pipeline.helper import (
     post_process_file,
 )
 from pipeline.renamer import rename, rename_eval
+from pipeline.stats_tracker import init
 
 from tqdm import tqdm
 
@@ -134,7 +135,7 @@ def process_single_eval(file_path: Path) -> tuple[List[PairMetrics], int, list[s
             )
             continue
 
-        predicted_code, clean = rename_eval(obf_code)
+        predicted_code, clean = rename_eval(obf_code, file_path)
 
         if not clean:
             failed_count += 1
@@ -225,6 +226,8 @@ if __name__ == "__main__":
     args = argument_parser().parse_args()
 
     MODE = args.mode
+    
+    init()
 
     if MODE == "single":
         logger.info("Processing single file")

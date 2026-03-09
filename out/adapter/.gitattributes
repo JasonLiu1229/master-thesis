@@ -1,3 +1,4 @@
-adapter_25pct/** filter=lfs diff=lfs merge=lfs -text
-adapter_50pct/** filter=lfs diff=lfs merge=lfs -text
-adapter_100pct/** filter=lfs diff=lfs merge=lfs -text
+adapter_25pct/**    filter=lfs diff=lfs merge=lfs -text
+adapter_50pct/**    filter=lfs diff=lfs merge=lfs -text
+adapter_100pct/**   filter=lfs diff=lfs merge=lfs -text
+adapter**           filter=lfs diff=lfs merge=lfs -text

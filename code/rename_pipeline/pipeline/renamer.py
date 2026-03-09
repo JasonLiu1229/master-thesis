@@ -15,6 +15,8 @@ from prompts import (
     USER_PROMPT_TEMPLATE,
 )
 
+from stats_tracker import log_error
+
 from pipeline.helper import (
     apply_rename_mapping,
     extract_identifier_candidates,
@@ -28,8 +30,6 @@ from pipeline.helper import (
     unescape_java_stringified_source,
     wrap_test_case,
 )
-
-from typing import List
 
 
 config = {}
@@ -64,17 +64,17 @@ def make_messages(user_message: str, sys_instruction: str = SYSTEM_INSTRUCTION):
 def _format_identifier_list_for_prompt(identifiers: list[str]) -> str:
     return "\n".join(f"- {name}" for name in identifiers)
 
-def _rename_function(func_name: str, code: str):
-    pass
 
-def _rename_variables(variable_names: List[str], code: str):
-    pass
-
-def _rename_process(wrapped_source_code: str, source_code_clean: str):
+def _rename_process(
+    wrapped_source_code: str, source_code_clean: str, file_path: str = None
+):
     try:
         original_method_name = parse_method_name(source_code_clean)
     except Exception as e:
         logger.error(f"Failed to extract method name: {e}")
+
+        log_error(file_path, 1, "MethodNotFound", f"Failed to extract method name: {e}")
+
         return JavaTestCase(
             name=None,
             original_code=source_code_clean,
@@ -85,9 +85,17 @@ def _rename_process(wrapped_source_code: str, source_code_clean: str):
     try:
         identifier_candidates = extract_identifier_candidates(wrapped_source_code)
     except Exception as e:
-        logger.warning(
+        logger.error(
             f"Failed to extract identifier candidates for {original_method_name}: {e}"
         )
+
+        log_error(
+            file_path,
+            1,
+            "NoIdentifiers",
+            f"Failed to extract identifier candidates for {original_method_name}: {e}",
+        )
+
         return JavaTestCase(
             name=original_method_name,
             original_code=source_code_clean,
@@ -107,7 +115,7 @@ def _rename_process(wrapped_source_code: str, source_code_clean: str):
         )
 
     identifier_candidates.append(original_method_name)
-    
+
     identifiers_for_prompt = _format_identifier_list_for_prompt(identifier_candidates)
 
     user_message = USER_PROMPT_TEMPLATE.format(
@@ -120,6 +128,8 @@ def _rename_process(wrapped_source_code: str, source_code_clean: str):
     best_mapping = None
     clean = False
 
+    assert config["TRIES"] > 0, "Amount of tries can not be 0 or smaller"
+
     for i in range(config["TRIES"]):
         logger.info(f"\nLLM attempt {i + 1} (mapping) for {original_method_name}")
         raw = client.chat(LLM_MODEL, messages)
@@ -129,9 +139,12 @@ def _rename_process(wrapped_source_code: str, source_code_clean: str):
             mapping = json.loads(raw)
         except json.JSONDecodeError as e:
             error_reason = f"Response was not valid JSON: {e}"
-            logger.warning(
+            logger.error(
                 f"{error_reason} for {original_method_name} on attempt {i + 1}: {raw!r}"
             )
+
+            log_error(file_path, i + 1, "UnvalidJson", error_reason, raw)
+
             user_message = RETRY_USER_PROMPT_TEMPLATE.format(
                 test_case=wrapped_source_code,
                 identifiers=identifiers_for_prompt,
@@ -146,6 +159,9 @@ def _rename_process(wrapped_source_code: str, source_code_clean: str):
             logger.error(
                 f"{error_reason} for {original_method_name} on attempt {i + 1}: {raw!r}"
             )
+
+            log_error(file_path, i + 1, "JsonObjectError", error_reason, raw)
+
             user_message = RETRY_USER_PROMPT_TEMPLATE.format(
                 test_case=wrapped_source_code,
                 identifiers=identifiers_for_prompt,
@@ -160,9 +176,11 @@ def _rename_process(wrapped_source_code: str, source_code_clean: str):
 
         extra_keys = mapping_keys - candidate_set
         if extra_keys:
-            logger.warning(
-                f"Mapping for {original_method_name} contains unexpected keys {extra_keys}; they will be ignored."
-            )
+            error_reason = f"Mapping for {original_method_name} contains unexpected keys {extra_keys}; they will be ignored."
+            logger.error(error_reason)
+
+            log_error(file_path, i + 1, "ExtraKeyError", error_reason)
+
             for k in extra_keys:
                 mapping.pop(k, None)
 
@@ -176,6 +194,8 @@ def _rename_process(wrapped_source_code: str, source_code_clean: str):
             logger.error(
                 f"{error_reason} for {original_method_name} on attempt {i+1}: {mapping}"
             )
+            
+            log_error(file_path, i+1, "MissingKeysError", error_reason)
 
             user_message = RETRY_USER_PROMPT_TEMPLATE.format(
                 test_case=wrapped_source_code,
@@ -191,10 +211,14 @@ def _rename_process(wrapped_source_code: str, source_code_clean: str):
         break
 
     if not clean or best_mapping is None:
-        logger.warning(
-            f"All {config['TRIES']} attempts failed to produce a usable mapping for {original_method_name}; "
-            "keeping original test."
+        error_reason = f"All {config['TRIES']} attempts failed to produce a usable mapping for {original_method_name}; keeping original test."
+        
+        logger.error(
+            error_reason
         )
+        
+        log_error(file_path, config["TRIES"], "FailedRename", error_reason)
+        
         return JavaTestCase(
             name=original_method_name,
             original_code=source_code_clean,
@@ -214,11 +238,9 @@ def _rename_process(wrapped_source_code: str, source_code_clean: str):
         code=candidate_code,
         clean=clean,
     )
-    
-def _rename_process_local(wrapped_source_code: str, source_code_clean: str):
-    ...
 
-# TODO: split renaming in two parts, variable and function, so we can have different templating schemes for them
+
+def _rename_process_local(wrapped_source_code: str, source_code_clean: str): ...
 
 
 def rename(java_test_span: JavaTestSpan):
@@ -234,15 +256,17 @@ def rename(java_test_span: JavaTestSpan):
     if looks_stringified(wrapped_source_code):
         wrapped_source_code = unescape_java_stringified_source(wrapped_source_code)
 
-    return _rename_process(wrapped_source_code, source_code_clean)
+    return _rename_process(
+        wrapped_source_code, source_code_clean, java_test_span.file_path
+    )
 
 
-def rename_eval(src: str):
+def rename_eval(src: str, file_path: str = None):
     if looks_stringified(src):
         src = unescape_java_stringified_source(src)
 
     source_code_clean = remove_wrap(src)
 
-    java_test_case = _rename_process(src, source_code_clean)
+    java_test_case = _rename_process(src, source_code_clean, file_path)
 
     return wrap_test_case(java_test_case.code), bool(java_test_case.clean)

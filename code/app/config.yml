@@ -2,4 +2,4 @@
 MODEL_ID: "Qwen/Qwen2.5-Coder-7B-Instruct"
 
 USE_LOCAL_LLM: false
-LOCAL_MODEL_PATH: "model/local_model/"
+ADAPTER_FILE: "out/adapter/adapter_25pct"

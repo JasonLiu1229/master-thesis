@@ -1,10 +1,12 @@
+import copy
 import os
 
 import threading
 from enum import Enum
 
 import torch
-import copy
+
+from peft import PeftModel
 
 from prompts import SYSTEM_INSTRUCTION
 from transformers import (
@@ -91,10 +93,12 @@ class LLM_Model:
 
     def get_device(self):
         return self.device
-    
+
     def _tokenize_prompt(self, user_prompt: str, sys_instruction: str):
-    # Qwen chat template path: tokenize directly
-        if "qwen" in self.model_id.lower() and getattr(self.tokenizer, "chat_template", None):
+        # Qwen chat template path: tokenize directly
+        if "qwen" in self.model_id.lower() and getattr(
+            self.tokenizer, "chat_template", None
+        ):
             messages = [
                 {"role": "system", "content": sys_instruction},
                 {"role": "user", "content": user_prompt.strip()},
@@ -115,7 +119,9 @@ class LLM_Model:
                 return self.tokenizer(text, return_tensors="pt")
 
         # non-template models: your current behavior
-        formatted = self._build_model_input(user_prompt, sys_instruction=sys_instruction)
+        formatted = self._build_model_input(
+            user_prompt, sys_instruction=sys_instruction
+        )
         return self.tokenizer(formatted, return_tensors="pt")
 
     def load_model(self, model_path, quantize: str = "int4"):
@@ -129,7 +135,7 @@ class LLM_Model:
                 load_in_4bit=True,
                 bnb_4bit_quant_type="nf4",
                 bnb_4bit_use_double_quant=True,
-                bnb_4bit_compute_dtype=torch.bfloat16,  
+                bnb_4bit_compute_dtype=torch.bfloat16,
             )
         elif torch.cuda.is_available() and quantize == "int8":
             quantization_config = BitsAndBytesConfig(load_in_8bit=True)
@@ -139,13 +145,14 @@ class LLM_Model:
             low_cpu_mem_usage=True,
         )
 
-
         if quantization_config is None:
             load_kwargs["torch_dtype"] = torch_dtype
         else:
             load_kwargs["quantization_config"] = quantization_config
 
-        self.model = AutoModelForCausalLM.from_pretrained(model_path, **load_kwargs).eval()
+        self.model = AutoModelForCausalLM.from_pretrained(
+            model_path, **load_kwargs
+        ).eval()
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)
 
@@ -251,18 +258,16 @@ def get_model(model_id) -> LLM_Model:
     return _llm_model
 
 
-def get_local_model(local_model_path) -> LLM_Model:
+def get_local_model(local_model_path, adapter=None) -> LLM_Model:
     global _llm_model
     if _llm_model is None:
         print("Loading local LLM model into memory...")
         m = LLM_Model()
         try:
-            tokenizer = AutoTokenizer.from_pretrained(local_model_path)
-            model = AutoModelForCausalLM.from_pretrained(
-                local_model_path, torch_dtype="auto", device_map="auto"
-            ).eval()
-            name = AutoConfig.from_pretrained(local_model_path).model_type
-            m.set_model(model, name, tokenizer)
+            m.load_model(local_model_path)
+            if adapter:
+                m.model = PeftModel.from_pretrained(m.model, adapter).eval()
+            m.set_model(m.model, local_model_path, m.tokenizer)
         except Exception as e:
             print(f"Error loading local model {local_model_path}: {e}")
             raise
