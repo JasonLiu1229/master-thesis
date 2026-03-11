@@ -1,16 +1,14 @@
 import copy
 import os
-
 import threading
+import time
+from dataclasses import dataclass
 from enum import Enum
 
 import torch
-
 from peft import PeftModel
-
 from prompts import SYSTEM_INSTRUCTION
 from transformers import (
-    AutoConfig,
     AutoModelForCausalLM,
     AutoTokenizer,
     BitsAndBytesConfig,
@@ -21,6 +19,15 @@ from transformers import (
 class ModelStyle(Enum):
     LlamaInstruct = "inst"
     Plain = "plain"
+
+
+@dataclass
+class LocalUsage:
+    """Token counts + latency for a local model generation call."""
+
+    prompt_tokens: int
+    completion_tokens: int
+    latency_ms: float
 
 
 _llm_model = None  # singleton
@@ -55,7 +62,37 @@ class LLM_Model:
         top_k=5,
         do_sample=False,
         sys_instruction: str = SYSTEM_INSTRUCTION,
-    ):
+    ) -> str:
+        """Generate text. Returns only the response string (backwards compatible)."""
+        text, _ = self.generate_with_usage(
+            prompt,
+            max_new_tokens=max_new_tokens,
+            temperature=temperature,
+            top_p=top_p,
+            top_k=top_k,
+            do_sample=do_sample,
+            sys_instruction=sys_instruction,
+        )
+        return text
+
+    @torch.inference_mode()
+    def generate_with_usage(
+        self,
+        prompt,
+        max_new_tokens=256,
+        temperature=0.25,
+        top_p=0.85,
+        top_k=5,
+        do_sample=False,
+        sys_instruction: str = SYSTEM_INSTRUCTION,
+    ) -> tuple[str, LocalUsage]:
+        """
+        Generate text and return (response_text, LocalUsage).
+
+        Token counts come from the tokenizer directly so they are exact,
+        not estimated, important for comparing local vs. API model costs
+        in the thesis.
+        """
         with _model_lock:
             assert self.model is not None, "Model not loaded."
             assert self.tokenizer is not None, "Tokenizer not loaded."
@@ -64,6 +101,7 @@ class LLM_Model:
                 prompt, sys_instruction=sys_instruction
             )
             inputs = self.tokenizer(formatted_prompt, return_tensors="pt")
+            prompt_tokens: int = inputs["input_ids"].shape[1]
 
             if not self._gen_config:
                 self._gen_config = GenerationConfig(
@@ -73,6 +111,7 @@ class LLM_Model:
                     top_k=top_k,
                 )
 
+            t0 = time.perf_counter()
             outputs = self.model.generate(
                 **inputs.to(self.model.device),
                 max_new_tokens=max_new_tokens,
@@ -80,10 +119,20 @@ class LLM_Model:
                 pad_token_id=self.tokenizer.pad_token_id,
                 eos_token_id=self.tokenizer.eos_token_id,
             )
+            latency_ms = (time.perf_counter() - t0) * 1000
 
             generated_ids = outputs[0][inputs["input_ids"].shape[1] :]
+            completion_tokens: int = generated_ids.shape[0]
+
             text = self.tokenizer.decode(generated_ids, skip_special_tokens=True)
-            return text.strip()
+
+            usage = LocalUsage(
+                prompt_tokens=prompt_tokens,
+                completion_tokens=completion_tokens,
+                latency_ms=round(latency_ms, 1),
+            )
+
+            return text.strip(), usage
 
     def get_model(self):
         return self.model
@@ -104,7 +153,6 @@ class LLM_Model:
                 {"role": "user", "content": user_prompt.strip()},
             ]
             try:
-                # fast path: returns input_ids/attention_mask directly
                 return self.tokenizer.apply_chat_template(
                     messages,
                     add_generation_prompt=True,
@@ -112,13 +160,11 @@ class LLM_Model:
                     return_tensors="pt",
                 )
             except TypeError:
-                # fallback for older tokenizer APIs
                 text = self.tokenizer.apply_chat_template(
                     messages, add_generation_prompt=True, tokenize=False
                 )
                 return self.tokenizer(text, return_tensors="pt")
 
-        # non-template models: your current behavior
         formatted = self._build_model_input(
             user_prompt, sys_instruction=sys_instruction
         )
@@ -231,7 +277,6 @@ class LLM_Model:
                 {"role": "system", "content": sys_instruction},
                 {"role": "user", "content": user_prompt.strip()},
             ]
-
             return self.tokenizer.apply_chat_template(
                 messages, add_generation_prompt=True, tokenize=False
             )
@@ -240,7 +285,6 @@ class LLM_Model:
         return user_prompt.strip()
 
     def _postprocess(self, full_decoded_text: str, full_prompt: str) -> str:
-        # No-op
         return full_decoded_text
 
 
@@ -289,5 +333,11 @@ if __name__ == "__main__":
         "Hello, this is a test prompt for the LLM model. Are you working correctly?"
     )
 
-    response = llm_model.generate(prompt)
+    response, usage = llm_model.generate_with_usage(prompt)
     print(response)
+    print(f"Prompt tokens:     {usage.prompt_tokens}")
+    print(f"Completion tokens: {usage.completion_tokens}")
+    print(f"Latency:           {usage.latency_ms} ms")
+    print(
+        f"Tokens/sec:        {usage.completion_tokens / (usage.latency_ms / 1000):.1f}"
+    )

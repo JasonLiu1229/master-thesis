@@ -7,8 +7,8 @@ USER_PROMPT_TEMPLATE = (
     "{identifiers}\n\n"
     "Propose more meaningful names for each of THESE identifiers only.\n"
     "Return a single JSON object mapping originalName -> newName.\n"
-    "Example:\n"
-    '{{ "func_1": "Should_ThrowException_When_AgeLessThan18", "var_1": "yearEndDate", "var_2": "calendar" }}\n\n'
+    # "Example:\n"
+    # '{{ "func_1": "Should_ThrowException_When_AgeLessThan18", "var_1": "yearEndDate", "var_2": "calendar" }}\n\n'
     "Important:\n"
     "- Use ONLY the listed identifiers as keys.\n"
     "- Do NOT introduce new identifiers.\n"

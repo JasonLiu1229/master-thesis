@@ -19,7 +19,6 @@ ALso log token use, timing, cost of things
 
 50k is a bit to large
 
-
 When will I get paid?
     - Maybe next week
 

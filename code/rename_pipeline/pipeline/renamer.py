@@ -7,6 +7,7 @@ import yaml
 from dotenv import load_dotenv
 from llm_client import LLMClient
 from logger import setup_logging
+from usage_tracker import record_llm_call
 
 from prompts import (
     REATTEMPT_SYSTEM_INSTRUCT,
@@ -130,9 +131,11 @@ def _rename_process(
 
     assert config["TRIES"] > 0, "Amount of tries can not be 0 or smaller"
 
+    attempts = 0
+    
     for i in range(config["TRIES"]):
         logger.info(f"\nLLM attempt {i + 1} (mapping) for {original_method_name}")
-        raw = client.chat(LLM_MODEL, messages)
+        raw, usage = client.chat_with_usage(LLM_MODEL, messages)
         raw = strip_markdown_fences(raw).strip()
 
         try:
@@ -208,6 +211,7 @@ def _rename_process(
 
         best_mapping = mapping
         clean = True
+        attempts = i
         break
 
     if not clean or best_mapping is None:
@@ -227,6 +231,17 @@ def _rename_process(
         )
 
     candidate_code = apply_rename_mapping(source_code_clean, best_mapping)
+    
+    record_llm_call(
+        file_path=file_path,
+        method_name=original_method_name,
+        attempt=attempts + 1,
+        call_type="rename" if attempts == 0 else "rename_retry",
+        prompt_tokens=usage.prompt_tokens,
+        completion_tokens=usage.completion_tokens,
+        latency_ms=usage.latency_ms,
+        success=clean,  
+    )
 
     logger.info(
         f"Renamed test method (mapping mode): {original_method_name} -> {best_mapping[original_method_name]} (clean={clean})"

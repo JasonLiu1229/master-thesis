@@ -19,7 +19,8 @@ from pipeline.helper import (
     post_process_file,
 )
 from pipeline.renamer import rename, rename_eval
-from pipeline.stats_tracker import init
+from pipeline.stats_tracker import init as sInit
+from pipeline.usage_tracker import init as uInit
 
 from tqdm import tqdm
 
@@ -227,7 +228,8 @@ if __name__ == "__main__":
 
     MODE = args.mode
     
-    init()
+    sInit()
+    uInit()
 
     if MODE == "single":
         logger.info("Processing single file")

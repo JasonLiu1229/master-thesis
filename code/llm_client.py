@@ -1,8 +1,10 @@
 import logging
 import os
 import threading
+import time
+from dataclasses import dataclass
 
-import requests  
+import requests
 from dotenv import load_dotenv
 
 from logger import setup_logging
@@ -24,6 +26,13 @@ def _get_session() -> requests.Session:
     return _thread_local.session
 
 
+@dataclass
+class LLMUsage:
+    prompt_tokens: int
+    completion_tokens: int
+    latency_ms: float
+
+
 class LLMClient:
     def __init__(
         self, api_key: str, base_url: str = "https://api.openai.com/v1/chat/completions"
@@ -33,9 +42,21 @@ class LLMClient:
 
     def chat(self, model: str, messages: list[dict]) -> str:
         """
+        Thread-safe chat call. Returns only the response text.
+        Preserved for backwards compatibility.
+        """
+        text, _ = self.chat_with_usage(model, messages)
+        return text
+
+    def chat_with_usage(self, model: str, messages: list[dict]) -> tuple[str, LLMUsage]:
+        """
         Thread-safe chat call.
-        - No mutation of self.*
-        - Uses thread-local requests.Session for connection reuse.
+        Returns (response_text, LLMUsage) so the caller can record token usage.
+
+        The ``usage`` object in every OpenAI-compatible response body looks like:
+            { "prompt_tokens": N, "completion_tokens": M, "total_tokens": N+M }
+        All major providers (OpenAI, Mistral, Together, Ollama, vLLM, LM Studio)
+        include this field.
         """
         session = _get_session()
 
@@ -45,7 +66,9 @@ class LLMClient:
         }
         data = {"model": model, "messages": messages}
 
+        t0 = time.perf_counter()
         response = session.post(self.base_url, headers=headers, json=data)
+        latency_ms = (time.perf_counter() - t0) * 1000
 
         if response.status_code != 200:
             logger.error(f"LLM ERROR status: {response.status_code}")
@@ -58,10 +81,19 @@ class LLMClient:
         body = response.json()
 
         try:
-            return body["choices"][0]["message"]["content"]
+            text = body["choices"][0]["message"]["content"]
         except (KeyError, IndexError, TypeError) as e:
             logger.error(f"Unexpected response format from LLM: {e}; body={body!r}")
             raise
+
+        usage_raw = body.get("usage") or {}
+        usage = LLMUsage(
+            prompt_tokens=usage_raw.get("prompt_tokens", 0),
+            completion_tokens=usage_raw.get("completion_tokens", 0),
+            latency_ms=round(latency_ms, 1),
+        )
+
+        return text, usage
 
 
 if __name__ == "__main__":
@@ -72,12 +104,15 @@ if __name__ == "__main__":
 
     client = LLMClient(API_KEY, API_URL)
 
-    reply = client.chat(
-        "gpt-5-mini",
+    reply, usage = client.chat_with_usage(
+        "gpt-4o-mini",
         [
-            {"role": "user", "content": "Give me the time of today."},
             {"role": "system", "content": "You are a helpful assistant"},
+            {"role": "user", "content": "Give me the time of today."},
         ],
     )
 
     print(reply)
+    print(f"Prompt tokens: {usage.prompt_tokens}")
+    print(f"Completion tokens: {usage.completion_tokens}")
+    print(f"Latency: {usage.latency_ms} ms")
