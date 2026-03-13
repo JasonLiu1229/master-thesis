@@ -3,7 +3,7 @@ import logging
 from fastapi import APIRouter, Header, HTTPException, status
 
 from logger import setup_logging
-from schemas.chat_schema import ChatChoice, ChatMessage, ChatRequest, ChatResponse
+from schemas.chat_schema import ChatChoice, ChatMessage, ChatRequest, ChatResponse, Usage
 from services.llm import ask_llm
 from services.security import verify_api_key
 
@@ -43,7 +43,7 @@ async def chat_endpoint(
             sys_instruction = message.content
 
     try:
-        reply_text = await ask_llm(user_message, sys_instruction)
+        reply_text, usage = await ask_llm(user_message, sys_instruction)
 
         return ChatResponse(
             choices=[
@@ -53,7 +53,12 @@ async def chat_endpoint(
                         content=reply_text,
                     )
                 )
-            ]
+            ],
+            usage=Usage(
+                prompt_tokens=usage.prompt_tokens,
+                completion_tokens=usage.completion_tokens,
+                latency_ms=usage.latency_ms,
+            ),
         )
     except Exception as e:
         logger.error(f"Upstream LLM error: {e}")

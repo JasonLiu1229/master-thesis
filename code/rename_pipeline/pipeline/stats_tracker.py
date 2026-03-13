@@ -1,9 +1,13 @@
 import csv
 import os
 from datetime import datetime
+import yaml
 
+config = {}
+with open("pipeline/config.yml", "r") as f:
+    config = yaml.safe_load(f)
 
-ERROR_LOG_PATH = "pipeline/errors.csv"
+ERROR_LOG_PATH = config["ERROR_LOG_PATH"]
 
 _FIELDNAMES = [
     "timestamp",

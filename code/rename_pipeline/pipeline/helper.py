@@ -425,36 +425,6 @@ def list_files(folder):
             files.add(relative_path)
     return files
 
-
-# def build_identifier_context_snippets(
-#     wrapped_test_case: str,
-#     identifier_candidates: list[str],
-#     window: int = 2,
-# ) -> dict[str, str]:
-#     lines = wrapped_test_case.splitlines()
-#     n = len(lines)
-
-#     contexts: dict[str, str] = {}
-
-#     for name in identifier_candidates:
-#         first_idx = None
-#         pattern = re.compile(rf"\b{name}\b")
-#         for i, line in enumerate(lines):
-#             if pattern.search(line):
-#                 first_idx = i
-#                 break
-
-#         if first_idx is None:
-#             continue
-
-#         start = max(0, first_idx - window)
-#         end = min(n, first_idx + window + 1)
-#         snippet = "\n".join(lines[start:end])
-#         contexts[name] = snippet
-
-#     return contexts
-
-
 # === Post process functions ===
 def remove_wrap(code: str) -> str:
     header_pattern = (
@@ -558,8 +528,8 @@ TEST_ANNOT_START_RE = re.compile(
 
 
 def parse_method_name(test_case: str) -> str:
-    logger.warning("DEBUG contains @Test? %s", "@Test" in test_case)
-    logger.warning("DEBUG head=%r", test_case)
+    # logger.warning("DEBUG contains @Test? %s", "@Test" in test_case)
+    # logger.warning("DEBUG head=%r", test_case)
 
     m_annot = TEST_ANNOT_START_RE.search(test_case)
     if m_annot:

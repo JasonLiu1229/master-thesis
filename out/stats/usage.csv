@@ -1,0 +1,11 @@
+timestamp,file_path,method_name,attempt,call_type,prompt_tokens,completion_tokens,total_tokens,latency_ms,success
+2026-03-13T11:04:09,in/test/TestClass15205.java.jsonl,func_1,1,rename,0,0,0,40333.7,True
+2026-03-13T11:07:41,in/test/TestClass23196.java.jsonl,func_1,1,rename,0,0,0,3454.8,True
+2026-03-13T11:09:03,in/test/TestClass10386.java.jsonl,func_1,1,rename,0,0,0,6633.5,True
+2026-03-13T11:10:24,in/test/TestClass77051.java.jsonl,func_1,1,rename,0,0,0,4091.4,True
+2026-03-13T11:16:22,in/test/TestClass22293.java.jsonl,func_1,1,rename,0,0,0,5818.2,True
+2026-03-13T11:18:52,in/test/TestClass62902.java.jsonl,func_1,1,rename,0,0,0,3570.3,True
+2026-03-13T11:20:44,in/test/TestClass64726.java.jsonl,func_1,1,rename,0,0,0,3584.1,True
+2026-03-13T11:24:11,in/test/TestClass56405.java.jsonl,func_1,1,rename,0,0,0,8248.5,True
+2026-03-13T11:26:03,in/test/TestClass61970.java.jsonl,func_1,1,rename,0,0,0,3359.5,True
+2026-03-13T11:27:17,in/test/TestClass18107.java.jsonl,func_1,1,rename,0,0,0,5014.2,True

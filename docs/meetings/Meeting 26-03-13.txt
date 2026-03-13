@@ -23,7 +23,7 @@ references:
     - [forum cohen d](https://stats.stackexchange.com/questions/437009/when-to-use-cohens-d-and-when-t-test)
     - [cohen d definition](https://statisticsbyjim.com/basics/cohens-d/)
 
-Also implemented the reporting part but did not have time to test this yet
+Also implemented the reporting part
     - 
 
 Bug:

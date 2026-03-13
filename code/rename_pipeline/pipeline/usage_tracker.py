@@ -1,13 +1,19 @@
 import csv
 import os
 from datetime import datetime
+import yaml
 
-USAGE_LOG_PATH = "pipeline/usage.csv"
+config = {}
+with open("pipeline/config.yml", "r") as f:
+    config = yaml.safe_load(f)
+
+USAGE_LOG_PATH = config["USAGE_LOG_PATH"]
 
 _FIELDNAMES = [
     "timestamp",
     "file_path",
     "method_name",
+    "new_method_name",
     "attempt",
     "call_type",           # rename | rename_retry | eval
     "prompt_tokens",
@@ -48,6 +54,7 @@ def record_llm_call(
     *,
     file_path: str,
     method_name: str,
+    new_method_name:str,
     attempt: int,
     call_type: str,
     prompt_tokens: int,
@@ -67,6 +74,7 @@ def record_llm_call(
             "timestamp":         datetime.now().isoformat(timespec="seconds"),
             "file_path":         file_path or "",
             "method_name":       method_name or "",
+            "new_method_name": new_method_name or "",
             "attempt":           attempt,
             "call_type":         call_type,
             "prompt_tokens":     prompt_tokens,

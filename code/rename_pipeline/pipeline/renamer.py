@@ -235,6 +235,7 @@ def _rename_process(
     record_llm_call(
         file_path=file_path,
         method_name=original_method_name,
+        new_method_name=best_mapping[original_method_name],
         attempt=attempts + 1,
         call_type="rename" if attempts == 0 else "rename_retry",
         prompt_tokens=usage.prompt_tokens,

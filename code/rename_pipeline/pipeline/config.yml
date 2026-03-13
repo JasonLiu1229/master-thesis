@@ -14,3 +14,7 @@ AMOUNT_OF_EVAL_SAMPLES: 10 # set to -1 to use all eval samples
 EVAL_FAILED_FILE: out/logs/eval_failed.txt
 
 CODEREADER_CONFIG_FILE: pipeline/codereader.yml
+
+ERROR_LOG_PATH: "out/stats/errors.csv"
+
+USAGE_LOG_PATH: "out/stats/usage.csv"
