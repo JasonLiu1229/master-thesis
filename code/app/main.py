@@ -1,19 +1,22 @@
+import logging
+
 from api.chat import router as chat_router
 from api.keygen import router as keygen_router
 from fastapi import FastAPI
-
-import logging
 
 app = FastAPI(title="LLM Chat API (Local tool)", version="1.0.0")
 
 app.include_router(chat_router, prefix="/api", tags=["chat"])
 app.include_router(keygen_router, prefix="/api", tags=["keygen"])
 
+
 class HealthCheckFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
         return "GET /health" not in record.getMessage()
 
+
 logging.getLogger("uvicorn.access").addFilter(HealthCheckFilter())
+
 
 @app.get("/health")
 async def health():

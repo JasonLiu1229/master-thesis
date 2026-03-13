@@ -1,6 +1,7 @@
 import csv
 import os
 from datetime import datetime
+
 import yaml
 
 config = {}
@@ -18,13 +19,15 @@ _FIELDNAMES = [
     "raw_response",
 ]
 
+
 def init():
     """Reset the error log at the start of a new run."""
     os.makedirs(os.path.dirname(ERROR_LOG_PATH), exist_ok=True)
     with open(ERROR_LOG_PATH, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=_FIELDNAMES)
         writer.writeheader()
-        
+
+
 def _ensure_header():
     """Write the CSV header if the file doesn't exist yet."""
     if not os.path.exists(ERROR_LOG_PATH):

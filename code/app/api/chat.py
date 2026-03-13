@@ -3,7 +3,13 @@ import logging
 from fastapi import APIRouter, Header, HTTPException, status
 
 from logger import setup_logging
-from schemas.chat_schema import ChatChoice, ChatMessage, ChatRequest, ChatResponse, Usage
+from schemas.chat_schema import (
+    ChatChoice,
+    ChatMessage,
+    ChatRequest,
+    ChatResponse,
+    Usage,
+)
 from services.llm import ask_llm
 from services.security import verify_api_key
 

@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 from llm_client import LLMClient
 from logger import setup_logging
 
-
 from prompts import (
     REATTEMPT_SYSTEM_INSTRUCT,
     RETRY_USER_PROMPT_TEMPLATE,
@@ -16,8 +15,6 @@ from prompts import (
     USER_PROMPT_TEMPLATE,
 )
 
-from pipeline.stats_tracker import log_error
-from pipeline.usage_tracker import record_llm_call
 from pipeline.helper import (
     apply_rename_mapping,
     extract_identifier_candidates,
@@ -31,6 +28,9 @@ from pipeline.helper import (
     unescape_java_stringified_source,
     wrap_test_case,
 )
+
+from pipeline.stats_tracker import log_error
+from pipeline.usage_tracker import record_llm_call
 
 
 config = {}
@@ -132,7 +132,7 @@ def _rename_process(
     assert config["TRIES"] > 0, "Amount of tries can not be 0 or smaller"
 
     attempts = 0
-    
+
     for i in range(config["TRIES"]):
         logger.info(f"\nLLM attempt {i + 1} (mapping) for {original_method_name}")
         raw, usage = client.chat_with_usage(LLM_MODEL, messages)
@@ -197,8 +197,8 @@ def _rename_process(
             logger.error(
                 f"{error_reason} for {original_method_name} on attempt {i+1}: {mapping}"
             )
-            
-            log_error(file_path, i+1, "MissingKeysError", error_reason)
+
+            log_error(file_path, i + 1, "MissingKeysError", error_reason)
 
             user_message = RETRY_USER_PROMPT_TEMPLATE.format(
                 test_case=wrapped_source_code,
@@ -216,13 +216,11 @@ def _rename_process(
 
     if not clean or best_mapping is None:
         error_reason = f"All {config['TRIES']} attempts failed to produce a usable mapping for {original_method_name}; keeping original test."
-        
-        logger.error(
-            error_reason
-        )
-        
+
+        logger.error(error_reason)
+
         log_error(file_path, config["TRIES"], "FailedRename", error_reason)
-        
+
         return JavaTestCase(
             name=original_method_name,
             original_code=source_code_clean,
@@ -231,7 +229,7 @@ def _rename_process(
         )
 
     candidate_code = apply_rename_mapping(source_code_clean, best_mapping)
-    
+
     record_llm_call(
         file_path=file_path,
         method_name=original_method_name,
@@ -241,7 +239,7 @@ def _rename_process(
         prompt_tokens=usage.prompt_tokens,
         completion_tokens=usage.completion_tokens,
         latency_ms=usage.latency_ms,
-        success=clean,  
+        success=clean,
     )
 
     logger.info(

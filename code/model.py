@@ -239,7 +239,13 @@ class LLM_Model:
                 self.model.device
             )
             _ = self.model.generate(
-                **inputs, max_new_tokens=4, do_sample=False, use_cache=True
+                **inputs,
+                max_new_tokens=10,
+                do_sample=False,
+                use_cache=True,
+                generation_config=copy.deepcopy(self._gen_config),
+                pad_token_id=self.tokenizer.pad_token_id,
+                eos_token_id=self.tokenizer.eos_token_id,
             )
         except Exception:
             pass

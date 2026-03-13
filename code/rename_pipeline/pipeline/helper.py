@@ -425,6 +425,7 @@ def list_files(folder):
             files.add(relative_path)
     return files
 
+
 # === Post process functions ===
 def remove_wrap(code: str) -> str:
     header_pattern = (

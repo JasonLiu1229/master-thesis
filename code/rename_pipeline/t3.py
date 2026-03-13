@@ -227,7 +227,7 @@ if __name__ == "__main__":
     args = argument_parser().parse_args()
 
     MODE = args.mode
-    
+
     sInit()
     uInit()
 
