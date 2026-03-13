@@ -91,7 +91,7 @@ def _llm_parser(lines: Iterable[str]) -> Tuple[float, float]:
 
 
 def llm_readability_score(prediction: str) -> Tuple[float, float]:
-    r = requests.post(f"{CODEREADER_URL}/grade", json={"text": prediction}, timeout=120)
+    r = requests.post(f"{CODEREADER_URL}/grade", json={"text": prediction}, timeout=900)
     if not r.ok:
         try:
             detail = r.json().get("detail", r.text)

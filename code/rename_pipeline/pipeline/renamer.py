@@ -7,7 +7,7 @@ import yaml
 from dotenv import load_dotenv
 from llm_client import LLMClient
 from logger import setup_logging
-from usage_tracker import record_llm_call
+
 
 from prompts import (
     REATTEMPT_SYSTEM_INSTRUCT,
@@ -16,8 +16,8 @@ from prompts import (
     USER_PROMPT_TEMPLATE,
 )
 
-from stats_tracker import log_error
-
+from pipeline.stats_tracker import log_error
+from pipeline.usage_tracker import record_llm_call
 from pipeline.helper import (
     apply_rename_mapping,
     extract_identifier_candidates,
