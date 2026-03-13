@@ -2,7 +2,6 @@ https://arxiv.org/pdf/2302.10352
     - Based on this article, trains on full method2test dataset but only makes use of 5k samples of test dataset.
         - But the test dataset is a different currated dataset
 
-
 https://www.mdpi.com/2079-9292/14/7/1463 
     - This one makes use of a dataset that contains 700k samples but is truncated to ~25k, which ~18k is used for training, ~6k for validation and 300 samples for testing.
 
@@ -24,10 +23,23 @@ references:
     - [cohen d definition](https://statisticsbyjim.com/basics/cohens-d/)
 
 Also implemented the reporting part
-    - 
+    - outputted to a csv file
+
+Using adapter files also works
 
 Bug:
     - Training completed but did not output with final model (tested this locally and it did work for small example), I have the 50pct as last closest step
+        - New cost estimation from scratch and from 50pct 
 
 This week cost:
     - 112.76 euro
+
+--------------------------
+
+Check if the 25pct and 50pct are mature enough
+
+Find more data about the test datasize
+    - worst case full dataset 
+
+Make sure deepseek-coder is a proper baseline or maybe some other
+    - find motivation, right argument

@@ -18,4 +18,4 @@ COPY ../tools/java-dataset-converter-llm/dataset/test/jsonl  /app/in/test
 WORKDIR /app
 
 # Eval
-CMD ["bash", "-lc", "ollama serve & python3 t3.py --mode eval --dir in/test --force --output out/java/"]
+CMD ["bash", "-lc", "python3 t3.py --mode eval --dir in/test --force --output out/java/"]

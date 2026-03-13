@@ -1,5 +1,7 @@
 timestamp,file_path,attempt,error_type,error_message,raw_response
-2026-03-13T12:10:49,in/test/TestClass23196.java.jsonl,1,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['var_1'],
-2026-03-13T12:15:13,in/test/TestClass77051.java.jsonl,1,MissingKeysError,"The mapping did not contain all required identifiers. Missing: ['a', 'n']",
-2026-03-13T12:19:37,in/test/TestClass64726.java.jsonl,1,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['var_1'],
-2026-03-13T12:19:39,in/test/TestClass64726.java.jsonl,2,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['func_1'],
+2026-03-13T15:31:24,in/test/TestClass64726.java.jsonl,1,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['var_1'],
+2026-03-13T15:31:25,in/test/TestClass64726.java.jsonl,2,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['func_1'],
+2026-03-13T15:47:26,in/test/TestClass19743.java.jsonl,1,MissingKeysError,"The mapping did not contain all required identifiers. Missing: ['var_1', 'var_2', 'var_3']",
+2026-03-13T16:15:08,in/test/TestClass76713.java.jsonl,1,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['func_1'],
+2026-03-13T16:40:17,in/test/TestClass74881.java.jsonl,1,MissingKeysError,"The mapping did not contain all required identifiers. Missing: ['var_1', 'var_2']",
+2026-03-13T18:37:46,in/test/TestClass5302.java.jsonl,1,MissingKeysError,"The mapping did not contain all required identifiers. Missing: ['var_1', 'var_2']",
