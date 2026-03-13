@@ -23,7 +23,7 @@ BATCH_SIZE_PER_DEVICE: 1
 GRAD_ACCUM_STEPS: 6
 NUM_EPOCHS: 1
 LEARNING_RATE: 0.0001
-MAX_SAVE_TOTAL: 1
+MAX_SAVE_TOTAL: 3
 LOGGING_STEPS: 200
 EVAL_STEPS: 2000
 SAVE_STEPS: 2000
@@ -36,6 +36,8 @@ RANK: 8 # The rank determines the dimensionality of the low-rank decomposition. 
 LORA_ALPHA: 32 # is a scaling factor that controls the contribution of the LoRA adaptation to the original weights.
 LORA_DROPOUT: 0.05 # in LoRA randomly zeros out some of the activations before the low-rank adapters during training, just like regular dropout.
 RESUME_FROM_LAST_CP: false # Whether to resume training from the last checkpoint in the output directory.
+
+RESUME_ADAPTER_PATH: out/adapter/adapter_50pct
 
 # smaller dataset config
 USE_SMALLER_DATASET: false

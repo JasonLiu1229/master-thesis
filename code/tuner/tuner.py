@@ -9,7 +9,13 @@ from logger import setup_logging
 
 from model import LLM_Model
 
-from peft import get_peft_model, LoraConfig, prepare_model_for_kbit_training
+from peft import (
+    get_peft_model,
+    LoraConfig,
+    prepare_model_for_kbit_training,
+    set_peft_model_state_dict,
+)
+from safetensors.torch import load_file
 
 from transformers import (
     AutoModelForCausalLM,
@@ -186,6 +192,21 @@ def define_base():
 
     model = get_peft_model(base_model, lora_config)
 
+    resume_adapter = config.get("RESUME_ADAPTER_PATH", None)
+    if resume_adapter and os.path.isdir(resume_adapter):
+        adapter_file = os.path.join(resume_adapter, "adapter_model.safetensors")
+        bin_file = os.path.join(resume_adapter, "adapter_model.bin")
+
+        if os.path.exists(adapter_file):
+            state_dict = load_file(adapter_file)
+        elif os.path.exists(bin_file):
+            state_dict = torch.load(bin_file, map_location="cpu")
+        else:
+            raise FileNotFoundError(f"No adapter weights found in {resume_adapter}")
+
+        set_peft_model_state_dict(model, state_dict)
+        logger.info(f"Resumed adapter weights from {resume_adapter}")
+
     try:
         model.config.use_cache = False
     except Exception:
@@ -258,23 +279,28 @@ class AdapterSnapshotCallback(TrainerCallback):
         self.percentages = percentages
         self.saved = set()
 
-    def on_step_end(self, args, state, control, **kwargs):
-        if not state.max_steps:
-            return
-
-        progress = state.global_step / state.max_steps
-        logger.info(f"Current progress: {state.global_step} / {state.max_steps} = {progress}")
-
+    def _try_save(self, progress, state):
         for p in self.percentages:
             if progress >= p and p not in self.saved:
                 out_dir = os.path.join(self.adapter_root, f"adapter_{int(p*100)}pct")
                 os.makedirs(out_dir, exist_ok=True)
-
                 self.model.save_pretrained(out_dir)
                 self.tokenizer.save_pretrained(out_dir)
-
                 logger.info(f"Saved adapter snapshot at {int(p*100)}% -> {out_dir}")
                 self.saved.add(p)
+
+    def on_step_end(self, args, state, control, **kwargs):
+        if not state.max_steps:
+            return
+        progress = state.global_step / state.max_steps
+        logger.info(
+            f"Current progress: {state.global_step} / {state.max_steps} = {progress:.4f}"
+        )
+        self._try_save(progress, state)
+
+    def on_train_end(self, args, state, control, **kwargs):
+        logger.info("on_train_end triggered — ensuring all snapshots are saved.")
+        self._try_save(1.0, state)  
 
 
 def tune(input_arrow_dir: str | None = None):
@@ -284,21 +310,13 @@ def tune(input_arrow_dir: str | None = None):
 
     train_ds = load_ds(train_data_path)
     val_ds = load_ds(val_data_path)
-    
-    # for ds_name, ds in [("train", train_ds), ("val", val_ds)]:
-    #     if ds is not None and "labels" in ds.column_names:
-    #         logger.warning(f"Removing 'labels' column from {ds_name} dataset (was ragged).")
-    #         if ds_name == "train":
-    #             train_ds = train_ds.remove_columns(["labels"])
-    #         else:
-    #             val_ds = val_ds.remove_columns(["labels"])
 
     model, tokenizer = define_base()
 
     collator = DataCollatorForLanguageModeling(
         tokenizer=tokenizer,
         mlm=False,
-        pad_to_multiple_of=8,  # for better performance on GPUs
+        pad_to_multiple_of=8,
     )
 
     args = make_args(val_ds)
@@ -329,7 +347,7 @@ def tune(input_arrow_dir: str | None = None):
                 model=model,
                 tokenizer=tokenizer,
                 adapter_root=config["ADAPTER_SAVE_PATH"],
-                percentages=(0.25, 0.5, 1.0),
+                percentages=(0.25, 0.5, 0.75, 1.0),
             ),
         ],
     )
@@ -342,8 +360,8 @@ def tune(input_arrow_dir: str | None = None):
     else:
         trainer.train()
 
-    # adapter_dir = config["ADAPTER_SAVE_PATH"]
-    # os.makedirs(adapter_dir, exist_ok=True)
-    # model.save_pretrained(adapter_dir)
-    # tokenizer.save_pretrained(adapter_dir)
-    # logger.info(f"Adapter model saved to {adapter_dir}")
+    adapter_dir = config["ADAPTER_SAVE_PATH"]
+    os.makedirs(adapter_dir, exist_ok=True)
+    model.save_pretrained(adapter_dir)
+    tokenizer.save_pretrained(adapter_dir)
+    logger.info(f"Final Adapter model saved to {adapter_dir}")
