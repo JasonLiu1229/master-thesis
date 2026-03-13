@@ -1,4 +1,5 @@
 import subprocess
+import logging
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
@@ -6,6 +7,12 @@ from pydantic import BaseModel, Field
 app = FastAPI(title="codereader raw API", version="1.0")
 
 DEFAULT_CFG = "codereader.yml"
+
+class HealthCheckFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        return "GET /health" not in record.getMessage()
+
+logging.getLogger("uvicorn.access").addFilter(HealthCheckFilter())
 
 class GradeRequest(BaseModel):
     text: str = Field(..., min_length=1)
