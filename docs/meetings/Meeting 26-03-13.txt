@@ -22,3 +22,12 @@ references:
     - [guide test size](https://liner.com/review/hitchhikers-guide-to-testing-statistical-significance-in-natural-language-processing)
     - [forum cohen d](https://stats.stackexchange.com/questions/437009/when-to-use-cohens-d-and-when-t-test)
     - [cohen d definition](https://statisticsbyjim.com/basics/cohens-d/)
+
+Also implemented the reporting part but did not have time to test this yet
+    - 
+
+Bug:
+    - Training completed but did not output with final model (tested this locally and it did work for small example), I have the 50pct as last closest step
+
+This week cost:
+    - 112.76 euro
