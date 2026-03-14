@@ -2,16 +2,49 @@ import json
 import logging
 import os
 import random
+import shutil
 from typing import List
 
 import yaml
 from datasets import Dataset, Features, Sequence, Value
 from logger import setup_logging
-from prompts import SYSTEM_INSTRUCTION, USER_PROMPT_TEMPLATE
 from transformers import AutoTokenizer
 
-setup_logging("tuner_preprocess")
-logger = logging.getLogger("tuner_preprocess")
+SYSTEM_INSTRUCTION = (
+    "You are a code refactoring assistant for Java unit tests.\n"
+    "You will be given:\n"
+    "- A Java test method (wrapped in a dummy class), and\n"
+    "- A list of identifier names (method + local variables + parameters).\n\n"
+    "Your job is to propose more meaningful names for these identifiers.\n"
+    "Make use of this template to additionally guide the naming:\n"
+    "- A test case should have an assertion between expected and actual values. "
+    "So for identifiers that are used in the assertions itself, try to make use "
+    "of expected and actual.\n\n"
+    "You MUST ONLY respond with a JSON object mapping originalName -> newName.\n"
+    "You MUST NOT output code or comments or markdown.\n"
+)
+
+USER_PROMPT_TEMPLATE = (
+    "Here is the obfuscated Java test method wrapped in a dummy class:\n\n"
+    "```java\n"
+    "{test_case}\n"
+    "```\n\n"
+    "Here are the identifiers that may be renamed:\n"
+    "{identifiers}\n\n"
+    "Propose more meaningful names for each of THESE identifiers only.\n"
+    "Return a single JSON object mapping originalName -> newName.\n"
+    "Example:\n"
+    '{{ "func_1": "testYearEnd" }}\n\n'
+    "Important:\n"
+    "- Use ONLY the listed identifiers as keys.\n"
+    "- Do NOT introduce new identifiers.\n"
+    "- Do NOT include any keys that were not listed.\n"
+    "- Do NOT output anything except the JSON object (no backticks, no text)."
+)
+
+
+setup_logging("tuner")
+logger = logging.getLogger("tuner")
 
 config: dict = {}
 try:
@@ -85,7 +118,7 @@ def preprocess_single(
     offsets: List[tuple] = encoder["offset_mapping"]
 
     labels: List[int] = []
-    for (_, end), idx, mask in zip(offsets, input_ids, attn_mask):
+    for (start, end), idx, mask in zip(offsets, input_ids, attn_mask):
         if mask == 0:
             labels.append(-100)
         elif end <= prompt_len_chars:
@@ -123,8 +156,6 @@ def preprocess(
             f"Output directory {output_dir} already exists and is not empty. "
             "Overwriting contents."
         )
-        import shutil
-
         for name in os.listdir(output_dir):
             fp = os.path.join(output_dir, name)
             shutil.rmtree(fp) if os.path.isdir(fp) else os.remove(fp)
@@ -181,8 +212,8 @@ def preprocess(
                             continue
 
                         obf_code = record.get("obf_code")
-                        mapping = record.get("mapping")  # dict
-                        identifiers = record.get("identifiers")  # list
+                        mapping = record.get("mapping")  
+                        identifiers = record.get("identifiers")  
 
                         if not obf_code or not mapping or not identifiers:
                             skipped_json += 1

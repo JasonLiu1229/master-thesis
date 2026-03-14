@@ -21,11 +21,11 @@ COPY ../code/tuner /app
 COPY ../code/model.py /app
 COPY ../code/logger.py /app
 COPY ../code/prompts.py /app
+COPY ../code/convert_dataset.py /app
+COPY ../scripts/entrypoint.sh /app/entrypoint.sh
 
-COPY ../tools/java-dataset-converter-llm/dataset/train/jsonl /app/in/train
-COPY ../tools/java-dataset-converter-llm/dataset/val/jsonl   /app/in/val
-COPY ../tools/java-dataset-converter-llm/dataset/test/jsonl  /app/in/test
+RUN chmod +x /app/entrypoint.sh
 
 WORKDIR /app
 
-CMD ["python3", "main.py", "--preprocess"]
+CMD ["/app/entrypoint.sh"]

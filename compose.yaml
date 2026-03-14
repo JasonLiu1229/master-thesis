@@ -144,6 +144,7 @@ services:
     volumes:
       - ./out:/app/out/
       - hf_cache:/root/.cache/huggingface/
+      - ./tools/java-dataset-converter-llm/dataset:/app/in/raw:ro
     working_dir: /app
     gpus: all
     profiles: ["tune_process"]
