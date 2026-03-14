@@ -1,5 +1,5 @@
 # Configuration for LLM model
 MODEL_ID: "Qwen/Qwen2.5-Coder-7B-Instruct"
 
-USE_LOCAL_LLM: false
+USE_LOCAL_LLM: true
 ADAPTER_FILE: "out/adapter/adapter_25pct"

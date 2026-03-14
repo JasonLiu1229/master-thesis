@@ -1,0 +1,22 @@
+{
+  "cer": 12.385913949438539,
+  "correct_ordered": 0.7653997378768022,
+  "correct_unordered": 0.706060606060606,
+  "edit_distance": 109.33333333333333,
+  "f1": 0.8245098039215687,
+  "failed_files": [
+    "TestClass10386.java.jsonl",
+    "TestClass18107.java.jsonl",
+    "TestClass23196.java.jsonl",
+    "TestClass56405.java.jsonl",
+    "TestClass61970.java.jsonl",
+    "TestClass62902.java.jsonl",
+    "TestClass64726.java.jsonl"
+  ],
+  "failes": 7,
+  "llm_score_avg": 68.88888888888889,
+  "llm_score_wavg": 68.78787878787878,
+  "precision": 0.8092592592592593,
+  "recall": 0.8416666666666667,
+  "total_time": 438.8293607234955
+}

@@ -9,7 +9,7 @@ AMT_WORKERS: 1 # set to -1 to use all workers available, check if your api allow
 # Eval
 EVAL_OUTPUT_FILE_NAME: out/benchmark/t3_benchmark_results.json
 
-AMOUNT_OF_EVAL_SAMPLES: 100 # set to -1 to use all eval samples
+AMOUNT_OF_EVAL_SAMPLES: 10 # set to -1 to use all eval samples
 
 EVAL_FAILED_FILE: out/logs/eval_failed.txt
 
