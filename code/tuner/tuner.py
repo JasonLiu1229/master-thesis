@@ -86,6 +86,8 @@ def pick_attn_implementation() -> str | None:  # gpt generated
         return "sdpa"
 
     try:
+        import flash_attn
+
         logger.info("flash_attn import OK -> using flash_attention_2.")
         return "flash_attention_2"
     except Exception as e:
@@ -240,7 +242,7 @@ def make_args(val_ds: Dataset | None) -> TrainingArguments:
         "learning_rate": config["LEARNING_RATE"],
         "warmup_ratio": 0.03,  # starts with a lower LR and then slowly increases to the set LR based on this ratio
         "lr_scheduler_type": "cosine",  # slow decay in the beginning, fast decay at the end
-        "weight_decay": 0.0,
+        "weight_decay": 0.01,
         "logging_steps": config["LOGGING_STEPS"],
         "eval_steps": config["EVAL_STEPS"],
         "save_steps": config["SAVE_STEPS"],
@@ -253,6 +255,7 @@ def make_args(val_ds: Dataset | None) -> TrainingArguments:
         "group_by_length": True,
         "dataloader_num_workers": 8,
         "optim": "paged_adamw_8bit",
+        "neftune_noise_alpha": 5,
     }
 
     try:
@@ -282,11 +285,11 @@ class AdapterSnapshotCallback(TrainerCallback):
     def _try_save(self, progress, state):
         for p in self.percentages:
             if progress >= p and p not in self.saved:
-                out_dir = os.path.join(self.adapter_root, f"adapter_{int(p*100)}pct")
+                out_dir = os.path.join(self.adapter_root, f"adapter_{int(p * 100)}pct")
                 os.makedirs(out_dir, exist_ok=True)
                 self.model.save_pretrained(out_dir)
                 self.tokenizer.save_pretrained(out_dir)
-                logger.info(f"Saved adapter snapshot at {int(p*100)}% -> {out_dir}")
+                logger.info(f"Saved adapter snapshot at {int(p * 100)}% -> {out_dir}")
                 self.saved.add(p)
 
     def on_step_end(self, args, state, control, **kwargs):
@@ -300,7 +303,7 @@ class AdapterSnapshotCallback(TrainerCallback):
 
     def on_train_end(self, args, state, control, **kwargs):
         logger.info("on_train_end triggered — ensuring all snapshots are saved.")
-        self._try_save(1.0, state)  
+        self._try_save(1.0, state)
 
 
 def tune(input_arrow_dir: str | None = None):

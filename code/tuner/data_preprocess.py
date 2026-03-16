@@ -87,14 +87,11 @@ def preprocess_single(
 ):
     """
     Build one (input_ids, attention_mask, labels) triple.
-
-    The model is trained to produce the JSON mapping as its completion.
-    Only completion tokens carry real labels; prompt tokens get -100.
+    Prompt tokens are masked with -100; only completion tokens are supervised.
     """
     eos = tokenizer.eos_token or "</s>"
 
     prompt = build_prompt(obf_code, identifiers, tokenizer)
-
     completion = (
         json.dumps(
             {k: mapping[k] for k in identifiers if k in mapping}, ensure_ascii=False
@@ -102,29 +99,34 @@ def preprocess_single(
         + eos
     )
 
-    full_text = prompt + completion
-    prompt_len_chars = len(prompt)
+    # Tokenize prompt alone (no padding) to get the exact prompt token count
+    prompt_ids = tokenizer(
+        prompt,
+        add_special_tokens=False,
+        truncation=False,
+    )["input_ids"]
+    prompt_len = len(prompt_ids)
 
+    # Tokenize full sequence with padding/truncation
     encoder = tokenizer(
-        full_text,
-        return_offsets_mapping=True,
+        prompt + completion,
+        add_special_tokens=False,
         max_length=max_length,
         truncation=True,
         padding="max_length",
+        return_attention_mask=True,
     )
 
     input_ids: List[int] = encoder["input_ids"]
     attn_mask: List[int] = encoder["attention_mask"]
-    offsets: List[tuple] = encoder["offset_mapping"]
 
+    # Mask prompt tokens and padding tokens with -100
     labels: List[int] = []
-    for (start, end), idx, mask in zip(offsets, input_ids, attn_mask):
-        if mask == 0:
-            labels.append(-100)
-        elif end <= prompt_len_chars:
+    for i, (tok_id, mask) in enumerate(zip(input_ids, attn_mask)):
+        if mask == 0 or i < prompt_len:
             labels.append(-100)
         else:
-            labels.append(idx)
+            labels.append(tok_id)
 
     assert len(labels) == len(input_ids) == max_length
     return {
@@ -212,8 +214,8 @@ def preprocess(
                             continue
 
                         obf_code = record.get("obf_code")
-                        mapping = record.get("mapping")  
-                        identifiers = record.get("identifiers")  
+                        mapping = record.get("mapping")
+                        identifiers = record.get("identifiers")
 
                         if not obf_code or not mapping or not identifiers:
                             skipped_json += 1
