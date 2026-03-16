@@ -21,7 +21,6 @@ COPY ../code/tuner /app
 COPY ../code/model.py /app
 COPY ../code/logger.py /app
 COPY ../code/prompts.py /app
-COPY ../code/convert_dataset.py /app
 COPY ../scripts/entrypoint.sh /app/entrypoint.sh
 
 RUN chmod +x /app/entrypoint.sh

@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import shutil
+from enum import Enum
 from logger import setup_logging
 
 setup_logging("tuner_converter")
@@ -11,26 +12,48 @@ logger = logging.getLogger("tuner_converter")
 OBF_RE = re.compile(r"\b(func_\d+|var_\d+)\b")
 
 
+class SkipReason(Enum):
+    NO_IDENTIFIERS = "no_obf_identifiers"
+    TOKEN_MISMATCH = "token_mismatch"
+    CONFLICT = "mapping_conflict"
+
+
 def _tokenize(code: str) -> list[str]:
     """
     Split Java source into a flat token list that preserves every character.
     Splits on word boundaries so that identifier tokens are isolated.
     """
-    return re.findall(r"[A-Za-z_]\w*|[^\w\s]|\d+|\s+", code)
+    return re.findall(r"[A-Za-z_$][\w$]*|[^\w\s$]|\d+|\s+", code)
 
 
-def extract_mapping(prompt: str, response: str) -> tuple[dict, list] | None:
+def sanitize(code: str) -> str:
+    code = code.replace("\\'", "'")
+    code = code.replace('\\\\\\"', '\\"')
+    code = code.replace('\\\\"', '\\"')
+    code = code.replace("\r\n", "\n")
+    code = code.replace("\0", "")
+    return code
+
+
+def extract_mapping(prompt: str, response: str) -> tuple[dict, list] | SkipReason:
     """
     Derive {obf_name: original_name} by aligning the token streams of the
     obfuscated prompt and the renamed response.
 
-    Returns (mapping, identifiers) on success, or None when alignment fails.
+    Returns (mapping, identifiers) on success, or a SkipReason on failure.
     """
+    prompt = sanitize(prompt)
+    response = sanitize(response)
+
     p_toks = _tokenize(prompt)
     r_toks = _tokenize(response)
 
     if len(p_toks) != len(r_toks):
-        return None
+        return SkipReason.TOKEN_MISMATCH
+
+    identifiers = list(dict.fromkeys(OBF_RE.findall(prompt)))
+    if not identifiers:
+        return SkipReason.NO_IDENTIFIERS
 
     mapping: dict[str, str] = {}
     conflicts: list[tuple] = []
@@ -48,24 +71,24 @@ def extract_mapping(prompt: str, response: str) -> tuple[dict, list] | None:
             conflicts.append((pt_s, mapping[pt_s], rt_s))
 
     if conflicts:
-        return None
+        return SkipReason.CONFLICT
 
-    identifiers = list(dict.fromkeys(OBF_RE.findall(prompt)))
-
-    if not identifiers:
-        return None
-
-    missing = [i for i in identifiers if i not in mapping]
-    if missing:
-        for m in missing:
-            mapping[m] = m
+    for ident in identifiers:
+        if ident not in mapping:
+            mapping[ident] = ident
 
     return mapping, identifiers
 
 
-def convert_file(input_path: str, output_path: str) -> tuple[int, int]:
-    """Convert one .jsonl file. Returns (kept, skipped)."""
-    kept = skipped = 0
+def convert_file(input_path: str, output_path: str) -> tuple[int, int, dict]:
+    """
+    Convert one .jsonl file.
+    Returns (kept, skipped, skip_counts) where skip_counts breaks down reasons.
+    """
+    kept = 0
+    skip_counts: dict[str, int] = {r.value: 0 for r in SkipReason}
+    skip_counts["bad_json"] = 0
+    skip_counts["missing_fields"] = 0
 
     with (
         open(input_path, "r", encoding="utf-8") as fin,
@@ -80,7 +103,7 @@ def convert_file(input_path: str, output_path: str) -> tuple[int, int]:
                 record = json.loads(line)
             except json.JSONDecodeError as e:
                 logger.warning(f"{input_path}:{line_idx} — bad JSON: {e}")
-                skipped += 1
+                skip_counts["bad_json"] += 1
                 continue
 
             prompt = record.get("prompt", "")
@@ -90,16 +113,28 @@ def convert_file(input_path: str, output_path: str) -> tuple[int, int]:
                 logger.warning(
                     f"{input_path}:{line_idx} — missing prompt or response, skipping."
                 )
-                skipped += 1
+                skip_counts["missing_fields"] += 1
                 continue
 
             result = extract_mapping(prompt, response)
-            if result is None:
-                logger.warning(
-                    f"{input_path}:{line_idx} — could not extract mapping "
-                    f"(token mismatch or conflict), skipping."
-                )
-                skipped += 1
+
+            if isinstance(result, SkipReason):
+                skip_counts[result.value] += 1
+                if result == SkipReason.TOKEN_MISMATCH:
+                    logger.warning(
+                        f"{input_path}:{line_idx} — token count mismatch "
+                        f"(prompt={len(_tokenize(prompt))}, "
+                        f"response={len(_tokenize(response))}), skipping."
+                    )
+                elif result == SkipReason.CONFLICT:
+                    logger.warning(
+                        f"{input_path}:{line_idx} — mapping conflict (same obf name "
+                        f"maps to multiple targets), skipping."
+                    )
+                else:
+                    logger.debug(
+                        f"{input_path}:{line_idx} — no obfuscated identifiers found, skipping."
+                    )
                 continue
 
             mapping, identifiers = result
@@ -112,7 +147,8 @@ def convert_file(input_path: str, output_path: str) -> tuple[int, int]:
             fout.write(json.dumps(new_record, ensure_ascii=False) + "\n")
             kept += 1
 
-    return kept, skipped
+    skipped = sum(skip_counts.values())
+    return kept, skipped, skip_counts
 
 
 def convert_dir(input_dir: str, output_dir: str) -> None:
@@ -128,24 +164,28 @@ def convert_dir(input_dir: str, output_dir: str) -> None:
     if not jsonl_files:
         raise RuntimeError(f"No .jsonl files found in {input_dir}")
 
-    total_kept = total_skipped = 0
+    total_kept = 0
+    total_skip_counts: dict[str, int] = {}
 
     for i, filename in enumerate(sorted(jsonl_files), 1):
         in_path = os.path.join(input_dir, filename)
         out_path = os.path.join(output_dir, filename)
 
-        kept, skipped = convert_file(in_path, out_path)
+        kept, skipped, skip_counts = convert_file(in_path, out_path)
         total_kept += kept
-        total_skipped += skipped
+        for reason, count in skip_counts.items():
+            total_skip_counts[reason] = total_skip_counts.get(reason, 0) + count
 
         if i % 500 == 0 or i == 1:
             logger.info(
                 f"[{i}/{len(jsonl_files)}] {filename} "
-                f"kept={kept} skipped={skipped}"
+                f"kept={kept} skipped={skipped} breakdown={skip_counts}"
             )
 
+    total_skipped = sum(total_skip_counts.values())
     logger.info(
         f"Conversion complete. "
         f"total_kept={total_kept}, total_skipped={total_skipped}, "
-        f"files={len(jsonl_files)}"
+        f"files={len(jsonl_files)}, "
+        f"skip_breakdown={total_skip_counts}"
     )
