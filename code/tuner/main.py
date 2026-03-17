@@ -20,38 +20,15 @@ with open("config.yml", "r") as f:
 config["INPUT_DIR"] = os.environ.get("INPUT_DIR", config["INPUT_DIR"])
 config["OUTPUT_DIR"] = os.environ.get("OUTPUT_DIR", config["OUTPUT_DIR"])
 config["SAVE_MODEL_PATH"] = os.environ.get("SAVE_MODEL_PATH", config["SAVE_MODEL_PATH"])
-config["ADAPTER_SAVE_PATH"] = os.environ.get("ADAPTER_SAVE_PATH", config["ADAPTER_SAVE_PATH"])
+config["ADAPTER_SAVE_PATH"] = os.environ.get(
+    "ADAPTER_SAVE_PATH", config["ADAPTER_SAVE_PATH"]
+)
 config["LOG_DIR"] = os.environ.get("LOG_DIR", config["LOG_DIR"])
 config["ARROW_DIR"] = os.environ.get("ARROW_DIR", config["ARROW_DIR"])
 
+
 def _preprocess_dataset(force: bool = False):
     os.makedirs(config["OUTPUT_DIR"], exist_ok=True)
-
-    # train dataset
-    logger.info("Preprocessing training dataset...")
-
-    train_path = os.path.join(config["INPUT_DIR"], config["TRAIN_DIR"])
-    train_output_path = os.path.join(config["OUTPUT_DIR"], config["TRAIN_DIR"])
-
-    if (
-        os.path.exists(
-            os.path.join(
-                train_output_path,
-            )
-        )
-        and not force
-        and os.listdir(train_output_path)
-    ):
-        logger.info(
-            f"Preprocessed training dataset already exists at {train_output_path}. Skipping preprocessing."
-        )
-    else:
-        preprocess(
-            input_dir=train_path,
-            output_dir=train_output_path,
-            shuffle=True,
-            seed=42,
-        )
 
     # val dataset
     logger.info("Preprocessing validation dataset...")
@@ -105,6 +82,32 @@ def _preprocess_dataset(force: bool = False):
             seed=42,
         )
 
+    # train dataset
+    logger.info("Preprocessing training dataset...")
+
+    train_path = os.path.join(config["INPUT_DIR"], config["TRAIN_DIR"])
+    train_output_path = os.path.join(config["OUTPUT_DIR"], config["TRAIN_DIR"])
+
+    if (
+        os.path.exists(
+            os.path.join(
+                train_output_path,
+            )
+        )
+        and not force
+        and os.listdir(train_output_path)
+    ):
+        logger.info(
+            f"Preprocessed training dataset already exists at {train_output_path}. Skipping preprocessing."
+        )
+    else:
+        preprocess(
+            input_dir=train_path,
+            output_dir=train_output_path,
+            shuffle=True,
+            seed=42,
+        )
+
 
 def tune_model():
     tune(config["ARROW_DIR"])
@@ -132,12 +135,12 @@ def argument_parser():
         action="store_true",
         help="Tune the LLM model.",
     )
-    
+
     parser.add_argument(
         "--arrow_dir",
         default=None,
         type=str,
-        help="Path to preprocessed Arrow dataset directory (contains train/val/test). Overrides ARROW_DIR."
+        help="Path to preprocessed Arrow dataset directory (contains train/val/test). Overrides ARROW_DIR.",
     )
     return parser
 
@@ -145,7 +148,7 @@ def argument_parser():
 if __name__ == "__main__":
     parser = argument_parser()
     args = parser.parse_args()
-    
+
     if args.arrow_dir:
         config["ARROW_DIR"] = args.arrow_dir
 
