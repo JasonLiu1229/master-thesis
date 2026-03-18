@@ -1,0 +1,13 @@
+Dataset processing:
+  - The original dataset had many cases where the string was of weird format: "{\\n \\"name\\" : \\"test1\\"\\n}". This causes the obfuscator to act weird.
+      - Removed these strings and making it dummy string.
+  - Converting it to as close as possible to our real prompt
+
+Cost estimation:
+  - Estinamting that the duration of the new training will take 10 days: 12 euros a day = 120 euros. 
+  - Testing the models and testing the baselines:
+      - Raw model takes 15 minutes on my own hardware for 10 samples -> 100 samples is around ~2h -> 1000 samples is around ~20h 
+      - 3 versions of the model so 3 full days for only my own solution
+      - Arno baselines are less pc intensive and can be computed relativly fast, so estimating both solutions can be ran in 1 day. 
+      - Other baselines additianlly not included
+      - Total for now: (3 + 1) x 12 = 48 euro.
