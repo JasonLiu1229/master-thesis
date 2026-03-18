@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import shutil
+from datetime import datetime
 from enum import Enum
 from logger import setup_logging
 
@@ -16,6 +17,15 @@ class SkipReason(Enum):
     NO_IDENTIFIERS = "no_obf_identifiers"
     TOKEN_MISMATCH = "token_mismatch"
     CONFLICT = "mapping_conflict"
+
+
+def _get_skip_log_path(output_dir: str) -> str:
+    """
+    Generate a timestamped skip log file path inside output_dir.
+    E.g. output_dir/skipped_20240317_143205.log
+    """
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return os.path.join(output_dir, f"skipped_{timestamp}.log")
 
 
 def _tokenize(code: str) -> list[str]:
@@ -80,15 +90,22 @@ def extract_mapping(prompt: str, response: str) -> tuple[dict, list] | SkipReaso
     return mapping, identifiers
 
 
-def convert_file(input_path: str, output_path: str) -> tuple[int, int, dict]:
+def convert_file(
+    input_path: str,
+    output_path: str,
+    skip_log_writer,
+) -> tuple[int, int, dict]:
     """
     Convert one .jsonl file.
     Returns (kept, skipped, skip_counts) where skip_counts breaks down reasons.
+    Writes each skipped record as a JSON line to skip_log_writer.
     """
     kept = 0
     skip_counts: dict[str, int] = {r.value: 0 for r in SkipReason}
     skip_counts["bad_json"] = 0
     skip_counts["missing_fields"] = 0
+
+    filename = os.path.basename(input_path)
 
     with (
         open(input_path, "r", encoding="utf-8") as fin,
@@ -104,6 +121,14 @@ def convert_file(input_path: str, output_path: str) -> tuple[int, int, dict]:
             except json.JSONDecodeError as e:
                 logger.warning(f"{input_path}:{line_idx} — bad JSON: {e}")
                 skip_counts["bad_json"] += 1
+                _write_skip_entry(
+                    skip_log_writer,
+                    file=filename,
+                    line=line_idx,
+                    reason="bad_json",
+                    detail=str(e),
+                    prompt=None,
+                )
                 continue
 
             prompt = record.get("prompt", "")
@@ -114,27 +139,47 @@ def convert_file(input_path: str, output_path: str) -> tuple[int, int, dict]:
                     f"{input_path}:{line_idx} — missing prompt or response, skipping."
                 )
                 skip_counts["missing_fields"] += 1
+                _write_skip_entry(
+                    skip_log_writer,
+                    file=filename,
+                    line=line_idx,
+                    reason="missing_fields",
+                    detail="prompt or response is empty",
+                    prompt=prompt or None,
+                )
                 continue
 
             result = extract_mapping(prompt, response)
 
             if isinstance(result, SkipReason):
                 skip_counts[result.value] += 1
+
                 if result == SkipReason.TOKEN_MISMATCH:
+                    detail = (
+                        f"prompt_tokens={len(_tokenize(prompt))}, "
+                        f"response_tokens={len(_tokenize(response))}"
+                    )
                     logger.warning(
                         f"{input_path}:{line_idx} — token count mismatch "
-                        f"(prompt={len(_tokenize(prompt))}, "
-                        f"response={len(_tokenize(response))}), skipping."
+                        f"({detail}), skipping."
                     )
                 elif result == SkipReason.CONFLICT:
+                    detail = "same obf name maps to multiple targets"
                     logger.warning(
-                        f"{input_path}:{line_idx} — mapping conflict (same obf name "
-                        f"maps to multiple targets), skipping."
+                        f"{input_path}:{line_idx} — mapping conflict ({detail}), skipping."
                     )
                 else:
-                    logger.debug(
-                        f"{input_path}:{line_idx} — no obfuscated identifiers found, skipping."
-                    )
+                    detail = "no obfuscated identifiers found"
+                    logger.debug(f"{input_path}:{line_idx} — {detail}, skipping.")
+
+                _write_skip_entry(
+                    skip_log_writer,
+                    file=filename,
+                    line=line_idx,
+                    reason=result.value,
+                    detail=detail,
+                    prompt=prompt,
+                )
                 continue
 
             mapping, identifiers = result
@@ -151,6 +196,29 @@ def convert_file(input_path: str, output_path: str) -> tuple[int, int, dict]:
     return kept, skipped, skip_counts
 
 
+def _write_skip_entry(
+    writer,
+    file: str,
+    line: int,
+    reason: str,
+    detail: str,
+    prompt: str | None,
+) -> None:
+    """Write a single skipped-record entry as a JSON line to the skip log."""
+    entry = {
+        "timestamp": datetime.now().isoformat(),
+        "file": file,
+        "line": line,
+        "reason": reason,
+        "detail": detail,
+    }
+    # Include a truncated snippet of the prompt to help with debugging,
+    # but cap at 300 chars to keep the log readable.
+    if prompt is not None:
+        entry["prompt_snippet"] = prompt[:300] + ("..." if len(prompt) > 300 else "")
+    writer.write(json.dumps(entry, ensure_ascii=False) + "\n")
+
+
 def convert_dir(input_dir: str, output_dir: str) -> None:
     if not os.path.isdir(input_dir):
         raise FileNotFoundError(f"Input directory not found: {input_dir}")
@@ -164,28 +232,33 @@ def convert_dir(input_dir: str, output_dir: str) -> None:
     if not jsonl_files:
         raise RuntimeError(f"No .jsonl files found in {input_dir}")
 
+    skip_log_path = _get_skip_log_path("out/logs/")
+    logger.info(f"Skip log will be written to: {skip_log_path}")
+
     total_kept = 0
     total_skip_counts: dict[str, int] = {}
 
-    for i, filename in enumerate(sorted(jsonl_files), 1):
-        in_path = os.path.join(input_dir, filename)
-        out_path = os.path.join(output_dir, filename)
+    with open(skip_log_path, "w", encoding="utf-8") as skip_log:
+        for i, filename in enumerate(sorted(jsonl_files), 1):
+            in_path = os.path.join(input_dir, filename)
+            out_path = os.path.join(output_dir, filename)
 
-        kept, skipped, skip_counts = convert_file(in_path, out_path)
-        total_kept += kept
-        for reason, count in skip_counts.items():
-            total_skip_counts[reason] = total_skip_counts.get(reason, 0) + count
+            kept, skipped, skip_counts = convert_file(in_path, out_path, skip_log)
+            total_kept += kept
+            for reason, count in skip_counts.items():
+                total_skip_counts[reason] = total_skip_counts.get(reason, 0) + count
 
-        if i % 500 == 0 or i == 1:
-            logger.info(
-                f"[{i}/{len(jsonl_files)}] {filename} "
-                f"kept={kept} skipped={skipped} breakdown={skip_counts}"
-            )
+            if i % 500 == 0 or i == 1:
+                logger.info(
+                    f"[{i}/{len(jsonl_files)}] {filename} "
+                    f"kept={kept} skipped={skipped} breakdown={skip_counts}"
+                )
 
     total_skipped = sum(total_skip_counts.values())
     logger.info(
         f"Conversion complete. "
         f"total_kept={total_kept}, total_skipped={total_skipped}, "
         f"files={len(jsonl_files)}, "
-        f"skip_breakdown={total_skip_counts}"
+        f"skip_breakdown={total_skip_counts}, "
+        f"skip_log={skip_log_path}"
     )
