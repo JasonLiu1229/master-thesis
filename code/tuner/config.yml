@@ -37,8 +37,8 @@ LORA_ALPHA: 32 # is a scaling factor that controls the contribution of the LoRA 
 LORA_DROPOUT: 0.05 # in LoRA randomly zeros out some of the activations before the low-rank adapters during training, just like regular dropout.
 RESUME_FROM_LAST_CP: false # Whether to resume training from the last checkpoint in the output directory.
 
-RESUME_ADAPTER_PATH: out/adapter/adapter_50pct
+# RESUME_ADAPTER_PATH: out/adapter/adapter_50pct
 
 # smaller dataset config
-USE_SMALLER_DATASET: false
+USE_SMALLER_DATASET: true
 SMALLER_FRACTION: 0.001 # Fraction of the dataset to use if USE_SMALLER_DATASET is true.

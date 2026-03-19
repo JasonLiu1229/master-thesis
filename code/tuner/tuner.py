@@ -364,7 +364,8 @@ def tune(input_arrow_dir: str | None = None):
         trainer.train()
 
     adapter_dir = config["ADAPTER_SAVE_PATH"]
-    os.makedirs(adapter_dir, exist_ok=True)
-    model.save_pretrained(adapter_dir)
-    tokenizer.save_pretrained(adapter_dir)
-    logger.info(f"Final Adapter model saved to {adapter_dir}")
+    out_path = os.path.join(adapter_dir, f"adapter_final")
+    os.makedirs(out_path, exist_ok=True)
+    model.save_pretrained(out_path)
+    tokenizer.save_pretrained(out_path)
+    logger.info(f"Final Adapter model saved to {out_path}")
