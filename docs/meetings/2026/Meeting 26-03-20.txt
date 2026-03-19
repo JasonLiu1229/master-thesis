@@ -11,3 +11,22 @@ Cost estimation:
       - Arno baselines are less pc intensive and can be computed relativly fast, so estimating both solutions can be ran in 1 day. 
       - Other baselines additianlly not included
       - Total for now: (3 + 1) x 12 = 48 euro.
+
+Cohen d and test samples:
+  - So cohen d works based on the difference of the actual data and what we get. So let us say if we have some obfucated code and we rename it. We can see how good is the obfuscated or not named code and how good is the renamed code. And see what the effect is. High effect means low amount of tests needed to see an impact.
+  - To measure this we start with d as 0.5 and see how the results turn out, we increase the samples if the effect is too low. 
+    - With only 0.5, we only need 32 tests at minimum and 50 - 100 recommended. (With beta = 0.8 and alpha = 0.05)
+      - Formula: 
+        - llm grader: n = ((z_{1-alpha/2} + z_{1-beta}) / d)
+        - f1: 2 * ((z_{1-alpha/2} + z_{1-beta}) / d)^2 
+      - Formula: 
+        - llm grader: d = avg(score(renamed) - score(original)) / standard_deviation of difference (paired)
+        - f1: d = (mean(x1) - mean(x2)) / standard_deviation(x1, x2) (independent)
+    - beta means the power
+    - alpha is significanse level
+    - d is effect size
+
+Dataset processed:
+  - 12 deleted out of test dataset because they couldnt be obfuscated 
+  - 120 samples skipped of train dataset 
+  - 26 samples skipped of validation dataset 
