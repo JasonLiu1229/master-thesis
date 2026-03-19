@@ -296,9 +296,6 @@ class AdapterSnapshotCallback(TrainerCallback):
         if not state.max_steps:
             return
         progress = state.global_step / state.max_steps
-        logger.info(
-            f"Current progress: {state.global_step} / {state.max_steps} = {progress:.4f}"
-        )
         self._try_save(progress, state)
 
     def on_train_end(self, args, state, control, **kwargs):
