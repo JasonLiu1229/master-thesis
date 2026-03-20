@@ -28,5 +28,5 @@ tools/randoop-*
 
 # venv
 *venv*
-out/
-out/
+out/adapter/
+out/data_preprocessed/
