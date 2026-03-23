@@ -6,7 +6,12 @@ services:
     volumes:
       - ./out:/app/code/out/
     working_dir: /app/code
-    gpus: all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
     profiles: ["t1", "arno", "test"]
     networks:
       - codereader
@@ -18,7 +23,12 @@ services:
     volumes:
       - ./out:/app/code/out/
     working_dir: /app/code
-    gpus: all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
     profiles: ["t2", "arno", "test"]
     networks:
       - codereader
@@ -26,7 +36,7 @@ services:
   t3:
     container_name: t3
     build:
-      dockerfile: docker/t3.Dockerfile
+      dockerfile: docker/pipeline.Dockerfile   # ← updated
     volumes:
       - ./out:/app/out/
     env_file:
@@ -44,6 +54,7 @@ services:
       dockerfile: docker/t3_eval.Dockerfile
     volumes:
       - ./out:/app/out/
+      - ./tools/java-dataset-converter-llm/dataset/test/jsonl/:/app/in/test:ro
     env_file:
       - .env
     profiles: ["t3_eval", "full_local_eval"]
@@ -65,6 +76,7 @@ services:
       dockerfile: docker/t3_eval.Dockerfile
     volumes:
       - ./out:/app/out/
+      - ./tools/java-dataset-converter-llm/dataset/test/jsonl/:/app/in/test:ro
     env_file:
       - .env
     profiles: ["t3_eval_openai"]
@@ -90,7 +102,12 @@ services:
         condition: service_completed_successfully
       t2:
         condition: service_completed_successfully
-    gpus: all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
     profiles: ["benchmark", "arno"]
 
   api:
@@ -99,7 +116,12 @@ services:
       dockerfile: docker/api.Dockerfile
     ports:
       - "8000:8000"
-    gpus: all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
     env_file:
       - .env
     profiles: ["api", "full_local", "full_local_eval"]
@@ -124,7 +146,12 @@ services:
       - ./out:/app/out/
       - hf_cache:/root/.cache/huggingface/
     working_dir: /app
-    gpus: all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
     profiles: ["tune"]
     ulimits:
       nofile:
@@ -144,11 +171,15 @@ services:
     volumes:
       - ./out:/app/out/
       - hf_cache:/root/.cache/huggingface/
-      - ./tools/java-dataset-converter-llm/dataset/test/jsonl/:/app/in/raw/test:ro
       - ./tools/java-dataset-converter-llm/dataset/train/jsonl/:/app/in/raw/train:ro
       - ./tools/java-dataset-converter-llm/dataset/val/jsonl/:/app/in/raw/val:ro
     working_dir: /app
-    gpus: all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
     profiles: ["tune_process"]
     ulimits:
       nofile:
@@ -165,7 +196,12 @@ services:
     container_name: codereader_ollama
     build:
       dockerfile: docker/codereader.Dockerfile
-    gpus: all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
     profiles: ["full_local_eval", "t3_eval", "codereader"]
     networks:
       - codereader
@@ -184,12 +220,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 5m
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              capabilities: [gpu]
 
 volumes:
   hf_cache:

@@ -5,7 +5,7 @@ Dataset processing:
   - Now i also added a conversion of what we originally had: {"prompt": ..., "response": ...} -> {"obf_code": "public class TestClass0 {\n@Test public void func_1() { Date var_1 = DateUtils.yearStart(); assertNotNull(var_1); GregorianCalendar var_2 = new GregorianCalendar(); var_2.setTime(var_1); assertEquals(1, var_2.get(DAY_OF_YEAR)); }\n}", "mapping": {"func_1": "yearStart", "var_1": "date", "var_2": "calendar"}, "identifiers": ["func_1", "var_1", "var_2"]}
 
 Dataset processed:
-  - 12 deleted out of test dataset because they couldnt be obfuscated 
+  - 12 deleted out of test dataset because they couldn't be obfuscated 
   - 120 samples skipped of train dataset 
   - 26 samples skipped of validation dataset 
 
@@ -24,10 +24,24 @@ Cohen d and test samples:
     - d is effect size
 
 Cost estimation:
-  - Estinamting that the duration of the new training will take 10 days: 12 euros a day = 120 euros. 
+  - Estimating that the duration of the new training will take 10 days: 12 euros a day = 120 euros. 
   - Testing the models and testing the baselines:
       - Raw model takes 15 minutes on my own hardware for 10 samples -> 100 samples is around ~2h -> 1000 samples is around ~20h 
       - 3 versions of the model so 3 full days for only my own solution
-      - Arno baselines are less pc intensive and can be computed relativly fast, so estimating both solutions can be ran in 1 day. 
-      - Other baselines additianlly not included
+      - Arno baselines are less pc intensive and can be computed relatively fast, so estimating both solutions can be ran in 1 day. 
+      - Other baselines additionaly not included
       - Total for now: (3 + 1) x 12 = 48 euro.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Response format can be used in the chat so it forces Json.
+
+Skip the one that causes corruption
+  - based on amount make decision
+    - > 25% is large
+    - make a seperate dataset case for it
+  - to keep it as authenic
+
+Cohen d estimation
+
+mail for cost of previous trainings 

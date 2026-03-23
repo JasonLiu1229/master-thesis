@@ -115,9 +115,10 @@ class LLM_Model:
             outputs = self.model.generate(
                 **inputs.to(self.model.device),
                 max_new_tokens=max_new_tokens,
-                generation_config=copy.deepcopy(self._gen_config),
+                generation_config=self._gen_config,
                 pad_token_id=self.tokenizer.pad_token_id,
                 eos_token_id=self.tokenizer.eos_token_id,
+                use_cache=True,
             )
             latency_ms = (time.perf_counter() - t0) * 1000
 
@@ -176,6 +177,7 @@ class LLM_Model:
         torch_dtype = torch.bfloat16 if torch.cuda.is_available() else torch.float32
 
         quantization_config = None
+
         if torch.cuda.is_available() and quantize == "int4":
             quantization_config = BitsAndBytesConfig(
                 load_in_4bit=True,
@@ -197,10 +199,13 @@ class LLM_Model:
             load_kwargs["quantization_config"] = quantization_config
 
         self.model = AutoModelForCausalLM.from_pretrained(
-            model_path, **load_kwargs
+            model_path, attn_implementation="flash_attention_2", **load_kwargs
         ).eval()
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)
+
+        if torch.cuda.is_available():
+            self.model = torch.compile(self.model, mode="reduce-overhead")
 
         if "qwen" in model_path.lower():
             if self.tokenizer.eos_token is None:
@@ -221,9 +226,9 @@ class LLM_Model:
         self._warmup()
 
     def load_local_model(self, local_model_path):
-        assert os.path.exists(
-            local_model_path
-        ), f"Model path does not exists: {local_model_path}"
+        assert os.path.exists(local_model_path), (
+            f"Model path does not exists: {local_model_path}"
+        )
 
         self.tokenizer = AutoTokenizer.from_pretrained(local_model_path)
         self.model = AutoModelForCausalLM.from_pretrained(

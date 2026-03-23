@@ -1,24 +1,24 @@
-FROM python:3.13.9-slim-bookworm
+FROM nvcr.io/nvidia/pytorch:25.06-py3
 
-# ---- system prerequisites ----
+RUN truncate -s 0 /etc/pip/constraint.txt
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    bash zip unzip ca-certificates git build-essential gcc g++ curl\
-    && rm -rf /var/lib/apt/lists/*
+  git build-essential curl \
+  && rm -rf /var/lib/apt/lists/*
 
-# ---- Python dependencies ----
+RUN pip install --upgrade pip setuptools wheel --no-cache-dir
+
 COPY requirements/requirements_api.txt /tmp/requirements.txt
-RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
-RUN rm /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt
 
-RUN pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu128
-
-# ---- application code ----
 WORKDIR /app
 
-COPY ../code/app /app
+COPY ../code/app      /app
 COPY ../code/model.py /app
-COPY ../../out/model/ /app/model/
 COPY ../code/logger.py /app
 COPY ../code/prompts.py /app
+
+ENV TOKENIZERS_PARALLELISM=false
+ENV ATTN_IMPLEMENTATION=flash_attention_2
 
 CMD ["fastapi", "run", "main.py", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,4 +1,1 @@
 timestamp,file_path,method_name,new_method_name,attempt,call_type,prompt_tokens,completion_tokens,total_tokens,latency_ms,success
-2026-03-14T11:49:36,in/test/TestClass15205.java.jsonl,func_1,testParseCookiePathEndSlash,1,rename,572,56,628,49052.0,True
-2026-03-14T11:51:43,in/test/TestClass77051.java.jsonl,func_1,testFiltreNoeudsSimples,1,rename,676,64,740,10192.0,True
-2026-03-14T11:53:54,in/test/TestClass22293.java.jsonl,func_1,testGenerateBusinessObjectDataPartitions,1,rename,399,41,440,7601.9,True
