@@ -1,8 +1,24 @@
 New processing output Jsonl:
   - Train
     - 414976 - 8011
+      - 5 additionally skipped during processing of final dataset
   - Val
     - 50778 - 1157
   - Test 
     - 52472 - 1121
 
+
+I use a different metric instead of Cohen d, I use cohen r that is used for 2 datasets that are related to each other but are not uniform.
+  - additionally i add a wilcoxen factor that determines how conservitve we should be.
+
+Distribution       W         inflation (1/W)   use when
+Uniform            1         1.00              bounded scores on fixed scale ← your case
+Normal             π/3≈1.047 0.955             data known to be normal
+Logistic           9/π²≈0.91 1.10              light-tailed, symmetric
+Double Exponential 2/3       1.50              heavy-tailed, extreme outliers
+
+References:
+  - wilcoxen: https://www.ncss.com/wp-content/themes/ncss/pdf/Procedures/PASS/Wilcoxon_Signed-Rank_Tests.pdf
+  - effect size: https://en.wikipedia.org/wiki/Effect_size
+  - cohen r: https://www.researchgate.net/post/What_is_the_appropriate_effect_size_calculation_for_Wilcoxon_signed_rank_test_related_samples
+  - https://pmc.ncbi.nlm.nih.gov/articles/PMC12701665/

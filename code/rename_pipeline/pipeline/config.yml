@@ -18,3 +18,8 @@ CODEREADER_CONFIG_FILE: pipeline/codereader.yml
 ERROR_LOG_PATH: "out/stats/errors.csv"
 
 USAGE_LOG_PATH: "out/stats/usage.csv"
+
+# Cohen values 
+ALPHA: 0.05
+BETA: 0.80 # also known as power 
+NON_NORMALITY_CORRECTION: 1.15 # this is a factor based on how conservative we are

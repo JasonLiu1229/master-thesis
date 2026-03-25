@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Tuple
+from typing import Dict, Iterable, List, Optional, Tuple
 
 import javalang.tokenizer as jtok
 import requests
@@ -16,6 +16,23 @@ CODEREADER_URL = "http://codereader_ollama:8080"
 
 setup_logging("pipeline")
 logger = logging.getLogger("pipeline")
+
+
+@dataclass
+class F1Metrics:
+    cer: float
+    edit_distance: float
+    correct_ordered: float
+    correct_unordered: float
+    precision: float
+    recall: float
+    f1: float
+
+
+@dataclass
+class LLMMetrics:
+    codereader_avg: float
+    codereader_wavg: float
 
 
 @dataclass
@@ -56,7 +73,7 @@ def levenshtein(a: str, b: str) -> int:
     return dp[-1][-1]
 
 
-def extract_identifiers(java_code: str):
+def extract_identifiers(java_code: str) -> List[str]:
     try:
         tokens = list(jtok.tokenize(java_code))
         return [t.value for t in tokens if isinstance(t, jtok.Identifier)]
@@ -90,8 +107,8 @@ def _llm_parser(lines: Iterable[str]) -> Tuple[float, float]:
     return avg, wavg
 
 
-def llm_readability_score(prediction: str) -> Tuple[float, float]:
-    r = requests.post(f"{CODEREADER_URL}/grade", json={"text": prediction}, timeout=900)
+def llm_readability_score(code: str) -> Tuple[float, float]:
+    r = requests.post(f"{CODEREADER_URL}/grade", json={"text": code}, timeout=900)
     if not r.ok:
         try:
             detail = r.json().get("detail", r.text)
@@ -100,22 +117,17 @@ def llm_readability_score(prediction: str) -> Tuple[float, float]:
         raise RuntimeError(f"codereader request failed ({r.status_code}):\n{detail}")
 
     raw = r.json()["output"]
-
     lines = _llm_formatter(raw.splitlines(True))
     return _llm_parser(lines)
 
 
-def evaluate(oracle: str, prediction: str):  # function partially made using GPT
-    """
-    Evaluate a single prediction against a single oracle.
-    """
-
-    edit = levenshtein(oracle, prediction)
+def evaluate_f1(oracle: str, predicted: str) -> F1Metrics:
+    edit = levenshtein(oracle, predicted)
     total_chars = max(1, len(oracle))
     cer = 100.0 * edit / total_chars
 
     oracle_ids = extract_identifiers(oracle)
-    pred_ids = extract_identifiers(prediction)
+    pred_ids = extract_identifiers(predicted)
 
     if oracle_ids:
         same_positions = sum(
@@ -137,9 +149,9 @@ def evaluate(oracle: str, prediction: str):  # function partially made using GPT
     else:
         correct_unordered = 0.0
 
-    tp = len(oracle_set & pred_set)  # true positives
-    fp = len(pred_set - oracle_set)  # false positives
-    fn = len(oracle_set - pred_set)  # false negatives
+    tp = len(oracle_set & pred_set)
+    fp = len(pred_set - oracle_set)
+    fn = len(oracle_set - pred_set)
 
     precision = tp / (tp + fp) if (tp + fp) else 0.0
     recall = tp / (tp + fn) if (tp + fn) else 0.0
@@ -147,38 +159,44 @@ def evaluate(oracle: str, prediction: str):  # function partially made using GPT
         (2 * precision * recall / (precision + recall)) if (precision + recall) else 0.0
     )
 
+    return F1Metrics(
+        cer=cer,
+        edit_distance=float(edit),
+        correct_ordered=correct_ordered,
+        correct_unordered=correct_unordered,
+        precision=precision,
+        recall=recall,
+        f1=f1,
+    )
+
+
+def evaluate_llm(code: str) -> Optional[LLMMetrics]:
     try:
-        codereader_avg, codereader_wavg = llm_readability_score(prediction)
+        avg, wavg = llm_readability_score(code)
+        return LLMMetrics(codereader_avg=avg, codereader_wavg=wavg)
     except Exception as e:
-        codereader_avg, codereader_wavg = 0, 0
-        logger.error(f"Code not evaluated using codereader: {e}")
+        logger.error(f"LLM readability scoring failed: {e}")
+        return None
+
+
+def evaluate(oracle: str, predicted: str) -> PairMetrics:
+    f1m = evaluate_f1(oracle, predicted)
+    llm = evaluate_llm(predicted)
 
     return PairMetrics(
-        cer,
-        float(edit),
-        correct_ordered,
-        correct_unordered,
-        precision,
-        recall,
-        f1,
-        codereader_avg,
-        codereader_wavg,
+        cer=f1m.cer,
+        edit_distance=f1m.edit_distance,
+        correct_ordered=f1m.correct_ordered,
+        correct_unordered=f1m.correct_unordered,
+        precision=f1m.precision,
+        recall=f1m.recall,
+        f1=f1m.f1,
+        codereader_avg=llm.codereader_avg if llm is not None else 0.0,
+        codereader_wavg=llm.codereader_wavg if llm is not None else 0.0,
     )
 
 
 def compute_final_metrics(metrics: List[PairMetrics]) -> Dict[str, float]:
-    """
-    Compute average metrics for a whole dataset.
-
-    Returns a dict with:
-      - cer
-      - edit_distance
-      - correct_ordered
-      - correct_unordered
-      - precision
-      - recall
-      - f1
-    """
     if not metrics:
         return {
             "cer": 0.0,
@@ -194,24 +212,60 @@ def compute_final_metrics(metrics: List[PairMetrics]) -> Dict[str, float]:
 
     n = len(metrics)
 
-    sum_cer = sum(m.cer for m in metrics)
-    sum_edit = sum(m.edit_distance for m in metrics)
-    sum_co = sum(m.correct_ordered for m in metrics)
-    sum_cu = sum(m.correct_unordered for m in metrics)
-    sum_prec = sum(m.precision for m in metrics)
-    sum_rec = sum(m.recall for m in metrics)
-    sum_f1 = sum(m.f1 for m in metrics)
-    sum_llm_avg = sum(m.codereader_avg for m in metrics)
-    sum_llm_wavg = sum(m.codereader_wavg for m in metrics)
-
     return {
-        "cer": sum_cer / n,
-        "edit_distance": sum_edit / n,
-        "correct_ordered": sum_co / n,
-        "correct_unordered": sum_cu / n,
-        "precision": sum_prec / n,
-        "recall": sum_rec / n,
-        "f1": sum_f1 / n,
-        "llm_score_avg": sum_llm_avg / n,
-        "llm_score_wavg": sum_llm_wavg / n,
+        "cer": sum(m.cer for m in metrics) / n,
+        "edit_distance": sum(m.edit_distance for m in metrics) / n,
+        "correct_ordered": sum(m.correct_ordered for m in metrics) / n,
+        "correct_unordered": sum(m.correct_unordered for m in metrics) / n,
+        "precision": sum(m.precision for m in metrics) / n,
+        "recall": sum(m.recall for m in metrics) / n,
+        "f1": sum(m.f1 for m in metrics) / n,
+        "llm_score_avg": sum(m.codereader_avg for m in metrics) / n,
+        "llm_score_wavg": sum(m.codereader_wavg for m in metrics) / n,
     }
+
+
+def compute_cohens(
+    f1_metrics: List[F1Metrics],
+    llm_obf_metrics: List[LLMMetrics],
+    llm_renamed_metrics: List[LLMMetrics],
+) -> dict:
+    from pipeline.effect_size import compute_effect_size, effect_size_report
+
+    results = []
+
+    # F1: one-sample Wilcoxon (f1 scores vs zero)
+    if f1_metrics:
+        f1_scores = [m.f1 for m in f1_metrics]
+        results.append(
+            compute_effect_size(
+                scores_original=[0.0] * len(f1_scores),
+                scores_renamed=f1_scores,
+                metric_name="f1_vs_zero_baseline",
+            )
+        )
+
+    # LLM: paired obfuscated vs renamed
+    if len(llm_obf_metrics) != len(llm_renamed_metrics):
+        logger.error(
+            "compute_cohens: LLM obf and renamed lists have different lengths "
+            f"({len(llm_obf_metrics)} vs {len(llm_renamed_metrics)}). "
+            "Skipping LLM effect size."
+        )
+    elif llm_obf_metrics:
+        results.append(
+            compute_effect_size(
+                scores_original=[m.codereader_avg for m in llm_obf_metrics],
+                scores_renamed=[m.codereader_avg for m in llm_renamed_metrics],
+                metric_name="llm_score_avg",
+            )
+        )
+        results.append(
+            compute_effect_size(
+                scores_original=[m.codereader_wavg for m in llm_obf_metrics],
+                scores_renamed=[m.codereader_wavg for m in llm_renamed_metrics],
+                metric_name="llm_score_wavg",
+            )
+        )
+
+    return effect_size_report([r for r in results if r is not None])

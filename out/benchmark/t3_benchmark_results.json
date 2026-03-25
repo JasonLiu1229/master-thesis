@@ -1,14 +1,52 @@
 {
-  "cer": 25.41967165786085,
+  "cer": 23.285790834545153,
   "correct_ordered": 0.6710415531502436,
   "correct_unordered": 0.5586706349206348,
-  "edit_distance": 104.1,
+  "edit_distance": 91.7,
+  "effect_sizes": {
+    "f1_vs_zero_baseline": {
+      "effect_size_label": "large",
+      "effect_size_r": -0.8864,
+      "mean_diff": 0.7069,
+      "median_diff": 0.7386,
+      "n_pairs": 10,
+      "p_value": 0.0049,
+      "recommended_n": 1,
+      "std_diff": 0.1187,
+      "wilcoxon_statistic": 0.0,
+      "z_statistic": -2.8031
+    },
+    "llm_score_avg": {
+      "effect_size_label": "large",
+      "effect_size_r": -0.8219,
+      "mean_diff": 18.3333,
+      "median_diff": 18.3333,
+      "n_pairs": 10,
+      "p_value": 0.0093,
+      "recommended_n": 2,
+      "std_diff": 14.8812,
+      "wilcoxon_statistic": 2.0,
+      "z_statistic": -2.5992
+    },
+    "llm_score_wavg": {
+      "effect_size_label": "large",
+      "effect_size_r": -0.7252,
+      "mean_diff": 17.3535,
+      "median_diff": 18.1818,
+      "n_pairs": 10,
+      "p_value": 0.0217,
+      "recommended_n": 3,
+      "std_diff": 15.6256,
+      "wilcoxon_statistic": 5.0,
+      "z_statistic": -2.2934
+    }
+  },
   "f1": 0.7068879396465604,
   "failed_files": [],
-  "failes": 0,
-  "llm_score_avg": 77.41666666666666,
-  "llm_score_wavg": 78.95959595959596,
+  "fails": 0,
+  "llm_score_avg": 79.0,
+  "llm_score_wavg": 80.28282828282828,
   "precision": 0.7038994338994339,
   "recall": 0.7100899100899101,
-  "total_time": 1114.9586927890778
+  "total_time": 2760.3382003307343
 }
