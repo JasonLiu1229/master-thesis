@@ -17,6 +17,10 @@ Normal             π/3≈1.047 0.955             data known to be normal
 Logistic           9/π²≈0.91 1.10              light-tailed, symmetric
 Double Exponential 2/3       1.50              heavy-tailed, extreme outliers
 
+When you have a small sample (say n=10) and you observe a large effect (r = -0.886), you cannot trust that number as the true population effect. Small samples produce noisy estimates — you might have happened to get 10 test methods where your pipeline performed exceptionally well, and the true average effect across all possible test methods is actually more modest.
+
+This is called small-sample inflation bias. It is a well-documented phenomenon: the smaller your sample, the more your observed effect size tends to overshoot the true one.
+
 References:
   - wilcoxen: https://www.ncss.com/wp-content/themes/ncss/pdf/Procedures/PASS/Wilcoxon_Signed-Rank_Tests.pdf
   - effect size: https://en.wikipedia.org/wiki/Effect_size
