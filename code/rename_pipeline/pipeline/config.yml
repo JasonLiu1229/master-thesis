@@ -9,7 +9,7 @@ AMT_WORKERS: 1 # set to -1 to use all workers available, check if your api allow
 # Eval
 EVAL_OUTPUT_FILE_NAME: out/benchmark/t3_benchmark_results.json
 
-AMOUNT_OF_EVAL_SAMPLES: 10 # set to -1 to use all eval samples
+AMOUNT_OF_EVAL_SAMPLES: 100 # set to -1 to use all eval samples
 
 EVAL_FAILED_FILE: out/logs/eval_failed.txt
 
@@ -22,4 +22,4 @@ USAGE_LOG_PATH: "out/stats/usage.csv"
 # Cohen values 
 ALPHA: 0.05
 BETA: 0.80 # also known as power 
-NON_NORMALITY_CORRECTION: 1.15 # this is a factor based on how conservative we are
+NON_NORMALITY_CORRECTION: 1 # this is a factor based on how conservative we are

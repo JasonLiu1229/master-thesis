@@ -53,8 +53,6 @@ SYSTEM_INSTRUCTION = (
     "- A Java test method (wrapped in a dummy class), and\n"
     "- A list of identifier names (method + local variables + parameters).\n\n"
     "Your job is to propose more meaningful names for these identifiers.\n"
-    "Make use of this template to additionally guide the naming:\n"
-    "- A test case should have an assertion between expected and actual values. So for identifiers that are used in the assertions itself, try to make use of expected and actual.\n\n"
     "You MUST ONLY respond with a JSON object mapping originalName -> newName.\n"
     "You MUST NOT output code or comments or markdown.\n"
 )

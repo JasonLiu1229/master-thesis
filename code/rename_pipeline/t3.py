@@ -186,7 +186,6 @@ def process_single_eval(
             llm_obf = evaluate_llm(obf_code)
             llm_renamed = evaluate_llm(predicted_code)
 
-            # Only keep the pair if both scores succeeded — we need matched pairs
             if llm_obf is not None and llm_renamed is not None:
                 llm_obf_metrics.append(llm_obf)
                 llm_renamed_metrics.append(llm_renamed)
@@ -196,7 +195,6 @@ def process_single_eval(
                     "because one or both LLM scores failed."
                 )
         else:
-            # Normal mode: one combined call, LLM scored on renamed code only
             pair_metrics.append(evaluate(oracle_code, predicted_code))
 
     return (

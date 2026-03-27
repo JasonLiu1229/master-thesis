@@ -8,19 +8,49 @@ settings:
   log_path: out/temp/readability_results.txt
   debug_jsonl_path: responses.jsonl
 
-tags: # Context clues for models
+tags:
   - testing
   - unit tests
   - identifiers
   - function naming
   - variable naming
+  - assertion clarity               
+  - test independence             
 
-rules: # So users can add custom prompting (more freedom)
-  - Clarity 
-  - Behavioral specificity 
-  - Consistency with JUnit naming conventions 
-  - Alignment with actual test logic
-  - Ignore class name
+rules:
+  - Clarity of variable and method names assess whether identifier names clearly
+    convey intent without needing to read the full test body. Penalise generic
+    names like var1, obj, result0, or single letters unless used as counters.
+
+  - Behavioral specificity the test name and body should together make the
+    tested behaviour obvious. A reader should understand WHAT is being tested
+    and WHAT the expected outcome is without reading the production code.
+
+  - Consistency with JUnit naming conventions method names should follow the
+    pattern methodName_stateUnderTest_expectedBehavior or a similar convention.
+    Variable names should use camelCase and reflect their role (e.g. expected,
+    actual, input, result — not temp, x, var2).
+
+  - Alignment with actual test logic identifier names must match what the
+    variable actually holds or what the method actually does. A variable named
+    expectedResult holding an exception object is misleading and should be flagged.
+
+  - Ignore class name do not penalise or reward based on the outer class name.
+
+  - Assertion quality assess whether assertions are expressive and clearly state
+    what is being verified. Prefer specific assertions (assertEquals, assertNotNull,
+    assertThrows) over assertTrue(a == b). Penalise absent assertion messages when
+    the failure reason would be non-obvious without one.
+
+  - Magic numbers and unexplained literals flag hardcoded numeric or string
+    literals in assertions or method calls that have no named constant or comment
+    explaining their meaning (e.g. assertEquals(42, result) without context).
+    Well-named variables for expected values (e.g. int expectedAge = 42) improve
+    readability significantly.
+
+  - Test independence and minimal dependencies the test should be self-contained
+    and not rely on shared mutable state or execution order. Penalise tests that
+    appear to depend on external state or side effects from other tests.
 
 models:
   - name: Qwen2.5-coder
@@ -45,4 +75,12 @@ models:
     runner_config:
       ollama_bin: ollama
     weight: 0.6
+    enable: true
+
+  - name: Qwen3.5
+    model: qwen3.5:9b
+    runner: ollama
+    runner_config:
+      ollama_bin: ollama
+    weight: 1.25
     enable: true

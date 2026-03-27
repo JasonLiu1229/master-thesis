@@ -21,8 +21,27 @@ When you have a small sample (say n=10) and you observe a large effect (r = -0.8
 
 This is called small-sample inflation bias. It is a well-documented phenomenon: the smaller your sample, the more your observed effect size tends to overshoot the true one.
 
+So after doing a run of n=100:
+  - r = 0.76-0.86 with beta = 0.8 and alpha = 0.05 
+    - Meaning that we do not need many test to verify if the results are good. If we calculate n, this would mean we only need 2-3 test to see the effective results
+  - Still it is better to test for bigger numbers like 100, to garantue good results
+
+Literature based analysis:
+  - To validate the 100 we make use of literature results:
+    - Based on lit 1, that is based on testing chatgpt against evosuite, it made use of 207 java classes from 75 different projects
+      - Based on this we can state that we do not need many tests, but still enough
+
+Other closely related works:
+  - Make use of real human surveys
+    - 36 external - internal developers: https://arxiv.org/html/2601.13118v1
+    - We state that our Code reader is our evaluater instead of a real human, so 100 should be sufficient enough.
+  - 
+
 References:
   - wilcoxen: https://www.ncss.com/wp-content/themes/ncss/pdf/Procedures/PASS/Wilcoxon_Signed-Rank_Tests.pdf
   - effect size: https://en.wikipedia.org/wiki/Effect_size
   - cohen r: https://www.researchgate.net/post/What_is_the_appropriate_effect_size_calculation_for_Wilcoxon_signed_rank_test_related_samples
   - https://pmc.ncbi.nlm.nih.gov/articles/PMC12701665/
+  - lit 1: chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://eprints.gla.ac.uk/324030/2/324030.pdf
+  - https://arxiv.org/html/2403.16639v1
+  - https://arxiv.org/html/2504.04372v1
