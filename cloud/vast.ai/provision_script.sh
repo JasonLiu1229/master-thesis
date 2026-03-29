@@ -14,11 +14,7 @@ BRANCH="${BRANCH:-main}"
 PROFILE="${PROFILE:-tune}"
 
 # Sparse-checkout paths (space-separated).
-SPARSE_PATHS="${SPARSE_PATHS:-docker/tuner.Dockerfile code/tuner code/logger.py code/model.py code/prompts.py requirements/requirements_tuner.txt compose.yaml out/data_preprocessed}"
-
-# Git LFS: which LFS paths to materialize (comma-separated for git lfs include/exclude syntax)
-LFS_INCLUDE="${LFS_INCLUDE:-out/data_preprocessed/**}"
-LFS_EXCLUDE="${LFS_EXCLUDE:-}"
+SPARSE_PATHS="${SPARSE_PATHS:-docker/tuner.Dockerfile code/tuner code/logger.py code/model.py code/prompts.py requirements/requirements_tuner.txt compose.yaml}"
 
 USE_TMUX="${USE_TMUX:-1}"
 TMUX_SESSION="${TMUX_SESSION:-tuning}"
@@ -52,8 +48,8 @@ if ! command -v docker >/dev/null 2>&1; then
 
   echo \
     "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
-    https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" \
-    | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
+    https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" |
+    sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
 
   sudo apt-get update
   sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin

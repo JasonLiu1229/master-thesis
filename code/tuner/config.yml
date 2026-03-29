@@ -40,5 +40,5 @@ RESUME_FROM_LAST_CP: false # Whether to resume training from the last checkpoint
 # RESUME_ADAPTER_PATH: out/adapter/adapter_50pct
 
 # smaller dataset config
-USE_SMALLER_DATASET: true
-SMALLER_FRACTION: 0.001 # Fraction of the dataset to use if USE_SMALLER_DATASET is true.
+USE_SMALLER_DATASET: false
+SMALLER_FRACTION: 0.05 # Fraction of the dataset to use if USE_SMALLER_DATASET is true.

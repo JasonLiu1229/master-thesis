@@ -56,32 +56,6 @@ def _preprocess_dataset(force: bool = False):
             seed=42,
         )
 
-    # test dataset
-    logger.info("Preprocessing test dataset...")
-
-    test_path = os.path.join(config["INPUT_DIR"], config["TEST_DIR"])
-    test_output_path = os.path.join(config["OUTPUT_DIR"], config["TEST_DIR"])
-
-    if (
-        os.path.exists(
-            os.path.join(
-                test_output_path,
-            )
-        )
-        and not force
-        and os.listdir(test_output_path)
-    ):
-        logger.info(
-            f"Preprocessed test dataset already exists at {test_output_path}. Skipping preprocessing."
-        )
-    else:
-        preprocess(
-            input_dir=test_path,
-            output_dir=test_output_path,
-            shuffle=False,
-            seed=42,
-        )
-
     # train dataset
     logger.info("Preprocessing training dataset...")
 

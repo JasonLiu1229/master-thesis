@@ -10,37 +10,7 @@ from datasets import Dataset, Features, Sequence, Value
 from logger import setup_logging
 from transformers import AutoTokenizer
 
-SYSTEM_INSTRUCTION = (
-    "You are a code refactoring assistant for Java unit tests.\n"
-    "You will be given:\n"
-    "- A Java test method (wrapped in a dummy class), and\n"
-    "- A list of identifier names (method + local variables + parameters).\n\n"
-    "Your job is to propose more meaningful names for these identifiers.\n"
-    "Make use of this template to additionally guide the naming:\n"
-    "- A test case should have an assertion between expected and actual values. "
-    "So for identifiers that are used in the assertions itself, try to make use "
-    "of expected and actual.\n\n"
-    "You MUST ONLY respond with a JSON object mapping originalName -> newName.\n"
-    "You MUST NOT output code or comments or markdown.\n"
-)
-
-USER_PROMPT_TEMPLATE = (
-    "Here is the obfuscated Java test method wrapped in a dummy class:\n\n"
-    "```java\n"
-    "{test_case}\n"
-    "```\n\n"
-    "Here are the identifiers that may be renamed:\n"
-    "{identifiers}\n\n"
-    "Propose more meaningful names for each of THESE identifiers only.\n"
-    "Return a single JSON object mapping originalName -> newName.\n"
-    "Example:\n"
-    '{{ "func_1": "testYearEnd" }}\n\n'
-    "Important:\n"
-    "- Use ONLY the listed identifiers as keys.\n"
-    "- Do NOT introduce new identifiers.\n"
-    "- Do NOT include any keys that were not listed.\n"
-    "- Do NOT output anything except the JSON object (no backticks, no text)."
-)
+from prompts import USER_PROMPT_TEMPLATE, SYSTEM_INSTRUCTION
 
 
 setup_logging("tuner")
