@@ -1,0 +1,5 @@
+Tested on 5pct tuned model, did not differ much because tuning was too small, so opted to 15pct
+  - 5pct gave only improvements in LLM name scoring but not in others, other aspects it decreased
+    - This could be coz of too small of tuning and too much noise
+
+Started on the paper in ieee format. 

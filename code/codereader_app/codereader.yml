@@ -59,7 +59,7 @@ models:
     runner_config:
       ollama_bin: ollama
     weight: 1.2
-    enable: true
+    enable: false
 
   - name: Deepseek
     model: deepSeek-coder:6.7b

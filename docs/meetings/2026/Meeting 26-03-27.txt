@@ -7,7 +7,6 @@ New processing output Jsonl:
   - Test 
     - 52472 - 1121
 
-
 I use a different metric instead of Cohen d, I use cohen r that is used for 2 datasets that are related to each other but are not uniform.
   - additionally i add a wilcoxen factor that determines how conservitve we should be.
 
@@ -38,9 +37,11 @@ Other closely related works:
       - But still LLMs are not perfect replacements that is why we increase the amount of test to be more generalized
 
 Codereader:
-  - So I made the ruling more specific because based on papers I read, this would improve the reader to be as close as possible
+  - So I made the ruling more specific because based on papers I read, this would improve the reader to be as close as possible as to how humans would think
     - https://arxiv.org/html/2403.16639v1
     - https://arxiv.org/html/2504.04372v1
+
+Started on the training on the cloud again but this time for 5 percent of the dataset.
 
 References:
   - wilcoxen: https://www.ncss.com/wp-content/themes/ncss/pdf/Procedures/PASS/Wilcoxon_Signed-Rank_Tests.pdf

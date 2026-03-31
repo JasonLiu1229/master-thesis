@@ -9,7 +9,7 @@ with open("config.yml", "r") as f:
 
 async def ask_llm(user_message: str, sys_instruction: str) -> tuple[str, LocalUsage]:
     if config["USE_LOCAL_LLM"]:
-        llm = get_local_model(config["MODEL_ID"], config["ADAPTER_FILE"])
+        llm = get_local_model(config["MODEL_ID"], config["ADAPTER_DIR"])
     else:
         llm = get_model(config["MODEL_ID"])
 
