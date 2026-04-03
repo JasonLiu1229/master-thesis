@@ -3,3 +3,23 @@ Tested on 5pct tuned model, did not differ much because tuning was too small, so
     - This could be coz of too small of tuning and too much noise
 
 Started on the paper in ieee format. 
+
+Research questions?
+  - I feel like it is not the same things i want to answer anymore really, or at least some things are different then i expected
+    - Have a valid excuse to drop research question, be clear and give the full reason
+  - So it is okay to mention that using multiple LLMs to score LLMs as long as we mention that LLM come close to scoring readability using proper prompt engineering
+    - As long the reasons make sense. 
+    - Provide the evidence
+  - How much does fine tuning impact?
+    - Different stages
+
+New research questions?
+  - What is the motivation?
+  - Be clear?
+  - The means to answer to answer it? Like how, what?
+
+Add a graph to the sample size, so what scores where.
+  - Add it maybe as an interesting observation
+
+Structure of paper:
+  - bitbucket: https://bitbucket.org/sdemeyer/ansymomasterthesistemplatepaper/src/master/
