@@ -13,6 +13,7 @@ from prompts import (
     RETRY_USER_PROMPT_TEMPLATE,
     SYSTEM_INSTRUCTION,
     USER_PROMPT_TEMPLATE,
+    _format_identifier_list_with_kinds,
 )
 
 from pipeline.helper import (
@@ -60,10 +61,6 @@ def make_messages(user_message: str, sys_instruction: str = SYSTEM_INSTRUCTION):
             "content": user_message,
         },
     ]
-
-
-def _format_identifier_list_for_prompt(identifiers: list[str]) -> str:
-    return "\n".join(f"- {name}" for name in identifiers)
 
 
 def _rename_process(
@@ -117,7 +114,7 @@ def _rename_process(
 
     identifier_candidates.append(original_method_name)
 
-    identifiers_for_prompt = _format_identifier_list_for_prompt(identifier_candidates)
+    identifiers_for_prompt = _format_identifier_list_with_kinds(identifier_candidates)
 
     user_message = USER_PROMPT_TEMPLATE.format(
         test_case=wrapped_source_code,
@@ -195,7 +192,7 @@ def _rename_process(
                 f"Missing: {sorted(missing)}"
             )
             logger.error(
-                f"{error_reason} for {original_method_name} on attempt {i+1}: {mapping}"
+                f"{error_reason} for {original_method_name} on attempt {i + 1}: {mapping}"
             )
 
             log_error(file_path, i + 1, "MissingKeysError", error_reason)
@@ -258,9 +255,9 @@ def _rename_process_local(wrapped_source_code: str, source_code_clean: str): ...
 
 
 def rename(java_test_span: JavaTestSpan):
-    assert os.path.exists(
-        java_test_span.file_path
-    ), f"Java file path: {java_test_span.file_path} does not exists"
+    assert os.path.exists(java_test_span.file_path), (
+        f"Java file path: {java_test_span.file_path} does not exists"
+    )
 
     source_code_lines = parse_test_case(java_test_span)
     source_code_clean = "\n".join(source_code_lines)

@@ -2,4 +2,4 @@
 MODEL_ID: "Qwen/Qwen2.5-Coder-7B-Instruct"
 
 USE_LOCAL_LLM: false 
-ADAPTER_DIR: "out/adapter/5pct/adapter_final/"
+ADAPTER_DIR: "out/adapter/060426/adapter_15pct/"

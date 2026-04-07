@@ -10,7 +10,11 @@ from datasets import Dataset, Features, Sequence, Value
 from logger import setup_logging
 from transformers import AutoTokenizer
 
-from prompts import USER_PROMPT_TEMPLATE, SYSTEM_INSTRUCTION
+from prompts import (
+    USER_PROMPT_TEMPLATE,
+    SYSTEM_INSTRUCTION,
+    _format_identifier_list_with_kinds,
+)
 
 
 setup_logging("tuner")
@@ -27,15 +31,11 @@ except Exception as e:
     raise
 
 
-def _format_identifier_list(identifiers: List[str]) -> str:
-    return "\n".join(f"- {name}" for name in identifiers)
-
-
 def build_prompt(obf_code: str, identifiers: List[str], tokenizer) -> str:
     """Build the full prompt string in chat-template format."""
     user_content = USER_PROMPT_TEMPLATE.format(
         test_case=obf_code,
-        identifiers=_format_identifier_list(identifiers),
+        identifiers=_format_identifier_list_with_kinds(identifiers),
     )
     messages = [
         {"role": "system", "content": SYSTEM_INSTRUCTION},
@@ -58,6 +58,9 @@ def preprocess_single(
     """
     Build one (input_ids, attention_mask, labels) triple.
     Prompt tokens are masked with -100; only completion tokens are supervised.
+
+    Returns None if the completion would be truncated, so the caller can skip
+    the record cleanly instead of training on a partial (and misleading) output.
     """
     eos = tokenizer.eos_token or "</s>"
 
@@ -69,7 +72,6 @@ def preprocess_single(
         + eos
     )
 
-    # Tokenize prompt alone (no padding) to get the exact prompt token count
     prompt_ids = tokenizer(
         prompt,
         add_special_tokens=False,
@@ -77,12 +79,23 @@ def preprocess_single(
     )["input_ids"]
     prompt_len = len(prompt_ids)
 
-    # Tokenize full sequence with padding/truncation
+    completion_ids = tokenizer(
+        completion,
+        add_special_tokens=False,
+        truncation=False,
+    )["input_ids"]
+    completion_len = len(completion_ids)
+
+    total_len = prompt_len + completion_len
+    if total_len > max_length:
+        return None
+
+    # Tokenize full sequence with padding (no truncation needed — we checked above).
     encoder = tokenizer(
         prompt + completion,
         add_special_tokens=False,
         max_length=max_length,
-        truncation=True,
+        truncation=False,  # never truncate — we already rejected over-length examples
         padding="max_length",
         return_attention_mask=True,
     )
@@ -90,7 +103,11 @@ def preprocess_single(
     input_ids: List[int] = encoder["input_ids"]
     attn_mask: List[int] = encoder["attention_mask"]
 
-    # Mask prompt tokens and padding tokens with -100
+    # Sanity check — tokenizer should not have changed the length.
+    if len(input_ids) != max_length:
+        return None
+
+    # Mask prompt tokens and padding tokens with -100.
     labels: List[int] = []
     for i, (tok_id, mask) in enumerate(zip(input_ids, attn_mask)):
         if mask == 0 or i < prompt_len:
@@ -99,6 +116,15 @@ def preprocess_single(
             labels.append(tok_id)
 
     assert len(labels) == len(input_ids) == max_length
+
+    supervised_text = tokenizer.decode(
+        [t for t in labels if t != -100], skip_special_tokens=False
+    )
+    for ident in identifiers:
+        renamed = mapping.get(ident)
+        if renamed and renamed != ident and renamed not in supervised_text:
+            return None
+
     return {
         "input_ids": input_ids,
         "attention_mask": attn_mask,
@@ -159,7 +185,7 @@ def preprocess(
     )
 
     def gen():
-        kept = skipped_json = skipped_feat = 0
+        kept = skipped_json = skipped_feat = skipped_truncated = 0
 
         for file_idx, filename in enumerate(files, 1):
             if file_idx % 1000 == 0 or file_idx == 1:
@@ -216,6 +242,14 @@ def preprocess(
                             )
                             continue
 
+                        if feat is None:
+                            skipped_truncated += 1
+                            logger.debug(
+                                f"Skipping truncated/incomplete example at "
+                                f"{input_path}:{line_idx}"
+                            )
+                            continue
+
                         if any(
                             len(feat[k]) != max_len
                             for k in ("input_ids", "attention_mask", "labels")
@@ -239,7 +273,8 @@ def preprocess(
                             logger.info(
                                 f"Generated {kept} examples so far "
                                 f"(skipped_json={skipped_json}, "
-                                f"skipped_feat={skipped_feat})"
+                                f"skipped_feat={skipped_feat}, "
+                                f"skipped_truncated={skipped_truncated})"
                             )
 
                         yield feat
@@ -252,7 +287,9 @@ def preprocess(
 
         logger.info(
             f"Done. kept={kept}, "
-            f"skipped_json={skipped_json}, skipped_feat={skipped_feat}"
+            f"skipped_json={skipped_json}, "
+            f"skipped_feat={skipped_feat}, "
+            f"skipped_truncated={skipped_truncated}"
         )
 
     ds = Dataset.from_generator(gen, features=features)
