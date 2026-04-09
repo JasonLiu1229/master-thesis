@@ -30,3 +30,4 @@ tools/randoop-*
 *venv*
 out/adapter/
 out/data_preprocessed/
+out/*.zip

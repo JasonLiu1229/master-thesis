@@ -1,0 +1,3 @@
+Had to make a new dataset because of small prompting mistakes.
+
+The old one did improve but had minor faults so improving tuning

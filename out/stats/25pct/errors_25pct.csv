@@ -1,4 +1,1 @@
 timestamp,file_path,attempt,error_type,error_message,raw_response
-2026-04-06T12:30:24,in/test/TestClass10002.java.jsonl,1,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['var_1'],
-2026-04-06T12:46:25,in/test/TestClass10004.java.jsonl,1,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['var_1'],
-2026-04-06T12:54:26,in/test/TestClass10005.java.jsonl,1,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['var_1'],

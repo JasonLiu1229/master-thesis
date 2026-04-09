@@ -11,7 +11,12 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              capabilities: [gpu]
+              capabilities: [gpu] 
+    environment:
+      CODEREADER_URL: http://codereader_ollama:8080
+    depends_on:
+      codereader_ollama:
+        condition: service_healthy
     profiles: ["t1", "arno", "test"]
     networks:
       - codereader
@@ -29,6 +34,11 @@ services:
           devices:
             - driver: nvidia
               capabilities: [gpu]
+    environment:
+      CODEREADER_URL: http://codereader_ollama:8080
+    depends_on:
+      codereader_ollama:
+        condition: service_healthy
     profiles: ["t2", "arno", "test"]
     networks:
       - codereader
