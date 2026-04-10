@@ -226,7 +226,7 @@ def process_folder(
         if config["AMOUNT_OF_EVAL_SAMPLES"] != -1:
             limit = config["AMOUNT_OF_EVAL_SAMPLES"]
 
-        jsonl_files = jsonl_files[:limit]
+        jsonl_files = jsonl_files[: limit + 1]
 
         failed_count = 0
         total_pair_metrics: List[PairMetrics] = []

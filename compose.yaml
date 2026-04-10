@@ -5,6 +5,7 @@ services:
       dockerfile: docker/t1.Dockerfile
     volumes:
       - ./out:/app/code/out/
+      - ./tools/java-dataset-converter-llm/dataset/test/jsonl/:/app/in/test:ro
     working_dir: /app/code
     deploy:
       resources:
@@ -17,7 +18,7 @@ services:
     depends_on:
       codereader_ollama:
         condition: service_healthy
-    profiles: ["t1", "arno", "test"]
+    profiles: ["t1", "arno", "test", "t1_eval"]
     networks:
       - codereader
 
@@ -27,6 +28,7 @@ services:
       dockerfile: docker/t2.Dockerfile
     volumes:
       - ./out:/app/code/out/
+      - ./tools/java-dataset-converter-llm/dataset/test/jsonl/:/app/in/test:ro
     working_dir: /app/code
     deploy:
       resources:
@@ -39,7 +41,7 @@ services:
     depends_on:
       codereader_ollama:
         condition: service_healthy
-    profiles: ["t2", "arno", "test"]
+    profiles: ["t2", "arno", "test", "t2_eval"]
     networks:
       - codereader
 
@@ -234,7 +236,7 @@ services:
           devices:
             - driver: nvidia
               capabilities: [gpu]
-    profiles: ["full_local_eval", "t3_eval", "codereader", "t3_eval_cohen", "t3_eval_openai"]
+    profiles: ["full_local_eval", "t3_eval", "codereader", "t3_eval_cohen", "t3_eval_openai", "t1_eval", "t2_eval"]
     networks:
       - codereader
     ports:
