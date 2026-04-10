@@ -21,6 +21,8 @@ _KEY_MAP = {
     "CER": "cer",
     "Edit distance": "edit_distance",
     "Execution time": "execution_time_s",
+    "LLM score avg": "llm_score_avg",
+    "LLM score wavg": "llm_score_wavg",
 }
 
 # Note regex are made using GPT
@@ -30,11 +32,10 @@ _LABELS_RE = re.compile(
     + r")\s*:\s*(?P<value>.+?)\s*$"
 )
 
-_NUM_RE = re.compile(
-    r"^[+-]?(?:\d{1,3}(?:,\d{3})*|\d+)(?:\.\d+)?(?:[eE][+-]?\d+)?$"
-)
+_NUM_RE = re.compile(r"^[+-]?(?:\d{1,3}(?:,\d{3})*|\d+)(?:\.\d+)?(?:[eE][+-]?\d+)?$")
 
 _SEC_SUFFIX_RE = re.compile(r"^(?P<num>.+?)\s*(?:seconds?|s)\s*$", re.IGNORECASE)
+
 
 # Note this function is made using GPT
 def _parse_value(raw: str):
@@ -58,6 +59,7 @@ def _parse_value(raw: str):
             pass
 
     return raw
+
 
 def parse(lines: Iterable[str]) -> Dict[str, object]:
     """

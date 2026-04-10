@@ -5,7 +5,7 @@ services:
       dockerfile: docker/t1.Dockerfile
     volumes:
       - ./out:/app/code/out/
-      - ./tools/java-dataset-converter-llm/dataset/test/jsonl/:/app/in/test:ro
+      - ./tools/java-dataset-converter-llm/dataset/test/jsonl/:/app/code/in/test:ro
     working_dir: /app/code
     deploy:
       resources:
