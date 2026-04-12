@@ -1,2 +1,0 @@
-timestamp,file_path,method_name,new_method_name,attempt,call_type,prompt_tokens,completion_tokens,total_tokens,latency_ms,success
-2026-04-10T15:34:52,in/test/TestClass0.java.jsonl,func_1,testShouldReturnFirstDayOfYear,1,rename,447,30,477,41132.9,True

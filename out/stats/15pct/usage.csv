@@ -1,0 +1,11 @@
+timestamp,file_path,method_name,new_method_name,attempt,call_type,prompt_tokens,completion_tokens,total_tokens,latency_ms,success
+2026-04-12T09:00:01,in/test/TestClass0.java.jsonl,func_1,testShouldReturnFirstDayOfYear,1,rename,447,30,477,46103.7,True
+2026-04-12T09:07:35,in/test/TestClass1.java.jsonl,func_1,testYearEndReturnsCorrectDate,1,rename,461,30,491,5001.4,True
+2026-04-12T09:14:58,in/test/TestClass100.java.jsonl,func_1,testShouldReturnIdentifierWhenPolicyIsOptionalWithCredentialIdList,1,rename,443,30,473,5275.2,True
+2026-04-12T09:22:51,in/test/TestClass1000.java.jsonl,func_1,testShouldReturnCorrectOutcomeForEmptyLists,1,rename,478,36,514,6239.2,True
+2026-04-12T09:30:35,in/test/TestClass10000.java.jsonl,func_1,testShouldReturnStringRepresentationOfMap,1,rename,484,23,507,4494.9,True
+2026-04-12T09:42:23,in/test/TestClass10002.java.jsonl,func_1,testShouldReturnEmptyStringWhenMapIsEmpty,1,rename,424,25,449,4613.1,True
+2026-04-12T09:50:11,in/test/TestClass10003.java.jsonl,func_1,testShouldReturnExpectedContentWhenInputStreamIsProvided,1,rename,454,45,499,8540.3,True
+2026-04-12T09:57:43,in/test/TestClass10004.java.jsonl,func_1,testComputeBoundWithPositiveValues,1,rename,603,27,630,4605.6,True
+2026-04-12T10:04:48,in/test/TestClass10005.java.jsonl,func_1,testComputeBoundWithDifferentParameters,1,rename,824,23,847,5317.7,True
+2026-04-12T10:12:27,in/test/TestClass10006.java.jsonl,func_1,testComputeBoundWithPositiveValues,1,rename,635,23,658,3927.9,True

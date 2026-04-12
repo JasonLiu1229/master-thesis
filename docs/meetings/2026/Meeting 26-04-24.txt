@@ -1,3 +1,7 @@
 Had to make a new dataset because of small prompting mistakes.
 
-The old one did improve but had minor faults so improving tuning
+The old one did improve but had minor faults so improving tuning.
+
+The new tuned models are improved, wiht 25 percent the f1 score increases a bit and the readability scoring using LLMs increases by a lot. 
+
+Next a worthy thing to note, is the decrease of errors. the new tuned model after 15 percent have less errors compared to the original model. More specifically it has 0 errors.
