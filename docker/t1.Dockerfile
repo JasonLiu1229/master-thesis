@@ -1,6 +1,11 @@
 # T1 image (e.g., your GNN env)
 FROM nvidia/cuda:13.0.1-cudnn-runtime-ubuntu24.04
 
+ENV PYTHONDONTWRITEBYTECODE=0 \
+  PYTHONUNBUFFERED=0 \
+  PIP_NO_CACHE_DIR=0 \
+  DEBIAN_FRONTEND=noninteractive
+
 # ---- install Python 3.7 + pip ----
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
@@ -20,21 +25,13 @@ RUN ln -sf /usr/bin/python3.7 /usr/local/bin/python && \
 # Sanity check
 RUN python --version && pip --version
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
-  PYTHONUNBUFFERED=1 \
-  PIP_NO_CACHE_DIR=1 \
-  DEBIAN_FRONTEND=noninteractive
-
 # ---- system prerequisites ----
 RUN apt-get update && apt-get install -y --no-install-recommends \
   bash zip unzip ca-certificates git \
   && rm -rf /var/lib/apt/lists/*
 
 USER root
-ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
-  build-essential \
-  python3.7-dev \
   gcc \
   g++ \
   && rm -rf /var/lib/apt/lists/*
@@ -47,19 +44,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3.7-venv 
 RUN python3.7 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-RUN pip3 install --upgrade "pip<24" "setuptools<70" wheel
-RUN pip3 install "pybind11>=2.10,<2.12"
+RUN pip install --upgrade "pip<24" "setuptools<70" wheel
+RUN pip install "pybind11>=2.10,<2.12"
 
 WORKDIR /tmp/fastwer-build
-RUN pip3 download fastwer==0.1.3 --no-binary :all: \
+RUN pip download fastwer==0.1.3 --no-binary :all: \
   && tar -xzf fastwer-0.1.3.tar.gz \
   && cd fastwer-0.1.3 \
   && sed -i '1i #include <cstdint>' src/fastwer.hpp \
   && sed -i '2i #include <cstdint>' src/fastwer.cpp \
-  && pip3 install --no-build-isolation .
+  && pip install --no-build-isolation .
 
 COPY ../requirements/requirements_t1.txt /tmp/requirements.txt
-RUN pip3 install -r /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt
 
 # ---- SDKMAN! + Java ----
 ARG JAVA_DIST=12.0.2.hs-adpt
