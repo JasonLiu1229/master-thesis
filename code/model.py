@@ -318,10 +318,31 @@ def get_local_model(local_model_path, adapter=None) -> LLM_Model:
     if _llm_model is None:
         print("Loading local LLM model into memory...")
         m = LLM_Model()
+
         try:
-            m.load_model(local_model_path)
+            torch_dtype = torch.bfloat16 if torch.cuda.is_available() else torch.float32
+            bnb_config = BitsAndBytesConfig(
+                load_in_3bit=True,
+                bnb_3bit_quant_type="nf4",
+                bnb_3bit_use_double_quant=True,
+                bnb_3bit_compute_dtype=torch.bfloat16,
+            )
+
+            base = AutoModelForCausalLM.from_pretrained(
+                local_model_path,
+                quantization_config=bnb_config if torch.cuda.is_available() else None,
+                torch_dtype=torch_dtype,
+                device_map="auto",
+            ).eval()
+
             if adapter:
-                m.model = PeftModel.from_pretrained(m.model, adapter).eval()
+                base = PeftModel.from_pretrained(base, adapter).eval()
+
+            if torch.cuda.is_available():
+                base = torch.compile(base, mode="reduce-overhead")
+
+            m.model = base
+            m.tokenizer = AutoTokenizer.from_pretrained(local_model_path, use_fast=True)
             m.set_model(m.model, local_model_path, m.tokenizer)
         except Exception as e:
             print(f"Error loading local model {local_model_path}: {e}")

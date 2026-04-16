@@ -1,14 +1,14 @@
 {
-  "cer": 21.71987178320689,
-  "correct_ordered": 0.6971285096719827,
-  "correct_unordered": 0.5649206349206348,
-  "edit_distance": 83.7,
-  "f1": 0.7114463442049649,
+  "cer": 12.78124399582194,
+  "correct_ordered": 0.64842293177239,
+  "correct_unordered": 0.7390314687291883,
+  "edit_distance": 67.6,
+  "f1": 0.8472688868219092,
   "failed_files": [],
   "fails": 0,
-  "llm_score_avg": 74.98333333333333,
-  "llm_score_wavg": 75.2080808080808,
-  "precision": 0.7055477855477855,
-  "recall": 0.7177822177822177,
-  "total_time": 4856.686794281006
+  "llm_score_avg": 70.25,
+  "llm_score_wavg": 71.51515151515152,
+  "precision": 0.8538183749888555,
+  "recall": 0.8414260304912478,
+  "total_time": 4781.534991264343
 }

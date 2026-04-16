@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import time
+import random
 
 from concurrent.futures import as_completed, ThreadPoolExecutor
 from datetime import datetime
@@ -225,6 +226,9 @@ def process_folder(
         limit = len(jsonl_files)
         if config["AMOUNT_OF_EVAL_SAMPLES"] != -1:
             limit = config["AMOUNT_OF_EVAL_SAMPLES"]
+
+        random.seed(config["SEED"])
+        random.shuffle(jsonl_files)
 
         jsonl_files = jsonl_files[:limit]
 
