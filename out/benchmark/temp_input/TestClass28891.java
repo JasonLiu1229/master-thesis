@@ -1,3 +1,0 @@
-public class TestClass28891 {
-@Test public void func_1() { final org.apache.nifi.registry.flow.Bundle var_1 = getRequestBundle(systemBundle); final ControllerServiceDefinition var_2 = extensionManager.getControllerServiceDefinition(sslContextService.getType(), var_1); assertNotNull(var_2); assertEquals(sslContextService.getType(), var_2.getType()); assertEquals(sslContextService.getGroup(), var_2.getGroup()); assertEquals(sslContextService.getArtifact(), var_2.getArtifact()); assertEquals(sslContextService.getVersion(), var_2.getVersion()); assertEquals(sslContextService.getPropertyDescriptors().size(), var_2.getPropertyDescriptors().size()); }
-}

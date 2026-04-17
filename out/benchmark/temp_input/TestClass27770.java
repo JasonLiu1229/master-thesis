@@ -1,3 +1,0 @@
-public class TestClass27770 {
-@Test public void func_1() { Product var_1 = new Product("test", "test", 1, 1); assertFalse(MphChlOp.isValidBrrSourceProduct(var_1, Sensor.MERIS_3RD)); for (String var_2 : MphChlConstants.MERIS_REQUIRED_BRR_BAND_NAMES) { var_1.addBand(var_2, ProductData.TYPE_FLOAT32); } assertTrue(MphChlOp.isValidBrrSourceProduct(var_1, Sensor.MERIS_3RD)); assertTrue(MphChlOp.isValidBrrSourceProduct(var_1, Sensor.MERIS_4TH)); assertFalse(MphChlOp.isValidBrrSourceProduct(var_1, Sensor.OLCI)); for (String var_3 : MphChlConstants.OLCI_REQUIRED_BRR_BAND_NAMES) { if (!var_1.containsBand(var_3)) { var_1.addBand(var_3, ProductData.TYPE_FLOAT32); } } assertTrue(MphChlOp.isValidBrrSourceProduct(var_1, Sensor.OLCI)); }
-}
