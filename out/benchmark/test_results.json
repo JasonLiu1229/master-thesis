@@ -1,0 +1,83 @@
+{
+  "summary": {
+    "total": 10,
+    "precision": 0.02702702702702703,
+    "recall": 0.01694915254237288,
+    "f1": 0.020833333333333336,
+    "correct_ordered": 0.01694915254237288,
+    "correct_unordered": 0.03333333333333333,
+    "cer": 164.7058823529412,
+    "edit_distance": 6.533333333333333,
+    "avg_predicted_subtokens": 1.2666666666666666,
+    "avg_expected_subtokens": 1.9666666666666666,
+    "avg_predicted_subtokens_correct": 1.0,
+    "avg_predicted_subtokens_incorrect": 1.2758620689655173,
+    "avg_expected_subtokens_incorrect": 2.0,
+    "avg_len_predicted_names": 7.0,
+    "avg_len_expected_names": 3.966666666666667,
+    "avg_len_correct_names": 3.0,
+    "dist_predicted_lengths": {
+      "1": 24,
+      "2": 4,
+      "3": 2
+    },
+    "dist_expected_lengths": {
+      "2": 29,
+      "1": 1
+    },
+    "llm_score_avg": 59.83333333333333,
+    "llm_score_wavg": 61.3994960263617
+  },
+  "per_file": [
+    {
+      "filename": "TestClass18143.java",
+      "codereader_avg": 55.0,
+      "codereader_wavg": 57.6923076923077
+    },
+    {
+      "filename": "TestClass27770.java",
+      "codereader_avg": 51.666666666666664,
+      "codereader_wavg": 49.40298507462687
+    },
+    {
+      "filename": "TestClass28891.java",
+      "codereader_avg": 76.66666666666667,
+      "codereader_wavg": 76.71641791044777
+    },
+    {
+      "filename": "TestClass30831.java",
+      "codereader_avg": 53.333333333333336,
+      "codereader_wavg": 55.44776119402986
+    },
+    {
+      "filename": "TestClass33509.java",
+      "codereader_avg": 70.0,
+      "codereader_wavg": 72.30769230769232
+    },
+    {
+      "filename": "TestClass34331.java",
+      "codereader_avg": 50.0,
+      "codereader_wavg": 53.13432835820896
+    },
+    {
+      "filename": "TestClass47511.java",
+      "codereader_avg": 55.0,
+      "codereader_wavg": 56.119402985074636
+    },
+    {
+      "filename": "TestClass5353.java",
+      "codereader_avg": 58.333333333333336,
+      "codereader_wavg": 61.268656716417915
+    },
+    {
+      "filename": "TestClass60352.java",
+      "codereader_avg": 58.333333333333336,
+      "codereader_wavg": 60.671641791044784
+    },
+    {
+      "filename": "TestClass64027.java",
+      "codereader_avg": 70.0,
+      "codereader_wavg": 71.23376623376625
+    }
+  ]
+}
