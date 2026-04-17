@@ -1,0 +1,3 @@
+public class TestClass47511 {
+@Test public void func_1() { final ContractAddress var_1 = new AergoKeyGenerator().create().getAddress() .adapt(ContractAddress.class); final Class<TestContract> var_2 = TestContract.class; final TryCountAndInterval var_3 = TryCountAndInterval.of(3, Time.of(100L)); final ContractApiFactory var_4 = new ContractApiFactory(); assertNotNull(var_4.create(var_1, var_2)); assertNotNull(var_4.create(var_1, var_2, var_3)); assertNotNull(var_4.create(var_1, var_2, getClass().getClassLoader())); assertNotNull(var_4 .create(var_1, var_2, var_3, getClass().getClassLoader())); }
+}

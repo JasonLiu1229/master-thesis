@@ -1,4 +1,5 @@
 import logging
+import re
 from dataclasses import dataclass
 from typing import Dict, Iterable, List, Optional, Tuple
 
@@ -121,47 +122,129 @@ def llm_readability_score(code: str) -> Tuple[float, float]:
     return _llm_parser(lines)
 
 
-def evaluate_f1(oracle: str, predicted: str) -> F1Metrics:
-    edit = levenshtein(oracle, predicted)
-    total_chars = max(1, len(oracle))
-    cer = 100.0 * edit / total_chars
+def _subtokenize(name: str) -> List[str]:
+    """Split a camelCase/snake_case identifier into lowercase subtokens."""
+    tokens = re.sub(r"([a-z])([A-Z])", r"\1 \2", name).replace("_", " ").split()
+    return [t.lower() for t in tokens if t]
 
-    oracle_ids = extract_identifiers(oracle)
-    pred_ids = extract_identifiers(predicted)
 
-    if oracle_ids:
-        same_positions = sum(
-            1
-            for i in range(min(len(oracle_ids), len(pred_ids)))
-            if oracle_ids[i] == pred_ids[i]
+def _align_identifier_pairs(
+    obf_code: str, oracle_code: str, predicted_code: str
+) -> List[Tuple[str, str]]:
+    """
+    Align predicted and oracle identifier names using the obfuscated code as a
+    positional anchor. Token positions are stable across all three versions
+    because T3 only renames identifiers (token count and structure are identical).
+
+    Returns a list of (oracle_name, predicted_name) pairs, one per identifier
+    occurrence (duplicates included so frequency weighs into metrics).
+    """
+    try:
+        obf_toks = list(jtok.tokenize(obf_code))
+        oracle_toks = list(jtok.tokenize(oracle_code))
+        pred_toks = list(jtok.tokenize(predicted_code))
+    except Exception as e:
+        logger.warning(f"_align_identifier_pairs: tokenization failed: {e}")
+        return []
+
+    if not (len(obf_toks) == len(oracle_toks) == len(pred_toks)):
+        logger.warning(
+            "_align_identifier_pairs: token counts differ "
+            f"(obf={len(obf_toks)}, oracle={len(oracle_toks)}, pred={len(pred_toks)}); "
+            "aligning identifier subsequences instead."
         )
-        correct_ordered = same_positions / len(oracle_ids)
+        obf_ids = [t.value for t in obf_toks if isinstance(t, jtok.Identifier)]
+        oracle_ids = [t.value for t in oracle_toks if isinstance(t, jtok.Identifier)]
+        pred_ids = [t.value for t in pred_toks if isinstance(t, jtok.Identifier)]
+        n = min(len(obf_ids), len(oracle_ids), len(pred_ids))
+        return [(oracle_ids[i], pred_ids[i]) for i in range(n)]
+
+    pairs = []
+    for o_tok, r_tok, p_tok in zip(obf_toks, oracle_toks, pred_toks):
+        if isinstance(o_tok, jtok.Identifier):
+            pairs.append((r_tok.value, p_tok.value))
+    return pairs
+
+
+def evaluate_f1(
+    oracle: str, predicted: str, obf_code: Optional[str] = None
+) -> F1Metrics:
+    """
+    Compute subtoken-level F1 metrics.
+
+    When `obf_code` is provided (strongly recommended), pairs are aligned
+    token-by-token via the obfuscated anchor so each identifier prediction is
+    evaluated independently against its oracle counterpart.
+
+    Without `obf_code` falls back to positional alignment of identifier lists.
+    """
+    if obf_code is not None:
+        pairs = _align_identifier_pairs(obf_code, oracle, predicted)
     else:
-        correct_ordered = 0.0
+        oracle_ids = extract_identifiers(oracle)
+        pred_ids = extract_identifiers(predicted)
+        n = min(len(oracle_ids), len(pred_ids))
+        pairs = [(oracle_ids[i], pred_ids[i]) for i in range(n)]
 
-    oracle_set = set(oracle_ids)
-    pred_set = set(pred_ids)
+    if not pairs:
+        return F1Metrics(
+            cer=0.0,
+            edit_distance=0.0,
+            correct_ordered=0.0,
+            correct_unordered=0.0,
+            precision=0.0,
+            recall=0.0,
+            f1=0.0,
+        )
 
-    if oracle_set or pred_set:
-        inter = len(oracle_set & pred_set)
-        union = len(oracle_set | pred_set)
-        correct_unordered = inter / union if union > 0 else 0.0
-    else:
-        correct_unordered = 0.0
+    total_tp = total_fp = total_fn = 0
+    total_correct_pos = 0
+    total_expected_subtokens = 0
+    n_correct = 0
+    total_edit = 0
+    total_expected_chars = 0
 
-    tp = len(oracle_set & pred_set)
-    fp = len(pred_set - oracle_set)
-    fn = len(oracle_set - pred_set)
+    for oracle_name, pred_name in pairs:
+        exp_subs = _subtokenize(oracle_name)
+        pred_subs = _subtokenize(pred_name)
 
-    precision = tp / (tp + fp) if (tp + fp) else 0.0
-    recall = tp / (tp + fn) if (tp + fn) else 0.0
+        exp_set = set(exp_subs)
+        pred_set = set(pred_subs)
+        tp = len(exp_set & pred_set)
+        fp = len(pred_set - exp_set)
+        fn = len(exp_set - pred_set)
+        total_tp += tp
+        total_fp += fp
+        total_fn += fn
+
+        total_correct_pos += sum(1 for a, b in zip(exp_subs, pred_subs) if a == b)
+        total_expected_subtokens += len(exp_subs)
+
+        if exp_subs == pred_subs:
+            n_correct += 1
+
+        edit = levenshtein(oracle_name, pred_name)
+        total_edit += edit
+        total_expected_chars += max(1, len(oracle_name))
+
+    n = len(pairs)
+    precision = total_tp / (total_tp + total_fp) if (total_tp + total_fp) else 0.0
+    recall = total_tp / (total_tp + total_fn) if (total_tp + total_fn) else 0.0
     f1 = (
         (2 * precision * recall / (precision + recall)) if (precision + recall) else 0.0
     )
+    correct_ordered = (
+        total_correct_pos / total_expected_subtokens
+        if total_expected_subtokens
+        else 0.0
+    )
+    correct_unordered = n_correct / n
+    cer = 100.0 * total_edit / total_expected_chars
+    avg_edit = total_edit / n
 
     return F1Metrics(
         cer=cer,
-        edit_distance=float(edit),
+        edit_distance=avg_edit,
         correct_ordered=correct_ordered,
         correct_unordered=correct_unordered,
         precision=precision,
@@ -179,8 +262,10 @@ def evaluate_llm(code: str) -> Optional[LLMMetrics]:
         return None
 
 
-def evaluate(oracle: str, predicted: str) -> PairMetrics:
-    f1m = evaluate_f1(oracle, predicted)
+def evaluate(
+    oracle: str, predicted: str, obf_code: Optional[str] = None
+) -> PairMetrics:
+    f1m = evaluate_f1(oracle, predicted, obf_code=obf_code)
     llm = evaluate_llm(predicted)
 
     return PairMetrics(

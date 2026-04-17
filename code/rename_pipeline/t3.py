@@ -180,8 +180,9 @@ def process_single_eval(
             continue
 
         if cohen:
-            # F1: oracle vs predicted  (how close to human names?)
-            f1_metrics.append(evaluate_f1(oracle_code, predicted_code))
+            f1_metrics.append(
+                evaluate_f1(oracle_code, predicted_code, obf_code=obf_code)
+            )
 
             # LLM: obfuscated vs renamed  (did readability improve?)
             llm_obf = evaluate_llm(obf_code)
@@ -196,7 +197,9 @@ def process_single_eval(
                     "because one or both LLM scores failed."
                 )
         else:
-            pair_metrics.append(evaluate(oracle_code, predicted_code))
+            pair_metrics.append(
+                evaluate(oracle_code, predicted_code, obf_code=obf_code)
+            )
 
     return (
         pair_metrics,

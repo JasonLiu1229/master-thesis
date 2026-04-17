@@ -8,49 +8,60 @@ settings:
   log_path: out/temp/readability_results.txt
   debug_jsonl_path: responses.jsonl
 
+scoring:
+  scale: 0-100
+  focus: identifier_naming
+  weights:
+    identifier_naming: 0.75
+    assertion_quality: 0.10
+    test_independence: 0
+    behavioral_specificity: 0.15
+
 tags:
   - testing
   - unit tests
   - identifiers
   - function naming
   - variable naming
-  - assertion clarity               
-  - test independence             
+  - assertion clarity
+  - test independence
 
 rules:
   - Clarity of variable and method names assess whether identifier names clearly
     convey intent without needing to read the full test body. Penalise generic
-    names like var1, obj, result0, or single letters unless used as counters.
+    names like var1, obj, result0, func_1 or single letters unless used as counters.
 
-  - Behavioral specificity the test name and body should together make the
-    tested behaviour obvious. A reader should understand WHAT is being tested
-    and WHAT the expected outcome is without reading the production code.
+  - Renamed vs. generic baseline explicitly penalise identifiers that appear to
+    still be auto-generated (e.g. var0, obj1, int0, string1, list0). These
+    represent failures of the renaming step and must receive the maximum penalty
+    on the identifier dimension.
 
-  - Consistency with JUnit naming conventions method names should follow the
-    pattern methodName_stateUnderTest_expectedBehavior or a similar convention.
-    Variable names should use camelCase and reflect their role (e.g. expected,
-    actual, input, result — not temp, x, var2).
+  - Identifier consistency across the test all identifiers within a single test
+    method should follow a coherent naming strategy. If one variable is named
+    expectedUserAge, a related variable should not be named result2. Penalise
+    tests where naming quality is uneven across variables.
 
   - Alignment with actual test logic identifier names must match what the
     variable actually holds or what the method actually does. A variable named
-    expectedResult holding an exception object is misleading and should be flagged.
+    expectedResult holding an exception object is misleading and must be flagged.
+
+  - Test method naming and behavioral specificity the test method name should
+    follow the pattern methodName_stateUnderTest_expectedBehavior or a similar
+    convention. The name and body together must make the tested behaviour and
+    expected outcome obvious without reading the production code.
+
+  - Assertion quality and magic numbers assertions must be expressive and clearly
+    state what is being verified. Prefer assertEquals, assertNotNull, assertThrows
+    over assertTrue(a == b). Penalise absent assertion messages when the failure
+    reason would be non-obvious. Flag hardcoded numeric or string literals with no
+    named constant or comment explaining their meaning — well-named expected value
+    variables (e.g. int expectedAge = 42) are strongly preferred.
+
+  - Test independence the test must be self-contained and not rely on shared
+    mutable state or execution order. Penalise tests that depend on external state
+    or side effects from other tests.
 
   - Ignore class name do not penalise or reward based on the outer class name.
-
-  - Assertion quality assess whether assertions are expressive and clearly state
-    what is being verified. Prefer specific assertions (assertEquals, assertNotNull,
-    assertThrows) over assertTrue(a == b). Penalise absent assertion messages when
-    the failure reason would be non-obvious without one.
-
-  - Magic numbers and unexplained literals flag hardcoded numeric or string
-    literals in assertions or method calls that have no named constant or comment
-    explaining their meaning (e.g. assertEquals(42, result) without context).
-    Well-named variables for expected values (e.g. int expectedAge = 42) improve
-    readability significantly.
-
-  - Test independence and minimal dependencies the test should be self-contained
-    and not rely on shared mutable state or execution order. Penalise tests that
-    appear to depend on external state or side effects from other tests.
 
 models:
   - name: Qwen2.5-coder
@@ -66,7 +77,7 @@ models:
     runner: ollama
     runner_config:
       ollama_bin: ollama
-    weight: 1.5
+    weight: 1.4
     enable: true
 
   - name: Phi
@@ -74,7 +85,7 @@ models:
     runner: ollama
     runner_config:
       ollama_bin: ollama
-    weight: 0.6
+    weight: 0.75
     enable: true
 
   - name: Qwen3.5

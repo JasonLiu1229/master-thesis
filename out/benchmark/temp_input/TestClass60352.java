@@ -1,0 +1,3 @@
+public class TestClass60352 {
+@Test public void func_1() { Identity var_1 = mock(Identity.class); String var_2 = "deletedUserName"; List var_3 = new ArrayList(); QTIResultSet var_4 = mock(QTIResultSet.class); var_3.add(var_4); QTIResultSet var_5 = mock(QTIResultSet.class); var_3.add(var_5); when(qtiResultDaoMock.findQtiResultSets(var_1)).thenReturn(var_3); qtiResultServiceImpl.deleteUserData(var_1, var_2); verify(qtiResultDaoMock).deleteResultSet(var_4); verify(qtiResultDaoMock).deleteResultSet(var_5); }
+}
