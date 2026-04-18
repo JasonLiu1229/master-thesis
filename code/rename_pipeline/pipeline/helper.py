@@ -9,7 +9,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List
 
-import javalang
 import javalang.tokenizer as jtok
 import yaml
 from colorama import Fore, init, Style
@@ -52,6 +51,9 @@ class JavaTestCase:
     mapping: dict = None
 
 
+_WRAPPER_CLASS_NAME = "TestClass1"
+
+
 # === Preprocess helper functions ===
 def wrap_test_case(test_case) -> str:
     """
@@ -67,7 +69,7 @@ def wrap_test_case(test_case) -> str:
     else:
         lines = list(test_case)
 
-    wrapped = ["public class TestClass1 {", *lines, "}"]
+    wrapped = [f"public class {_WRAPPER_CLASS_NAME} {{", *lines, "}"]
     return "\n".join(wrapped)
 
 
@@ -281,89 +283,36 @@ def unescape_java_stringified_source(text: str) -> str:
         return text
 
 
-def extract_identifier_candidates(
-    wrapped_test_case: str,
-) -> list[
-    str
-]:  # TODO: replace this with something else because does not work for all test files to extract identifiers
+def extract_identifier_candidates(wrapped_test_case: str) -> list[str]:
+    """
+    Extract rename-candidate identifiers from a wrapped Java test case using
+    the tokenizer instead of the full AST parser.
+    """
     try:
-        tree = javalang.parse.parse(wrapped_test_case)
+        tokens = list(jtok.tokenize(wrapped_test_case))
     except Exception as e:
         logger.error(
-            "extract_identifier_candidates: javalang parse failed, "
+            "extract_identifier_candidates: tokenization failed, "
             "no candidates extracted. Error: %s",
             e,
         )
         return []
 
-    class_decls = [
-        t for t in tree.types if isinstance(t, javalang.tree.ClassDeclaration)
-    ]
-    if not class_decls:
-        logger.error("extract_identifier_candidates: no ClassDeclaration found.")
-        return []
+    def is_candidate(name: str) -> bool:
+        if name == _WRAPPER_CLASS_NAME:
+            return False
+        if name[0].isupper():
+            return False
+        if name.replace("_", "").isupper() and any(c.isalpha() for c in name):
+            return False
+        return True
 
-    cls = class_decls[0]
-    methods = list(cls.methods)
-    if not methods:
-        logger.error("extract_identifier_candidates: no methods found in test class.")
-        return []
+    seen = set()
+    for tok in tokens:
+        if isinstance(tok, jtok.Identifier) and is_candidate(tok.value):
+            seen.add(tok.value)
 
-    def is_test_annotation(ann) -> bool:
-        return ann.name == "Test" or ann.name.endswith(".Test")
-
-    if len(methods) == 1:
-        test_method = methods[0]
-    else:
-        test_method = next(
-            (
-                m
-                for m in methods
-                if any(is_test_annotation(a) for a in getattr(m, "annotations", []))
-            ),
-            None,
-        )
-
-    if test_method is None:
-        logger.error(
-            "extract_identifier_candidates: multiple methods, none annotated with @Test;"
-        )
-        return []
-
-    names: set[str] = set()
-
-    # if test_method.name:
-    #     names.add(test_method.name)
-
-    for p in getattr(test_method, "parameters", []) or []:
-        if getattr(p, "name", None):
-            names.add(p.name)
-
-    for _, var_decl in test_method.filter(javalang.tree.VariableDeclarator):
-        if getattr(var_decl, "name", None):
-            names.add(var_decl.name)
-
-    for _, enhanced in test_method.filter(javalang.tree.EnhancedForControl):
-        var = getattr(enhanced, "var", None)
-        if var is not None and getattr(var, "name", None):
-            names.add(var.name)
-
-    for _, catch_param in test_method.filter(javalang.tree.CatchClauseParameter):
-        if getattr(catch_param, "name", None):
-            names.add(catch_param.name)
-
-    for _, lam in test_method.filter(javalang.tree.LambdaExpression):
-        for p in getattr(lam, "parameters", []) or []:
-            name = getattr(p, "name", None)
-            if name:
-                names.add(name)
-
-    def is_constant_like(name: str) -> bool:
-        return name.isupper()
-
-    return sorted(
-        n for n in names if n and not is_constant_like(n)
-    )  # constants are ignored
+    return sorted(seen)
 
 
 def apply_rename_mapping(code: str, mapping: dict[str, str]) -> str:
