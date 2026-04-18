@@ -248,6 +248,7 @@ def _rename_process(
         original_code=source_code_clean,
         code=candidate_code,
         clean=clean,
+        mapping=best_mapping,
     )
 
 
@@ -280,4 +281,8 @@ def rename_eval(src: str, file_path: str = None):
 
     java_test_case = _rename_process(src, source_code_clean, file_path)
 
-    return wrap_test_case(java_test_case.code), bool(java_test_case.clean)
+    return (
+        wrap_test_case(java_test_case.code),
+        bool(java_test_case.clean),
+        java_test_case.mapping,
+    )

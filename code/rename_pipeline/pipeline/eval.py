@@ -129,16 +129,53 @@ def _subtokenize(name: str) -> List[str]:
 
 
 def _align_identifier_pairs(
-    obf_code: str, oracle_code: str, predicted_code: str
+    obf_code: str,
+    oracle_code: str,
+    predicted_code: str,
+    mapping: Optional[dict] = None,
 ) -> List[Tuple[str, str]]:
     """
-    Align predicted and oracle identifier names using the obfuscated code as a
-    positional anchor. Token positions are stable across all three versions
-    because T3 only renames identifiers (token count and structure are identical).
+    Align predicted and oracle identifier names to produce per-identifier
+    (oracle_name, predicted_name) pairs for subtoken-level evaluation.
+
+    When `mapping` is provided (obf_name -> predicted_name), it is used as the
+    ground truth alignment — no token counting or inference needed. Each
+    obfuscated identifier token is looked up in the oracle to get the expected
+    name, and in the mapping to get the predicted name.
+
+    Falls back to positional token alignment when mapping is not available.
 
     Returns a list of (oracle_name, predicted_name) pairs, one per identifier
     occurrence (duplicates included so frequency weighs into metrics).
     """
+    if mapping is not None:
+        try:
+            obf_toks = list(jtok.tokenize(obf_code))
+            oracle_toks = list(jtok.tokenize(oracle_code))
+        except Exception as e:
+            logger.warning(
+                f"_align_identifier_pairs (mapping mode): tokenization failed: {e}"
+            )
+            return []
+
+        if len(obf_toks) != len(oracle_toks):
+            logger.warning(
+                "_align_identifier_pairs (mapping mode): obf/oracle token counts differ "
+                f"(obf={len(obf_toks)}, oracle={len(oracle_toks)}); "
+                "falling back to positional alignment."
+            )
+        else:
+            pairs = []
+            for o_tok, r_tok in zip(obf_toks, oracle_toks):
+                if isinstance(o_tok, jtok.Identifier):
+                    obf_name = o_tok.value
+                    oracle_name = r_tok.value
+                    predicted_name = mapping.get(
+                        obf_name, obf_name
+                    )  # default to obf if not in mapping
+                    pairs.append((oracle_name, predicted_name))
+            return pairs
+
     try:
         obf_toks = list(jtok.tokenize(obf_code))
         oracle_toks = list(jtok.tokenize(oracle_code))
@@ -153,11 +190,14 @@ def _align_identifier_pairs(
             f"(obf={len(obf_toks)}, oracle={len(oracle_toks)}, pred={len(pred_toks)}); "
             "aligning identifier subsequences instead."
         )
-        obf_ids = [t.value for t in obf_toks if isinstance(t, jtok.Identifier)]
         oracle_ids = [t.value for t in oracle_toks if isinstance(t, jtok.Identifier)]
         pred_ids = [t.value for t in pred_toks if isinstance(t, jtok.Identifier)]
-        n = min(len(obf_ids), len(oracle_ids), len(pred_ids))
-        return [(oracle_ids[i], pred_ids[i]) for i in range(n)]
+        # Pad shorter side with "" so missing predictions score 0 rather than
+        # being silently dropped from the metric
+        max_len = max(len(oracle_ids), len(pred_ids))
+        oracle_ids += [""] * (max_len - len(oracle_ids))
+        pred_ids += [""] * (max_len - len(pred_ids))
+        return list(zip(oracle_ids, pred_ids))
 
     pairs = []
     for o_tok, r_tok, p_tok in zip(obf_toks, oracle_toks, pred_toks):
@@ -167,19 +207,23 @@ def _align_identifier_pairs(
 
 
 def evaluate_f1(
-    oracle: str, predicted: str, obf_code: Optional[str] = None
+    oracle: str,
+    predicted: str,
+    obf_code: Optional[str] = None,
+    mapping: Optional[dict] = None,
 ) -> F1Metrics:
     """
     Compute subtoken-level F1 metrics.
 
-    When `obf_code` is provided (strongly recommended), pairs are aligned
-    token-by-token via the obfuscated anchor so each identifier prediction is
-    evaluated independently against its oracle counterpart.
+    When `mapping` is provided (obf_name -> predicted_name), it is used directly
+    for alignment — exact and immune to token count differences.
 
-    Without `obf_code` falls back to positional alignment of identifier lists.
+    When only `obf_code` is provided, alignment is done by positional token zip.
+
+    Without either, falls back to positional alignment of identifier lists.
     """
     if obf_code is not None:
-        pairs = _align_identifier_pairs(obf_code, oracle, predicted)
+        pairs = _align_identifier_pairs(obf_code, oracle, predicted, mapping=mapping)
     else:
         oracle_ids = extract_identifiers(oracle)
         pred_ids = extract_identifiers(predicted)
@@ -263,9 +307,12 @@ def evaluate_llm(code: str) -> Optional[LLMMetrics]:
 
 
 def evaluate(
-    oracle: str, predicted: str, obf_code: Optional[str] = None
+    oracle: str,
+    predicted: str,
+    obf_code: Optional[str] = None,
+    mapping: Optional[dict] = None,
 ) -> PairMetrics:
-    f1m = evaluate_f1(oracle, predicted, obf_code=obf_code)
+    f1m = evaluate_f1(oracle, predicted, obf_code=obf_code, mapping=mapping)
     llm = evaluate_llm(predicted)
 
     return PairMetrics(

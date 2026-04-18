@@ -171,7 +171,7 @@ def process_single_eval(
             )
             continue
 
-        predicted_code, clean = rename_eval(obf_code, file_path)
+        predicted_code, clean, mapping = rename_eval(obf_code, file_path)
 
         if not clean:
             failed_count += 1
@@ -181,7 +181,9 @@ def process_single_eval(
 
         if cohen:
             f1_metrics.append(
-                evaluate_f1(oracle_code, predicted_code, obf_code=obf_code)
+                evaluate_f1(
+                    oracle_code, predicted_code, obf_code=obf_code, mapping=mapping
+                )
             )
 
             # LLM: obfuscated vs renamed  (did readability improve?)
@@ -198,7 +200,9 @@ def process_single_eval(
                 )
         else:
             pair_metrics.append(
-                evaluate(oracle_code, predicted_code, obf_code=obf_code)
+                evaluate(
+                    oracle_code, predicted_code, obf_code=obf_code, mapping=mapping
+                )
             )
 
     return (

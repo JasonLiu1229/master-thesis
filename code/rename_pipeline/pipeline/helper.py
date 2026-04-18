@@ -49,6 +49,7 @@ class JavaTestCase:
     original_code: str
     code: str
     clean: bool = True
+    mapping: dict = None
 
 
 # === Preprocess helper functions ===
@@ -409,7 +410,7 @@ def apply_rename_mapping(code: str, mapping: dict[str, str]) -> str:
         if new_code[idx : idx + len(old)] != old:
             logger.warning(
                 f"Expected {old!r} at index {idx}, "
-                f"found {new_code[idx:idx+len(old)]!r}; skipping this replacement."
+                f"found {new_code[idx : idx + len(old)]!r}; skipping this replacement."
             )
             continue
         new_code = new_code[:idx] + new + new_code[idx + len(old) :]
@@ -612,5 +613,5 @@ if __name__ == "__main__":
     )
 
     print(
-        f"New source code: \n\n{_swap_test_case(source_code, JavaTestCase("calculator_test", test_to_replace, new_test))}"
+        f"New source code: \n\n{_swap_test_case(source_code, JavaTestCase('calculator_test', test_to_replace, new_test))}"
     )

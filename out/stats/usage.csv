@@ -1,0 +1,2 @@
+timestamp,file_path,method_name,new_method_name,attempt,call_type,prompt_tokens,completion_tokens,total_tokens,latency_ms,success
+2026-04-18T18:48:51,in/test/TestClass28891.java.jsonl,func_1,testGetControllerServiceDefinition,1,rename,521,29,550,52463.9,True
