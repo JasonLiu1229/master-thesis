@@ -4,6 +4,7 @@ import logging
 import os
 import time
 import random
+import re
 
 from concurrent.futures import as_completed, ThreadPoolExecutor
 from datetime import datetime
@@ -238,6 +239,16 @@ def process_folder(
         random.shuffle(jsonl_files)
 
         jsonl_files = jsonl_files[:limit]
+
+        indices_file = Path(config.get("INDICES_OUTPUT_FILE", "pipeline/indices.txt"))
+        indices_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(indices_file, "w") as f:
+            for jf in sorted(
+                jsonl_files, key=lambda p: int(re.search(r"\d+", p.stem).group())
+            ):
+                f.write(re.search(r"\d+", jf.stem).group() + "\n")
+
+        logger.info(f"Wrote {len(jsonl_files)} indices to {indices_file}")
 
         failed_count = 0
         total_pair_metrics: List[PairMetrics] = []

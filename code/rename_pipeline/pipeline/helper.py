@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List
 
+
 import javalang.tokenizer as jtok
 import yaml
 from colorama import Fore, init, Style
@@ -51,10 +52,12 @@ class JavaTestCase:
     mapping: dict = None
 
 
+# === Preprocess helper functions ===
+
+
 _WRAPPER_CLASS_NAME = "TestClass1"
 
 
-# === Preprocess helper functions ===
 def wrap_test_case(test_case) -> str:
     """
     Wrap the test case so it matches as similar as the original training data
@@ -283,10 +286,26 @@ def unescape_java_stringified_source(text: str) -> str:
         return text
 
 
+# Primitives that can appear before a variable declaration
+_JAVA_PRIMITIVES = frozenset(
+    {
+        "int",
+        "long",
+        "double",
+        "float",
+        "boolean",
+        "char",
+        "byte",
+        "short",
+        "void",
+    }
+)
+
+
 def extract_identifier_candidates(wrapped_test_case: str) -> list[str]:
     """
-    Extract rename-candidate identifiers from a wrapped Java test case using
-    the tokenizer instead of the full AST parser.
+    Extract rename-candidate identifiers (local variables, parameters, method name)
+    from a wrapped Java test case.
     """
     try:
         tokens = list(jtok.tokenize(wrapped_test_case))
@@ -298,21 +317,39 @@ def extract_identifier_candidates(wrapped_test_case: str) -> list[str]:
         )
         return []
 
-    def is_candidate(name: str) -> bool:
-        if name == _WRAPPER_CLASS_NAME:
-            return False
-        if name[0].isupper():
-            return False
-        if name.replace("_", "").isupper() and any(c.isalpha() for c in name):
-            return False
-        return True
+    def _is_type_token(tok) -> bool:
+        """True if this token looks like a type that precedes a variable name."""
+        if isinstance(tok, jtok.Keyword) and tok.value in _JAVA_PRIMITIVES:
+            return True
+        if isinstance(tok, jtok.Identifier) and tok.value[0].isupper():
+            return True
+        if isinstance(tok, jtok.Operator) and tok.value in (">", "]"):
+            return True
+        return False
 
-    seen = set()
+    def _is_constant_like(name: str) -> bool:
+        return name.replace("_", "").isupper() and any(c.isalpha() for c in name)
+
+    names: set[str] = set()
+    prev = None
+
     for tok in tokens:
-        if isinstance(tok, jtok.Identifier) and is_candidate(tok.value):
-            seen.add(tok.value)
+        if isinstance(tok, jtok.Identifier):
+            name = tok.value
+            if (
+                name != _WRAPPER_CLASS_NAME
+                and not name[0].isupper()
+                and not _is_constant_like(name)
+                and prev is not None
+                and _is_type_token(prev)
+            ):
+                names.add(name)
+        prev = tok
 
-    return sorted(seen)
+    logger.info(
+        f"Extracted identifiers: {names}\n\n For test_case: \n\n {wrapped_test_case}\n"
+    )
+    return sorted(names)
 
 
 def apply_rename_mapping(code: str, mapping: dict[str, str]) -> str:

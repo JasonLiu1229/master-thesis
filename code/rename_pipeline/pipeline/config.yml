@@ -21,6 +21,8 @@ USAGE_LOG_PATH: "out/stats/usage.csv"
 
 SEED: 42
 
+INDICES_OUTPUT_FILE: "out/indices.txt"
+
 # Cohen values 
 ALPHA: 0.05
 BETA: 0.80 # also known as power 

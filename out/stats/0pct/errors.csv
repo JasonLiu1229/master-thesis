@@ -1,1 +1,2 @@
 timestamp,file_path,attempt,error_type,error_message,raw_response
+2026-04-19T09:00:19,in/test/TestClass73575.java.jsonl,1,ExtraKeyError,Mapping for func_1 contains unexpected keys {'func_2'}; they will be ignored.,
