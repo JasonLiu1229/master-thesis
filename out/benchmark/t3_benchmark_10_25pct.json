@@ -1,0 +1,14 @@
+{
+  "cer": 20.63213898147761,
+  "correct_ordered": 0.7824017577016665,
+  "correct_unordered": 0.8087489508542139,
+  "edit_distance": 2.109590808801335,
+  "f1": 0.8457040385011642,
+  "failed_files": [],
+  "fails": 0,
+  "llm_score_avg": 68.8,
+  "llm_score_wavg": 70.28805970149254,
+  "precision": 0.868416798340992,
+  "recall": 0.8278483185208237,
+  "total_time": 4963.119781494141
+}
