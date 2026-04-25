@@ -1,0 +1,11 @@
+timestamp,file_path,method_name,new_method_name,attempt,call_type,prompt_tokens,completion_tokens,total_tokens,latency_ms,success
+2026-04-24T08:11:51,in/test/TestClass45240.java.jsonl,func_1,shouldNotSetAdConfigurationFromIntent,1,rename,479,45,524,50912.4,True
+2026-04-24T08:23:54,in/test/TestClass56449.java.jsonl,func_1,testAddLayer,1,rename,471,46,517,7134.2,True
+2026-04-24T08:31:18,in/test/TestClass43129.java.jsonl,func_1,testTranspose,1,rename,601,52,653,7164.1,True
+2026-04-24T08:39:03,in/test/TestClass29725.java.jsonl,func_1,testOnEvent,1,rename,608,54,662,7575.7,True
+2026-04-24T08:46:57,in/test/TestClass56972.java.jsonl,func_1,testParentLast,1,rename,436,29,465,4624.4,True
+2026-04-24T08:54:36,in/test/TestClass73575.java.jsonl,func_1,testFromJsonWithInvalidType,1,rename,456,35,491,5448.3,True
+2026-04-24T09:02:10,in/test/TestClass60619.java.jsonl,func_1,testSetExtraLogInfo,1,rename,486,43,529,6640.5,True
+2026-04-24T09:10:28,in/test/TestClass75952.java.jsonl,func_1,shouldLogErrorWithCause,1,rename,543,59,602,8784.0,True
+2026-04-24T09:18:05,in/test/TestClass16130.java.jsonl,func_1,testGetCorrespondingHolidays,1,rename,685,87,772,11214.8,True
+2026-04-24T09:25:49,in/test/TestClass31304.java.jsonl,func_1,testNewCDKAtom,1,rename,469,33,502,4683.7,True

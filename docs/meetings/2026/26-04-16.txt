@@ -1,7 +1,0 @@
-Model is trained, it does perform in some degree better. F1 score increases but the model does not improve after some time.
-
-LLM score degreases but this could be that the dataset is not good enough and the test that are in the dataset are not refined enough. But looking at the f1 score it does improve, meaning we could utilize LLM to improve naming for specific contexts.
-
-Also improved the codereader to be less ambigious and have a more strict grading scheme. Having a scoring system that the LLM should follow. 
-
-Added codereader to the T1 technique to see how well it performs there.

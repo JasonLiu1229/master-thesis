@@ -5,3 +5,54 @@ The old one did improve but had minor faults so improving tuning.
 The new tuned models are improved, wiht 25 percent the f1 score increases a bit and the readability scoring using LLMs increases by a lot. 
 
 Next a worthy thing to note, is the decrease of errors. the new tuned model after 15 percent have less errors compared to the original model. More specifically it has 0 errors.
+
+Model is trained, it does perform in some degree better. F1 score increases but the model does not improve after some time.
+
+LLM score degreases but this could be that the dataset is not good enough and the test that are in the dataset are not refined enough. But looking at the f1 score it does improve, meaning we could utilize LLM to improve naming for specific contexts.
+
+Also improved the codereader to be less ambigious and have a more strict grading scheme. Having a scoring system that the LLM should follow. 
+
+Added codereader to the T1 technique to see how well it performs there.
+
+Model improves in f1 score but LLM readability scoring drops: This implies that the model learns the tuning but dataset itself could be not as readabilble as thought it would be.
+  - finding root cause why it is not alligning
+  - 2 questions
+    - How much does the tuning affect the f1 score, precision and recall? 
+      - 
+    - What if we have no reference to the codebase, how is the LLM? So not fine tuned?
+      - Rough estimate, like think about how they can corrolate
+
+Score the ground truth of the dataset with codereader:
+  - scoring it 
+
+RQ:
+  - Comparing all the baselines, tuned models, Arnos work and gpt 
+  - is the llm judging in line with what humans think really? 
+
+Try to add the model to codereader (the tuned version)
+
+To know what reseqrch question we want, we need a good conclusion. Because if we would motivate one, it could contradict the other, so we should conclude it carefully.
+  - if LLM is ground truth, than is the tuned model better?
+  - if ground truth is better, why LLM?
+
+Try to focus on the consistency not readability but llm is about readability trying to get closer how humans interpreting it.
+  - Next meeting we should look at those papers that talk about readability. So find the papers.
+
+How effective is the readability:
+  - To the study and get results
+  - and critise it.
+
+Look at where the papers are published and how they evaluated things.
+  - things are said but not grounded
+
+intro around 1 page
+  - importance of autoamted test generation
+  - 
+
+background can be lazily introduced, not have to be an explicit thing. 
+
+=========================================================================================================
+1. Bring the readability papers — with notes on how each defines and measures readability
+2. Have CodeReader ground truth scores ready to discuss
+3. Be ready to argue: consistency (not just readability) is what the LLM judge should focus on — your supervisor specifically flagged this distinction
+
