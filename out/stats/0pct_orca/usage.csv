@@ -1,0 +1,11 @@
+timestamp,file_path,method_name,new_method_name,attempt,call_type,prompt_tokens,completion_tokens,total_tokens,latency_ms,success
+2026-04-26T12:40:28,in/test/TestClass45240.java.jsonl,func_1,testShouldReturnNullWhenInputIsEmpty,1,rename,479,48,527,47068.6,True
+2026-04-26T13:04:38,in/test/TestClass56449.java.jsonl,func_1,testShouldThrowUnsupportedOperationExceptionWhenAddingLayer,1,rename,471,52,523,4841.6,True
+2026-04-26T13:28:30,in/test/TestClass43129.java.jsonl,func_1,testTransposeMatrix,1,rename,601,54,655,5681.8,True
+2026-04-26T13:57:12,in/test/TestClass29725.java.jsonl,func_1,testShouldSendEventToSiddhiHandler,1,rename,608,79,687,8297.2,True
+2026-04-26T14:22:12,in/test/TestClass56972.java.jsonl,func_1,testShouldReturnDependencyFileUrl,1,rename,436,24,460,2489.7,True
+2026-04-26T14:45:30,in/test/TestClass73575.java.jsonl,func_1,testShouldThrowDittoJsonExceptionWhenJsonSchemaVersionIsInvalid,1,rename,456,30,486,3320.9,True
+2026-04-26T15:13:24,in/test/TestClass60619.java.jsonl,func_1,testSetExtraLogInfo,1,rename,486,35,521,4222.3,True
+2026-04-26T15:38:08,in/test/TestClass75952.java.jsonl,func_1,testShouldThrowExceptionWhenInputIsNull,1,rename,543,56,599,7731.3,True
+2026-04-26T16:08:36,in/test/TestClass16130.java.jsonl,func_1,testShouldReturnCorrectHolidaysForGivenPeriod,1,rename,685,89,774,11632.2,True
+2026-04-26T16:39:33,in/test/TestClass31304.java.jsonl,func_1,testShouldCreateAliphaticNitrogenAtom,1,rename,469,31,500,4517.3,True

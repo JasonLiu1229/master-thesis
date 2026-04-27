@@ -124,6 +124,28 @@ services:
       - pipeline
       - codereader
 
+  t3_eval_oracle:
+    container_name: t3_eval_oracle
+    build:
+      dockerfile: docker/t3_eval_oracle.Dockerfile
+    volumes:
+      - ./out:/app/out/
+      - ./tools/java-dataset-converter-llm/dataset/test/jsonl/:/app/in/test:ro
+    env_file:
+      - .env
+    profiles: ["t3_eval_oracle"]
+    depends_on:
+      api:
+        condition: service_healthy
+      codereader_ollama:
+        condition: service_healthy
+    environment:
+      CODEREADER_URL: http://codereader_ollama:8080
+      OLLAMA_HOST: http://codereader_ollama:11434
+    networks:
+      - pipeline
+      - codereader
+
   benchmark:
     container_name: benchmark
     build:
@@ -158,7 +180,7 @@ services:
               capabilities: [gpu]
     env_file:
       - .env
-    profiles: ["api", "full_local", "full_local_eval", "t3_eval_cohen"]
+    profiles: ["api", "full_local", "full_local_eval", "t3_eval_cohen", "t3_eval_oracle"]
     volumes:
       - hf_cache:/root/.cache/huggingface/
       - model_cache:/app/model/local_model/
@@ -236,7 +258,7 @@ services:
           devices:
             - driver: nvidia
               capabilities: [gpu]
-    profiles: ["full_local_eval", "t3_eval", "codereader", "t3_eval_cohen", "t3_eval_openai", "t1_eval", "t2_eval"]
+    profiles: ["full_local_eval", "t3_eval", "codereader", "t3_eval_cohen", "t3_eval_openai", "t1_eval", "t2_eval", "t3_eval_oracle"]
     networks:
       - codereader
     ports:

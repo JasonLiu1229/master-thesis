@@ -357,10 +357,30 @@ def compute_final_metrics(metrics: List[PairMetrics]) -> Dict[str, float]:
     }
 
 
+def compute_final_metrics_with_oracle(
+    metrics: List[PairMetrics],
+    oracle_llm_metrics: Optional[List[LLMMetrics]] = None,
+) -> Dict[str, float]:
+
+    result = compute_final_metrics(metrics)
+
+    if oracle_llm_metrics:
+        n = len(oracle_llm_metrics)
+        result["oracle_llm_score_avg"] = (
+            sum(m.codereader_avg for m in oracle_llm_metrics) / n
+        )
+        result["oracle_llm_score_wavg"] = (
+            sum(m.codereader_wavg for m in oracle_llm_metrics) / n
+        )
+
+    return result
+
+
 def compute_cohens(
     f1_metrics: List[F1Metrics],
     llm_obf_metrics: List[LLMMetrics],
     llm_renamed_metrics: List[LLMMetrics],
+    llm_oracle_metrics: Optional[List[LLMMetrics]] = None,
 ) -> dict:
     from pipeline.effect_size import compute_effect_size, effect_size_report
 
@@ -377,27 +397,74 @@ def compute_cohens(
             )
         )
 
-    # LLM: paired obfuscated vs renamed
+    # LLM: paired obfuscated vs renamed (did renaming improve readability?)
     if len(llm_obf_metrics) != len(llm_renamed_metrics):
         logger.error(
             "compute_cohens: LLM obf and renamed lists have different lengths "
             f"({len(llm_obf_metrics)} vs {len(llm_renamed_metrics)}). "
-            "Skipping LLM effect size."
+            "Skipping LLM obf-vs-renamed effect size."
         )
     elif llm_obf_metrics:
         results.append(
             compute_effect_size(
                 scores_original=[m.codereader_avg for m in llm_obf_metrics],
                 scores_renamed=[m.codereader_avg for m in llm_renamed_metrics],
-                metric_name="llm_score_avg",
+                metric_name="llm_score_avg__obf_vs_renamed",
             )
         )
         results.append(
             compute_effect_size(
                 scores_original=[m.codereader_wavg for m in llm_obf_metrics],
                 scores_renamed=[m.codereader_wavg for m in llm_renamed_metrics],
-                metric_name="llm_score_wavg",
+                metric_name="llm_score_wavg__obf_vs_renamed",
             )
         )
+
+    if llm_oracle_metrics is not None and llm_oracle_metrics:
+        # renamed vs oracle: how close did we get to human-written quality?
+        if len(llm_renamed_metrics) == len(llm_oracle_metrics):
+            results.append(
+                compute_effect_size(
+                    scores_original=[m.codereader_avg for m in llm_renamed_metrics],
+                    scores_renamed=[m.codereader_avg for m in llm_oracle_metrics],
+                    metric_name="llm_score_avg__renamed_vs_oracle",
+                )
+            )
+            results.append(
+                compute_effect_size(
+                    scores_original=[m.codereader_wavg for m in llm_renamed_metrics],
+                    scores_renamed=[m.codereader_wavg for m in llm_oracle_metrics],
+                    metric_name="llm_score_wavg__renamed_vs_oracle",
+                )
+            )
+        else:
+            logger.warning(
+                "compute_cohens: renamed and oracle LLM lists have different lengths "
+                f"({len(llm_renamed_metrics)} vs {len(llm_oracle_metrics)}). "
+                "Skipping renamed-vs-oracle effect size."
+            )
+
+        # obf vs oracle: how unreadable was the starting point?
+        if len(llm_obf_metrics) == len(llm_oracle_metrics):
+            results.append(
+                compute_effect_size(
+                    scores_original=[m.codereader_avg for m in llm_obf_metrics],
+                    scores_renamed=[m.codereader_avg for m in llm_oracle_metrics],
+                    metric_name="llm_score_avg__obf_vs_oracle",
+                )
+            )
+            results.append(
+                compute_effect_size(
+                    scores_original=[m.codereader_wavg for m in llm_obf_metrics],
+                    scores_renamed=[m.codereader_wavg for m in llm_oracle_metrics],
+                    metric_name="llm_score_wavg__obf_vs_oracle",
+                )
+            )
+        else:
+            logger.warning(
+                "compute_cohens: obf and oracle LLM lists have different lengths "
+                f"({len(llm_obf_metrics)} vs {len(llm_oracle_metrics)}). "
+                "Skipping obf-vs-oracle effect size."
+            )
 
     return effect_size_report([r for r in results if r is not None])

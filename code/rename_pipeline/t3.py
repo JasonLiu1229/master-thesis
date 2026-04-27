@@ -17,6 +17,7 @@ from logger import setup_logging
 from pipeline.eval import (
     compute_cohens,
     compute_final_metrics,
+    compute_final_metrics_with_oracle,
     evaluate,
     evaluate_f1,
     evaluate_llm,
@@ -99,6 +100,21 @@ def argument_parser():
         action="store_true",
     )
 
+    parser.add_argument(
+        "--oracle",
+        help=(
+            "Also score the oracle (ground-truth / human-written) code with "
+            "codereader alongside the obfuscated and renamed versions. "
+            "Produces a three-way readability comparison: "
+            "obfuscated → renamed → oracle. "
+            "Adds 'oracle_llm_score_avg' and 'oracle_llm_score_wavg' to the "
+            "output JSON and extends 'effect_sizes' with renamed-vs-oracle and "
+            "obf-vs-oracle comparisons. "
+            "Only valid with --mode eval and --cohen."
+        ),
+        action="store_true",
+    )
+
     parser.add_argument("--version", action="version", version="Pipeline v1.0.0")
 
     return parser
@@ -135,9 +151,11 @@ def process_single(file: Path, out: Path, force: bool):
 def process_single_eval(
     file_path: Path,
     cohen: bool,
+    oracle: bool = False,
 ) -> Tuple[
     List[PairMetrics],
     List[F1Metrics],
+    List[LLMMetrics],
     List[LLMMetrics],
     List[LLMMetrics],
     int,
@@ -158,6 +176,7 @@ def process_single_eval(
     f1_metrics: List[F1Metrics] = []
     llm_obf_metrics: List[LLMMetrics] = []
     llm_renamed_metrics: List[LLMMetrics] = []
+    llm_oracle_metrics: List[LLMMetrics] = []
     failed_count = 0
     failed_files: List[str] = []
 
@@ -187,7 +206,7 @@ def process_single_eval(
                 )
             )
 
-            # LLM: obfuscated vs renamed  (did readability improve?)
+            # LLM: obfuscated vs renamed (did readability improve?)
             llm_obf = evaluate_llm(obf_code)
             llm_renamed = evaluate_llm(predicted_code)
 
@@ -199,6 +218,16 @@ def process_single_eval(
                     f"Dropping LLM pair for one item in {file_path.name} "
                     "because one or both LLM scores failed."
                 )
+
+            if oracle:
+                llm_oracle = evaluate_llm(oracle_code)
+                if llm_oracle is not None:
+                    llm_oracle_metrics.append(llm_oracle)
+                else:
+                    logger.warning(
+                        f"Dropping oracle LLM score for one item in {file_path.name} "
+                        "because scoring failed."
+                    )
         else:
             pair_metrics.append(
                 evaluate(
@@ -211,13 +240,19 @@ def process_single_eval(
         f1_metrics,
         llm_obf_metrics,
         llm_renamed_metrics,
+        llm_oracle_metrics,
         failed_count,
         failed_files,
     )
 
 
 def process_folder(
-    root: Path, out: Path, is_eval: bool, force: bool, cohen: bool = False
+    root: Path,
+    out: Path,
+    is_eval: bool,
+    force: bool,
+    cohen: bool = False,
+    oracle: bool = False,
 ):
     out.mkdir(parents=True, exist_ok=True)
 
@@ -227,7 +262,9 @@ def process_folder(
 
     if is_eval:
         logger.info(
-            "Running evaluation" + (" with effect size (--cohen)" if cohen else "")
+            "Running evaluation"
+            + (" with effect size (--cohen)" if cohen else "")
+            + (" + oracle scoring (--oracle)" if oracle else "")
         )
         jsonl_files = list(root.glob("*.jsonl"))
 
@@ -255,13 +292,14 @@ def process_folder(
         total_f1_metrics: List[F1Metrics] = []
         total_llm_obf_metrics: List[LLMMetrics] = []
         total_llm_renamed_metrics: List[LLMMetrics] = []
+        total_llm_oracle_metrics: List[LLMMetrics] = []
         failed_files_all: List[str] = []
 
         start_time = time.time()
 
         with ThreadPoolExecutor(max_workers=workers) as executor:
             futures = {
-                executor.submit(process_single_eval, file, cohen): file
+                executor.submit(process_single_eval, file, cohen, oracle): file
                 for file in jsonl_files
             }
 
@@ -278,6 +316,7 @@ def process_folder(
                         f1_metrics,
                         llm_obf_metrics,
                         llm_renamed_metrics,
+                        llm_oracle_metrics,
                         count,
                         failed_files,
                     ) = fut.result()
@@ -289,6 +328,7 @@ def process_folder(
                 total_f1_metrics.extend(f1_metrics)
                 total_llm_obf_metrics.extend(llm_obf_metrics)
                 total_llm_renamed_metrics.extend(llm_renamed_metrics)
+                total_llm_oracle_metrics.extend(llm_oracle_metrics)
                 failed_count += count
                 failed_files_all.extend(failed_files)
 
@@ -311,7 +351,10 @@ def process_folder(
                         codereader_wavg=llm.codereader_wavg if llm else 0.0,
                     )
                 )
-            final_metric = compute_final_metrics(combined)
+            final_metric = compute_final_metrics_with_oracle(
+                combined,
+                oracle_llm_metrics=total_llm_oracle_metrics if oracle else None,
+            )
         else:
             final_metric = compute_final_metrics(total_pair_metrics)
 
@@ -326,6 +369,7 @@ def process_folder(
                 f1_metrics=total_f1_metrics,
                 llm_obf_metrics=total_llm_obf_metrics,
                 llm_renamed_metrics=total_llm_renamed_metrics,
+                llm_oracle_metrics=total_llm_oracle_metrics if oracle else None,
             )
             final_metric["effect_sizes"] = effect_sizes
 
@@ -369,6 +413,9 @@ if __name__ == "__main__":
     if args.cohen and MODE != "eval":
         raise ValueError("--cohen is only valid when --mode is 'eval'")
 
+    if args.oracle and not args.cohen:
+        raise ValueError("--oracle requires --cohen")
+
     sInit()
     uInit()
 
@@ -391,4 +438,5 @@ if __name__ == "__main__":
             is_eval=(MODE == "eval"),
             force=args.force,
             cohen=args.cohen,
+            oracle=args.oracle,
         )

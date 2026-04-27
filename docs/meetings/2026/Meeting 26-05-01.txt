@@ -1,0 +1,24 @@
+Papers for codereader motivation:
+  - Zheng et al. — "Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena"
+    - Venue: NeurIPS 2023 (Datasets & Benchmarks Track) — top ML conference, peer reviewed
+    - What it defends: Establishes LLM-as-judge as a valid methodology, shows >80% agreement with human preferences. Also documents known biases (verbosity, position) which motivates using multiple judges.
+  - Zhuo — "ICE-Score: Instructing Large Language Models to Evaluate Code"
+    - Venue: Findings of ACL — EACL 2024 — peer reviewed, ACL family (top NLP conference)
+    - What it defends: LLM evaluation specifically for code. Shows token-matching metrics like BLEU have weak correlation with human judgment on code tasks. LLM-based scoring achieves superior correlation. Directly the strongest justification for CodeReader's approach.
+  - Liu et al. — "G-Eval: NLG Evaluation using GPT-4 with Better Human Alignment"
+    - Venue: EMNLP 2023 — top NLP conference, peer reviewed
+    - What it defends: Chain-of-thought rubrics with explicit, fine-grained criteria produce significantly more stable and human-aligned scores than vague numeric scales. Spearman correlation of 0.514 with humans on summarization, outperforming all prior methods. This is exactly what CodeReader's YAML rules implement.
+  - Verga et al. — "Replacing Judges with Juries: Evaluating LLM Generations with a Panel of Diverse Models"
+    - Venue: arXiv:2404.18796 — preprint only, not yet peer reviewed at a conference
+    - What it defends: Panel of diverse smaller models (PoLL) outperforms a single large judge, reduces intra-model bias, and is 7× cheaper. Directly motivates your weighted multi-model setup.
+  - Chan et al. — "ChatEval: Towards Better LLM-based Evaluators through Multi-Agent Debate"
+    - Venue: ICLR 2024 — top ML conference, peer reviewed
+    - What it defends: Multi-model evaluation improves accuracy over single-agent by +6.2% (ChatGPT) and +2.5% (GPT-4). Diverse role prompts are essential — same-model ensemble degrades performance. Peer-reviewed complement to Verga et al.
+  - Winkler et al. — "Investigating the Readability of Test Code: Combining Scientific and Practical Views"
+    - Venue: Empirical Software Engineering (Springer), 2024 — top SE journal, peer reviewed
+    - What it defends: Systematic mapping study of test readability factors. Confirms no single metric captures all dimensions, and that identifier quality is a primary factor. Your CodeReader rules should map to their identified factors.
+  - Butler et al. — "Exploring the Influence of Identifier Names on Code Quality"
+    - Venue: CSMR 2010 (European Conference on Software Maintenance) — peer reviewed
+    - What it defends: Empirical evidence that poor identifier naming measurably degrades comprehension and maintainability. Grounds the whole premise of why CodeReader focuses on identifier naming.
+
+
