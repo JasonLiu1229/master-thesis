@@ -1,13 +1,18 @@
 import logging
+import os
 import re
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Tuple
 
 import javalang.tokenizer as jtok
+import matplotlib.pyplot as plt
 import requests
 
 import yaml
 from logger import setup_logging
+
+import numpy as np
 
 config = {}
 with open("pipeline/config.yml", "r") as f:
@@ -192,8 +197,6 @@ def _align_identifier_pairs(
         )
         oracle_ids = [t.value for t in oracle_toks if isinstance(t, jtok.Identifier)]
         pred_ids = [t.value for t in pred_toks if isinstance(t, jtok.Identifier)]
-        # Pad shorter side with "" so missing predictions score 0 rather than
-        # being silently dropped from the metric
         max_len = max(len(oracle_ids), len(pred_ids))
         oracle_ids += [""] * (max_len - len(oracle_ids))
         pred_ids += [""] * (max_len - len(pred_ids))
@@ -468,3 +471,147 @@ def compute_cohens(
             )
 
     return effect_size_report([r for r in results if r is not None])
+
+
+def _save(fig: plt.Figure, path: Path, show: bool) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(path, dpi=150, bbox_inches="tight")
+    if show:
+        plt.show()
+    plt.close(fig)
+    logger.info(f"[plot] saved → {path}")
+    return path
+
+
+def plot_llm_scores(
+    renamed_metrics: List[PairMetrics],
+    obf_metrics: Optional[List[LLMMetrics]] = None,
+    oracle_metrics: Optional[List[LLMMetrics]] = None,
+    *,
+    output_dir: str | os.PathLike = "../plots",
+    filename: str = "llm_scores.png",
+    show: bool = False,
+) -> Path:
+    n = len(renamed_metrics)
+    renamed_avg = sum(m.codereader_avg for m in renamed_metrics) / n if n else 0.0
+    renamed_wavg = sum(m.codereader_wavg for m in renamed_metrics) / n if n else 0.0
+
+    conditions: List[str] = []
+    avgs: List[float] = []
+    wavgs: List[float] = []
+
+    if obf_metrics:
+        no = len(obf_metrics)
+        conditions.append("Obfuscated")
+        avgs.append(sum(m.codereader_avg for m in obf_metrics) / no)
+        wavgs.append(sum(m.codereader_wavg for m in obf_metrics) / no)
+
+    conditions.append("Renamed")
+    avgs.append(renamed_avg)
+    wavgs.append(renamed_wavg)
+
+    if oracle_metrics:
+        nq = len(oracle_metrics)
+        conditions.append("Oracle")
+        avgs.append(sum(m.codereader_avg for m in oracle_metrics) / nq)
+        wavgs.append(sum(m.codereader_wavg for m in oracle_metrics) / nq)
+
+    x = np.arange(len(conditions))
+    width = 0.35
+
+    fig, ax = plt.subplots(figsize=(max(6, len(conditions) * 2.5), 5))
+    bars_avg = ax.bar(
+        x - width / 2, avgs, width, label="Avg", color="#4C72B0", alpha=0.88
+    )
+    bars_wavg = ax.bar(
+        x + width / 2, wavgs, width, label="Weighted Avg", color="#55A868", alpha=0.88
+    )
+
+    for bar in list(bars_avg) + list(bars_wavg):
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,
+            bar.get_height() + 0.005,
+            f"{bar.get_height():.3f}",
+            ha="center",
+            va="bottom",
+            fontsize=9,
+        )
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(conditions, fontsize=11)
+    ax.set_ylabel("LLM Readability Score")
+    ax.set_title("LLM Readability Scores by Condition")
+    ax.legend()
+    top = max(avgs + wavgs) if avgs else 1.0
+    ax.set_ylim(0, top * 1.2 + 0.05)
+    fig.tight_layout()
+
+    return _save(fig, Path(output_dir) / filename, show)
+
+
+def plot_f1_per_test(
+    metrics: List[PairMetrics],
+    test_names: Optional[List[str]] = None,
+    *,
+    output_dir: str | os.PathLike = "../plots",
+    filename: str = "f1_per_test.png",
+    show: bool = False,
+) -> Path:
+    """
+    Bar chart showing the F1 score for each individual test, with a dashed
+    mean line drawn across all tests.
+
+    Parameters
+    ----------
+    metrics    : one PairMetrics per test
+    test_names : optional list of test labels (falls back to "Test 1", "Test 2", …)
+    output_dir : folder to save the figure (default: ``plots/``)
+    filename   : file name for the PNG
+    show       : display interactively
+    """
+
+    f1_scores = [m.f1 for m in metrics]
+    n = len(f1_scores)
+    labels = (
+        test_names
+        if (test_names and len(test_names) == n)
+        else [f"Test {i + 1}" for i in range(n)]
+    )
+    mean_f1 = float(np.mean(f1_scores)) if f1_scores else 0.0
+
+    colours = ["#55A868" if v >= mean_f1 else "#C44E52" for v in f1_scores]
+
+    fig_width = max(8, n * 0.5)
+    fig, ax = plt.subplots(figsize=(fig_width, 5))
+    x = np.arange(n)
+    bars = ax.bar(x, f1_scores, color=colours, edgecolor="white", linewidth=0.6)
+
+    ax.axhline(
+        mean_f1,
+        color="#333333",
+        linewidth=1.5,
+        linestyle="--",
+        label=f"Mean F1 = {mean_f1:.3f}",
+    )
+
+    if n <= 40:
+        for bar, val in zip(bars, f1_scores):
+            ax.text(
+                bar.get_x() + bar.get_width() / 2,
+                bar.get_height() + 0.005,
+                f"{val:.2f}",
+                ha="center",
+                va="bottom",
+                fontsize=7,
+                rotation=90 if n > 20 else 0,
+            )
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=max(6, 9 - n // 10))
+    ax.set_ylabel("F1 Score")
+    ax.set_title("F1 Score per Test")
+    ax.set_ylim(0, 1.15)
+    ax.legend(fontsize=9)
+    fig.tight_layout()
+
+    return _save(fig, Path(output_dir) / filename, show)

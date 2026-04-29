@@ -21,6 +21,8 @@ from pipeline.eval import (
     evaluate,
     evaluate_f1,
     evaluate_llm,
+    plot_f1_per_test,
+    plot_llm_scores,
     F1Metrics,
     LLMMetrics,
     PairMetrics,
@@ -382,6 +384,21 @@ def process_folder(
                 )
 
         post_process_eval(final_metric, force)
+
+        plots_dir = out / "plots"
+
+        if cohen:
+            plot_llm_scores(
+                renamed_metrics=combined,
+                obf_metrics=total_llm_obf_metrics or None,
+                oracle_metrics=total_llm_oracle_metrics if oracle else None,
+                output_dir=plots_dir,
+            )
+            plot_f1_per_test(combined, output_dir=plots_dir)
+        else:
+            plot_llm_scores(renamed_metrics=total_pair_metrics, output_dir=plots_dir)
+            plot_f1_per_test(total_pair_metrics, output_dir=plots_dir)
+
         logger.info("Folder evaluated")
         return
 
