@@ -4,6 +4,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
   PYTHONUNBUFFERED=1 \
   PIP_NO_CACHE_DIR=1 \
   DEBIAN_FRONTEND=noninteractive
+ENV PATH="/opt/venv/bin:$PATH"
+ENV PIP_CONFIG_FILE=/dev/null
+
+
+USER root
 
 # ---- install Python 3.8 + pip ----
 RUN apt-get update && \
@@ -29,7 +34,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   bash zip unzip ca-certificates git \
   && rm -rf /var/lib/apt/lists/*
 
-USER root
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
   gcc \
   g++ \
@@ -45,13 +50,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # # Create an isolated venv and use that pip
 RUN python3.8 -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
 
 # Make sure Python 3.8 uses its own pip
 RUN python3.8 -m ensurepip --upgrade || curl -sS https://bootstrap.pypa.io/get-pip.py | python3.8
 RUN python3.8 -m pip install --upgrade "pip<24" "setuptools<70" wheel "pybind11>=2.10,<2.12"
 
-ENV PIP_CONFIG_FILE=/dev/null
+
 
 # IDK WHY THIS NEEDS TO BE DIFFERENT THAN T1 BECAUSE ELSE IT KEEPS RUNNING INFINITE (SHIT PYTHON)
 WORKDIR /tmp/fastwer-build
@@ -96,6 +100,7 @@ COPY ../rep_package_previous/code/Techniques/T2 /app/code/Techniques/T2
 COPY ../rep_package_previous/code/Techniques/__init__.py /app/code/Techniques
 COPY ../rep_package_previous/code/Utils /app/code/Utils
 COPY ../rep_package_previous/code/run_t2.py /app/code/run_t2.py
+COPY ../rep_package_previous/code/indices.txt /app/code/
 
 COPY ../code/benchmarking/t2_executioner.py /app/code/t2_executioner.py
 COPY ../code/benchmarking/t2_parser.py /app/code/t2_parser.py
