@@ -18,9 +18,17 @@ USE_TMUX="${USE_TMUX:-1}"
 TMUX_SESSION="${TMUX_SESSION:-t3_eval}"
 
 # ===== HELPERS =====
+wait_for_apt() {
+  while sudo fuser /var/lib/apt/lists/lock /var/lib/dpkg/lock /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
+    log "Waiting for apt lock to be released..."
+    sleep 5
+  done
+}
+
 ensure_pkg() {
   local pkg="$1"
   if ! dpkg -s "$pkg" >/dev/null 2>&1; then
+    wait_for_apt
     sudo apt-get update -y
     sudo apt-get install -y "$pkg"
   fi
@@ -32,13 +40,9 @@ if ! command -v git >/dev/null 2>&1; then
   ensure_pkg git
 fi
 
-if ! command -v git-lfs >/dev/null 2>&1; then
-  log "Installing git-lfs..."
-  ensure_pkg git-lfs
-fi
-
 if ! command -v docker >/dev/null 2>&1; then
   log "Installing Docker + compose plugin..."
+  wait_for_apt
   sudo apt-get update -y
   sudo apt-get install -y ca-certificates curl gnupg lsb-release
 
@@ -51,6 +55,7 @@ if ! command -v docker >/dev/null 2>&1; then
     https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" |
     sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
 
+  wait_for_apt
   sudo apt-get update -y
   sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
   sudo usermod -aG docker "$USER" || true
@@ -61,6 +66,7 @@ fi
 # NVIDIA container toolkit (needed for GPU passthrough into containers)
 if ! docker info 2>/dev/null | grep -qi nvidia; then
   log "Installing NVIDIA container toolkit (best-effort)..."
+  wait_for_apt
   sudo apt-get update -y
   sudo apt-get install -y nvidia-container-toolkit || true
   sudo nvidia-ctk runtime configure --runtime=docker || true
@@ -76,8 +82,6 @@ if [ ! -d "$REPO_DIR/.git" ]; then
   git clone --filter=blob:none --no-checkout --branch "$BRANCH" "$REPO_URL" "$REPO_DIR"
   cd "$REPO_DIR"
 
-  git lfs install --local || true
-
   git sparse-checkout init --no-cone
   # shellcheck disable=SC2086
   git sparse-checkout set $SPARSE_PATHS
@@ -91,8 +95,6 @@ else
     log "Updating existing repo..."
     git fetch --all --prune
 
-    git lfs install --local || true
-
     git sparse-checkout init --no-cone || true
     # shellcheck disable=SC2086
     git sparse-checkout set $SPARSE_PATHS
@@ -104,36 +106,28 @@ else
   fi
 fi
 
-# ===== LFS PULL =====
-log "Pulling Git LFS files (include: '$LFS_INCLUDE'${LFS_EXCLUDE:+, exclude: '$LFS_EXCLUDE'})..."
-if [ -n "$LFS_EXCLUDE" ]; then
-  git lfs pull --include="$LFS_INCLUDE" --exclude="$LFS_EXCLUDE"
-else
-  git lfs pull --include="$LFS_INCLUDE"
-fi
+# ===== OUTPUT DIR =====
+mkdir -p "$REPO_DIR/out"
 
 # ===== ENV FILE CHECK =====
 if [ ! -f "$REPO_DIR/.env" ]; then
   log "WARNING: No .env file found at $REPO_DIR/.env"
   log "  t3_eval + api require API_KEY, API_URL, and SERVER_SECRET."
   log "  Either copy your .env file here, or set them manually:"
-  log "    echo 'API_KEY=sk-...' >> $REPO_DIR/.env"
-  log "    echo 'API_URL=https://...' >> $REPO_DIR/.env"
-  log "    echo 'SERVER_SECRET=...' >> $REPO_DIR/.env"
+  log "    echo 'API_KEY=sk-...'         >> $REPO_DIR/.env"
+  log "    echo 'API_URL=https://...'    >> $REPO_DIR/.env"
+  log "    echo 'SERVER_SECRET=...'      >> $REPO_DIR/.env"
 fi
-
-mkdir -p "$REPO_DIR/out"
 
 # ===== RUN =====
 CMD="sudo docker compose --profile $PROFILE up --build"
 
 log "Running profile: $PROFILE"
-log "Sparse paths: $SPARSE_PATHS"
-log "LFS include:  $LFS_INCLUDE"
-log "Command:      $CMD"
+log "Sparse paths:    $SPARSE_PATHS"
+log "Command:         $CMD"
 
 if [ "$USE_TMUX" = "1" ]; then
-  sudo apt-get update -y && sudo apt-get install -y tmux || true
+  ensure_pkg tmux
   tmux has-session -t "$TMUX_SESSION" 2>/dev/null && tmux kill-session -t "$TMUX_SESSION" || true
   tmux new-session -d -s "$TMUX_SESSION" "cd '$REPO_DIR' && $CMD |& tee -a out/provision_${PROFILE}.log"
   log "Started tmux session '$TMUX_SESSION'."
