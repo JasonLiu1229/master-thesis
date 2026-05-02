@@ -12,7 +12,7 @@ BRANCH="${BRANCH:-main}"
 PROFILE="${PROFILE:-t3_eval}"
 
 # Sparse-checkout paths for t3_eval + api + codereader_ollama services
-SPARSE_PATHS="${SPARSE_PATHS:-docker/t3_eval.Dockerfile docker/api.Dockerfile docker/codereader.Dockerfile code/rename_pipeline code/app code/codereader_app code/llm_client.py code/logger.py code/model.py code/prompts.py requirements/requirements_t3.txt requirements/requirements_api.txt compose.yaml}"
+SPARSE_PATHS="${SPARSE_PATHS:-docker/t3_eval.Dockerfile docker/api.Dockerfile docker/codereader.Dockerfile docker/t3_eval_oracle.Dockerfile code/rename_pipeline code/app code/codereader_app code/llm_client.py code/logger.py code/model.py code/prompts.py requirements/requirements_t3.txt requirements/requirements_api.txt compose.yaml}"
 
 USE_TMUX="${USE_TMUX:-1}"
 TMUX_SESSION="${TMUX_SESSION:-t3_eval}"

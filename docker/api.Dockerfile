@@ -1,6 +1,6 @@
 FROM nvcr.io/nvidia/pytorch:25.06-py3
 
-RUN truncate -s 0 /etc/pip/constraint.txt
+RUN [ -f /etc/pip/constraint.txt ] && truncate -s 0 /etc/pip/constraint.txt || true
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
   git build-essential curl \

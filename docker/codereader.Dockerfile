@@ -1,16 +1,18 @@
-FROM nvidia/cuda:13.1.1-cudnn-runtime-ubuntu24.04
+FROM ollama/ollama:latest AS ollama-base
+
+FROM nvidia/cuda:12.6.3-cudnn-runtime-ubuntu24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV OLLAMA_HOST=0.0.0.0:11434
 ENV OLLAMA_DEBUG=ERROR
 ENV OLLAMA_NUM_PARALLEL=1
 
+COPY --from=ollama-base /bin/ollama /usr/local/bin/ollama
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
   python3 python3-pip python3-venv \
   curl ca-certificates zstd \
   && rm -rf /var/lib/apt/lists/*
-
-RUN curl -fsSL https://ollama.com/install.sh | sh
 
 ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV
@@ -33,7 +35,7 @@ CMD ["bash", "-lc", "\
   ollama serve & \
   until ollama list >/dev/null 2>&1; do sleep 1; done; \
   if [ ! -f /root/.ollama/.codereader_inited ]; then \
-    codereader init -c ${CODEREADER_CONFIG_FILE} && touch /root/.ollama/.codereader_inited; \
+  codereader init -c ${CODEREADER_CONFIG_FILE} && touch /root/.ollama/.codereader_inited; \
   fi; \
   exec uvicorn api:app --host 0.0.0.0 --port 8080 \
-"]
+  "]
