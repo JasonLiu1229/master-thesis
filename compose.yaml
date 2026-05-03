@@ -14,9 +14,9 @@ services:
             - driver: nvidia
               capabilities: [gpu] 
     environment:
-      CODEREADER_URL: http://codereader_ollama:8080
+      CODEREADER_URL: http://codereader:8080
     depends_on:
-      codereader_ollama:
+      codereader:
         condition: service_healthy
     profiles: ["t1", "arno", "test", "t1_eval"]
     networks:
@@ -37,9 +37,9 @@ services:
             - driver: nvidia
               capabilities: [gpu]
     environment:
-      CODEREADER_URL: http://codereader_ollama:8080
+      CODEREADER_URL: http://codereader:8080
     depends_on:
-      codereader_ollama:
+      codereader:
         condition: service_healthy
     profiles: ["t2", "arno", "test", "t2_eval"]
     networks:
@@ -73,11 +73,11 @@ services:
     depends_on:
       api:
         condition: service_healthy
-      codereader_ollama:
+      codereader:
         condition: service_healthy
     environment:
-      CODEREADER_URL: http://codereader_ollama:8080
-      OLLAMA_HOST: http://codereader_ollama:11434
+      CODEREADER_URL: http://codereader:8080
+      OLLAMA_HOST: http://codereader:11434
     networks:
       - pipeline
       - codereader
@@ -93,11 +93,11 @@ services:
       - .env
     profiles: ["t3_eval_openai"]
     depends_on:
-      codereader_ollama:
+      codereader:
         condition: service_healthy
     environment:
-      CODEREADER_URL: http://codereader_ollama:8080
-      OLLAMA_HOST: http://codereader_ollama:11434
+      CODEREADER_URL: http://codereader:8080
+      OLLAMA_HOST: http://codereader:11434
     networks:
       - pipeline
       - codereader
@@ -115,11 +115,11 @@ services:
     depends_on:
       api:
         condition: service_healthy
-      codereader_ollama:
+      codereaded:
         condition: service_healthy
     environment:
-      CODEREADER_URL: http://codereader_ollama:8080
-      OLLAMA_HOST: http://codereader_ollama:11434
+      CODEREADER_URL: http://codereader:8080
+      OLLAMA_HOST: http://codereader:11434
     networks:
       - pipeline
       - codereader
@@ -137,11 +137,11 @@ services:
     depends_on:
       api:
         condition: service_healthy
-      codereader_ollama:
+      codereader:
         condition: service_healthy
     environment:
-      CODEREADER_URL: http://codereader_ollama:8080
-      OLLAMA_HOST: http://codereader_ollama:11434
+      CODEREADER_URL: http://codereader:8080
+      OLLAMA_HOST: http://codereader:11434
     networks:
       - pipeline
       - codereader
@@ -248,8 +248,8 @@ services:
         hard: -1
     ipc: host
 
-  codereader_ollama:
-    container_name: codereader_ollama
+  codereader:
+    container_name: codereader
     build:
       dockerfile: docker/codereader.Dockerfile
     deploy:
