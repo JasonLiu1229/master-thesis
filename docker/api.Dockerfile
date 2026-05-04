@@ -1,15 +1,20 @@
-FROM nvcr.io/nvidia/pytorch:25.06-py3
+FROM pytorch/pytorch:2.11.0-cuda12.8-cudnn9-runtime
 
-RUN [ -f /etc/pip/constraint.txt ] && truncate -s 0 /etc/pip/constraint.txt || true
+RUN pip install --upgrade pip setuptools wheel --no-cache-dir --break-system-packages
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-  git build-essential curl \
-  && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir --break-system-packages \
+  "fastapi[standard]>=0.113.0,<0.114.0" \
+  httpx==0.28.1 \
+  pydantic-settings==2.11.0 \
+  python-dotenv==1.1.1 \
+  pydantic==2.12.3 \
+  hf-xet==1.2.0 \
+  peft==0.18.1
 
-RUN pip install --upgrade pip setuptools wheel --no-cache-dir
-
-COPY requirements/requirements_api.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt
+RUN pip install --no-cache-dir --break-system-packages \
+  transformers==4.55.2 \
+  accelerate==1.10.0 \
+  bitsandbytes==0.47.0
 
 WORKDIR /app
 
@@ -19,6 +24,6 @@ COPY ../code/logger.py /app
 COPY ../code/prompts.py /app
 
 ENV TOKENIZERS_PARALLELISM=false
-ENV ATTN_IMPLEMENTATION=flash_attention_2
+ENV ATTN_IMPLEMENTATION=eager
 
 CMD ["fastapi", "run", "main.py", "--host", "0.0.0.0", "--port", "8000"]

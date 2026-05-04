@@ -18,7 +18,7 @@ config = {}
 with open("pipeline/config.yml", "r") as f:
     config = yaml.safe_load(f)
 
-CODEREADER_URL = "http://codereader_ollama:8080"
+CODEREADER_URL = "http://codereader:8080"
 
 setup_logging("pipeline")
 logger = logging.getLogger("pipeline")

@@ -198,8 +198,10 @@ class LLM_Model:
         else:
             load_kwargs["quantization_config"] = quantization_config
 
+        attn_impl = os.environ.get("ATTN_IMPLEMENTATION", "eager")
+
         self.model = AutoModelForCausalLM.from_pretrained(
-            model_path, attn_implementation="flash_attention_2", **load_kwargs
+            model_path, attn_implementation=attn_impl, **load_kwargs
         ).eval()
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)

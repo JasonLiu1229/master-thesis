@@ -188,11 +188,11 @@ services:
     networks:
       - pipeline
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 5s
       timeout: 3s
       retries: 5
-      start_period: 5s
+      start_period: 1m
 
   tuner:
     container_name: tuner
@@ -271,11 +271,11 @@ services:
       CODEREADER_CONFIG_FILE: /app/codereader.yml
       OLLAMA_HOST: http://127.0.0.1:11434
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 5s
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/health && curl -sf http://localhost:11434/api/tags | grep -q 'models'"]
+      interval: 15s
       timeout: 10s
-      retries: 5
-      start_period: 5m
+      retries: 20
+      start_period: 15m
 
 volumes:
   hf_cache:

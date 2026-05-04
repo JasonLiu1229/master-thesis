@@ -63,16 +63,68 @@ else
   log "Docker already installed."
 fi
 
-# NVIDIA container toolkit (needed for GPU passthrough into containers)
-if ! docker info 2>/dev/null | grep -qi nvidia; then
-  log "Installing NVIDIA container toolkit (best-effort)..."
+setup_nvidia_toolkit() {
+  log "Installing/configuring NVIDIA container toolkit..."
   wait_for_apt
-  sudo apt-get update -y
-  sudo apt-get install -y nvidia-container-toolkit || true
-  sudo nvidia-ctk runtime configure --runtime=docker || true
-  sudo systemctl restart docker || true
+
+  # Add NVIDIA container toolkit repo if not already present
+  if ! apt-cache show nvidia-container-toolkit >/dev/null 2>&1; then
+    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey |
+      sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+    curl -fsSL https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list |
+      sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' |
+      sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list >/dev/null
+    wait_for_apt
+    sudo apt-get update -y
+  fi
+
+  sudo apt-get install -y nvidia-container-toolkit
+
+  # Configure Docker daemon to use nvidia runtime
+  sudo nvidia-ctk runtime configure --runtime=docker
+
+  # Restart Docker to pick up the new runtime config
+  log "Restarting Docker daemon to apply nvidia runtime..."
+  sudo systemctl restart docker
+
+  # Wait for Docker to come back up
+  local retries=10
+  while ! sudo docker info >/dev/null 2>&1; do
+    retries=$((retries - 1))
+    if [ "$retries" -eq 0 ]; then
+      log "ERROR: Docker did not come back up after restart."
+      exit 1
+    fi
+    sleep 2
+  done
+  log "Docker is back up."
+}
+
+verify_gpu_passthrough() {
+  # Actually run a container to verify GPU is visible — much more reliable than `docker info`
+  log "Verifying GPU passthrough into containers..."
+  if sudo docker run --rm --gpus all nvidia/cuda:12.6.3-base-ubuntu24.04 nvidia-smi >/dev/null 2>&1; then
+    log "GPU passthrough verified successfully."
+    return 0
+  else
+    log "GPU passthrough test failed."
+    return 1
+  fi
+}
+
+if ! verify_gpu_passthrough 2>/dev/null; then
+  log "GPU not accessible in containers — setting up NVIDIA container toolkit..."
+  setup_nvidia_toolkit
+
+  # Verify again after setup
+  if ! verify_gpu_passthrough; then
+    log "WARNING: GPU passthrough still not working after toolkit setup."
+    log "  Check that the host has a NVIDIA GPU and drivers installed:"
+    log "    nvidia-smi"
+    log "  Continuing anyway — containers may run on CPU."
+  fi
 else
-  log "Docker already reports NVIDIA runtime."
+  log "GPU passthrough already working."
 fi
 
 # ===== REPO SETUP (sparse checkout) =====
