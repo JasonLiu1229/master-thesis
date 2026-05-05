@@ -1,4 +1,3 @@
-import copy
 import os
 import threading
 import time
@@ -14,6 +13,14 @@ from transformers import (
     BitsAndBytesConfig,
     GenerationConfig,
 )
+
+import logging
+from logger import setup_logging
+
+setup_logging("model")
+logger = logging.getLogger("model")
+
+os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
 
 
 class ModelStyle(Enum):
@@ -86,13 +93,6 @@ class LLM_Model:
         do_sample=False,
         sys_instruction: str = SYSTEM_INSTRUCTION,
     ) -> tuple[str, LocalUsage]:
-        """
-        Generate text and return (response_text, LocalUsage).
-
-        Token counts come from the tokenizer directly so they are exact,
-        not estimated, important for comparing local vs. API model costs
-        in the thesis.
-        """
         with _model_lock:
             assert self.model is not None, "Model not loaded."
             assert self.tokenizer is not None, "Tokenizer not loaded."
@@ -103,21 +103,32 @@ class LLM_Model:
             inputs = self.tokenizer(formatted_prompt, return_tensors="pt")
             prompt_tokens: int = inputs["input_ids"].shape[1]
 
+            inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
+
             if not self._gen_config:
                 self._gen_config = GenerationConfig(
                     do_sample=do_sample,
-                    temperature=temperature,
-                    top_p=top_p,
-                    top_k=top_k,
+                    temperature=temperature if do_sample else None,
+                    top_p=top_p if do_sample else None,
+                    top_k=top_k if do_sample else None,
                 )
 
             t0 = time.perf_counter()
+
+            eos_ids = self.tokenizer.eos_token_id
+            if isinstance(eos_ids, list):
+                eos_ids = eos_ids[0]
+
+            pad_token_id = self.tokenizer.pad_token_id
+            if pad_token_id is None:
+                pad_token_id = eos_ids
+
             outputs = self.model.generate(
-                **inputs.to(self.model.device),
+                **inputs,
                 max_new_tokens=max_new_tokens,
                 generation_config=self._gen_config,
-                pad_token_id=self.tokenizer.pad_token_id,
-                eos_token_id=self.tokenizer.eos_token_id,
+                pad_token_id=pad_token_id,
+                eos_token_id=eos_ids,
                 use_cache=True,
             )
             latency_ms = (time.perf_counter() - t0) * 1000
@@ -171,7 +182,7 @@ class LLM_Model:
         )
         return self.tokenizer(formatted, return_tensors="pt")
 
-    def load_model(self, model_path, quantize: str = "int4"):
+    def load_model(self, model_path, quantize: str = "none"):
         _enable_speed_flags()
 
         torch_dtype = torch.bfloat16 if torch.cuda.is_available() else torch.float32
@@ -204,22 +215,17 @@ class LLM_Model:
             model_path, attn_implementation=attn_impl, **load_kwargs
         ).eval()
 
-        self.tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            model_path, use_fast=True, trust_remote_code=True
+        )
 
-        if torch.cuda.is_available():
-            self.model = torch.compile(self.model, mode="reduce-overhead")
-
-        if "qwen" in model_path.lower():
-            if self.tokenizer.eos_token is None:
-                self.tokenizer.eos_token = "<|im_end|>"
-            if self.tokenizer.pad_token is None:
-                self.tokenizer.pad_token = getattr(
-                    self.tokenizer, "unk_token", "<|extra_0|>"
-                )
+        if self.tokenizer.pad_token is None:
+            self.tokenizer.pad_token = self.tokenizer.eos_token
 
         if self.tokenizer.pad_token_id is None:
             self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
 
+        self.model.config.pad_token_id = self.tokenizer.pad_token_id
         self.model.generation_config.pad_token_id = self.tokenizer.pad_token_id
 
         self.model_id = model_path
@@ -245,17 +251,31 @@ class LLM_Model:
             inputs = self.tokenizer(formatted, return_tensors="pt").to(
                 self.model.device
             )
+
+            eos_ids = self.tokenizer.eos_token_id
+            if isinstance(eos_ids, list):
+                eos_ids = eos_ids[0]
+
+            pad_token_id = self.tokenizer.pad_token_id
+            if pad_token_id is None:
+                pad_token_id = eos_ids
+
             _ = self.model.generate(
                 **inputs,
                 max_new_tokens=10,
                 do_sample=False,
                 use_cache=True,
-                generation_config=copy.deepcopy(self._gen_config),
-                pad_token_id=self.tokenizer.pad_token_id,
-                eos_token_id=self.tokenizer.eos_token_id,
+                generation_config=GenerationConfig(
+                    do_sample=False,
+                    pad_token_id=pad_token_id,
+                    eos_token_id=eos_ids,
+                ),
+                pad_token_id=pad_token_id,
+                eos_token_id=eos_ids,
             )
-        except Exception:
-            pass
+            logger.info("Model warmup successful")
+        except Exception as e:
+            logger.warning(f"Model warmup failed: {e}")
 
     def set_model(self, model, model_name, tokenizer):
         self.model = model

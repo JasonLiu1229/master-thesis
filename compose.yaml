@@ -180,6 +180,9 @@ services:
               capabilities: [gpu]
     env_file:
       - .env
+    environment:
+      CUDA_LAUNCH_BLOCKING: "1"
+      TORCH_USE_CUDA_DSA: "1"
     profiles: ["api", "full_local", "full_local_eval", "t3_eval_cohen", "t3_eval_oracle"]
     volumes:
       - hf_cache:/root/.cache/huggingface/
@@ -258,6 +261,7 @@ services:
           devices:
             - driver: nvidia
               capabilities: [gpu]
+              count: all
     profiles: ["full_local_eval", "t3_eval", "codereader", "t3_eval_cohen", "t3_eval_openai", "t1_eval", "t2_eval", "t3_eval_oracle"]
     networks:
       - codereader

@@ -1,4 +1,4 @@
-FROM pytorch/pytorch:2.11.0-cuda12.8-cudnn9-runtime
+FROM pytorch/pytorch:2.11.0-cuda13.0-cudnn9-runtime
 
 RUN pip install --upgrade pip setuptools wheel --no-cache-dir --break-system-packages
 
@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir --break-system-packages \
 RUN pip install --no-cache-dir --break-system-packages \
   transformers==4.55.2 \
   accelerate==1.10.0 \
-  bitsandbytes==0.47.0
+  bitsandbytes
 
 WORKDIR /app
 
