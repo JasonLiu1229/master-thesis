@@ -1,0 +1,13 @@
+Fixing docker pipeline to make it work on the cloud.
+
+Also looked at the evaluation schemes of the other thesis:
+  - biagiola paper
+    - 9 LLMs tested: mix of industrial (GPT-4o, Claude, Gemini) and open-source (Llama, Mistral, etc.)
+    - The multi-step prompt design is fully described but no open source package
+    - evaluated based on real devs 
+  - Mastropaolo
+    - They measure correctness and partial correctness
+      - The model's suggestion exactly matches the name the developer chose
+      - At least one subtoken in the suggestion matches the reference name — so getUserName partially matches getUsername
+
+

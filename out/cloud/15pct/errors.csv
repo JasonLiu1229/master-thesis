@@ -1,0 +1,46 @@
+timestamp,file_path,attempt,error_type,error_message,raw_response
+2026-05-05T19:37:31,in/test/TestClass5792.java.jsonl,1,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['e'],
+2026-05-05T19:44:45,in/test/TestClass42289.java.jsonl,1,UnvalidJson,Response was not valid JSON: Extra data: line 1 column 55 (char 54),"{""func_1"": ""getJobProjectId"", ""var_1"": ""jobProjectId""}, {""func_1"": ""getJobProjectId"", ""var_1"": ""jobProjectId""}, {""func_1"": ""getJobProjectId"", ""var_1"": ""jobProjectId""}"
+2026-05-05T19:44:52,in/test/TestClass42289.java.jsonl,2,UnvalidJson,Response was not valid JSON: Extra data: line 1 column 55 (char 54),"{""func_1"": ""getJobProjectId"", ""var_1"": ""jobProjectId""}, {""func_1"": ""getJobProjectId"", ""var_1"": ""jobProjectId""}, {""func_1"": ""getJobProjectId"", ""var_1"": ""jobProjectId""}"
+2026-05-05T19:45:00,in/test/TestClass42289.java.jsonl,3,UnvalidJson,Response was not valid JSON: Extra data: line 1 column 55 (char 54),"{""func_1"": ""getJobProjectId"", ""var_1"": ""jobProjectId""}, {""func_1"": ""getJobProjectId"", ""var_1"": ""jobProjectId""}, {""func_1"": ""getJobProjectId"", ""var_1"": ""jobProjectId""}"
+2026-05-05T19:45:00,in/test/TestClass42289.java.jsonl,3,FailedRename,All 3 attempts failed to produce a usable mapping for func_1; keeping original test.,
+2026-05-05T19:59:30,in/test/TestClass28322.java.jsonl,1,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['e'],
+2026-05-05T19:59:36,in/test/TestClass28322.java.jsonl,2,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['e'],
+2026-05-05T19:59:41,in/test/TestClass28322.java.jsonl,3,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['e'],
+2026-05-05T19:59:41,in/test/TestClass28322.java.jsonl,3,FailedRename,All 3 attempts failed to produce a usable mapping for func_1; keeping original test.,
+2026-05-05T20:31:39,in/test/TestClass22185.java.jsonl,1,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['e'],
+2026-05-05T20:31:46,in/test/TestClass22185.java.jsonl,2,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['e'],
+2026-05-05T20:31:53,in/test/TestClass22185.java.jsonl,3,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['e'],
+2026-05-05T20:31:53,in/test/TestClass22185.java.jsonl,3,FailedRename,All 3 attempts failed to produce a usable mapping for func_1; keeping original test.,
+2026-05-05T20:34:24,in/test/TestClass58375.java.jsonl,1,UnvalidJson,Response was not valid JSON: Extra data: line 1 column 50 (char 49),"{""func_1"": ""ocdsByProjectId"", ""var_1"": ""release""}, {""func_1"": ""ocdsByProjectId"", ""var_1"": ""release""}"
+2026-05-05T20:34:29,in/test/TestClass58375.java.jsonl,2,UnvalidJson,Response was not valid JSON: Extra data: line 1 column 50 (char 49),"{""func_1"": ""ocdsByProjectId"", ""var_1"": ""release""}, {""func_1"": ""ocdsByProjectId"", ""var_1"": ""release""}"
+2026-05-05T20:34:33,in/test/TestClass58375.java.jsonl,3,UnvalidJson,Response was not valid JSON: Extra data: line 1 column 50 (char 49),"{""func_1"": ""ocdsByProjectId"", ""var_1"": ""release""}, {""func_1"": ""ocdsByProjectId"", ""var_1"": ""release""}"
+2026-05-05T20:34:33,in/test/TestClass58375.java.jsonl,3,FailedRename,All 3 attempts failed to produce a usable mapping for func_1; keeping original test.,
+2026-05-05T21:19:41,in/test/TestClass12981.java.jsonl,1,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['e'],
+2026-05-05T21:19:46,in/test/TestClass12981.java.jsonl,2,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['e'],
+2026-05-05T21:19:50,in/test/TestClass12981.java.jsonl,3,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['e'],
+2026-05-05T21:19:50,in/test/TestClass12981.java.jsonl,3,FailedRename,All 3 attempts failed to produce a usable mapping for func_1; keeping original test.,
+2026-05-05T21:20:00,in/test/TestClass22308.java.jsonl,1,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['e'],
+2026-05-05T21:20:08,in/test/TestClass22308.java.jsonl,2,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['e'],
+2026-05-05T21:20:17,in/test/TestClass22308.java.jsonl,3,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['e'],
+2026-05-05T21:20:17,in/test/TestClass22308.java.jsonl,3,FailedRename,All 3 attempts failed to produce a usable mapping for func_1; keeping original test.,
+2026-05-05T21:38:52,in/test/TestClass218.java.jsonl,1,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['e'],
+2026-05-05T21:38:57,in/test/TestClass218.java.jsonl,2,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['e'],
+2026-05-05T21:39:01,in/test/TestClass218.java.jsonl,3,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['e'],
+2026-05-05T21:39:01,in/test/TestClass218.java.jsonl,3,FailedRename,All 3 attempts failed to produce a usable mapping for func_1; keeping original test.,
+2026-05-05T21:53:03,in/test/TestClass25299.java.jsonl,1,UnvalidJson,Response was not valid JSON: Extra data: line 1 column 63 (char 62),"{""func_1"": ""getIncidentLocationList"", ""var_1"": ""locationList""}, {""func_1"": ""getIncidentLocationList"", ""var_1"": ""locationList""}"
+2026-05-05T21:53:07,in/test/TestClass25299.java.jsonl,2,UnvalidJson,Response was not valid JSON: Extra data: line 1 column 63 (char 62),"{""func_1"": ""getIncidentLocationList"", ""var_1"": ""locationList""}, {""func_1"": ""getIncidentLocationList"", ""var_1"": ""locationList""}"
+2026-05-05T21:53:13,in/test/TestClass25299.java.jsonl,3,UnvalidJson,Response was not valid JSON: Extra data: line 1 column 63 (char 62),"{""func_1"": ""getIncidentLocationList"", ""var_1"": ""locationList""}, {""func_1"": ""getIncidentLocationList"", ""var_1"": ""locationList""}"
+2026-05-05T21:53:13,in/test/TestClass25299.java.jsonl,3,FailedRename,All 3 attempts failed to produce a usable mapping for func_1; keeping original test.,
+2026-05-05T21:57:44,in/test/TestClass47507.java.jsonl,1,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['any'],
+2026-05-05T21:57:50,in/test/TestClass47507.java.jsonl,2,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['any'],
+2026-05-05T21:57:55,in/test/TestClass47507.java.jsonl,3,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['any'],
+2026-05-05T21:57:55,in/test/TestClass47507.java.jsonl,3,FailedRename,All 3 attempts failed to produce a usable mapping for func_1; keeping original test.,
+2026-05-05T22:02:22,in/test/TestClass36208.java.jsonl,1,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['ex'],
+2026-05-05T22:02:27,in/test/TestClass36208.java.jsonl,2,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['ex'],
+2026-05-05T22:02:32,in/test/TestClass36208.java.jsonl,3,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['ex'],
+2026-05-05T22:02:32,in/test/TestClass36208.java.jsonl,3,FailedRename,All 3 attempts failed to produce a usable mapping for func_1; keeping original test.,
+2026-05-05T22:13:59,in/test/TestClass57197.java.jsonl,1,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['e'],
+2026-05-05T22:14:04,in/test/TestClass57197.java.jsonl,2,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['e'],
+2026-05-05T22:14:10,in/test/TestClass57197.java.jsonl,3,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['e'],
+2026-05-05T22:14:10,in/test/TestClass57197.java.jsonl,3,FailedRename,All 3 attempts failed to produce a usable mapping for func_1; keeping original test.,
