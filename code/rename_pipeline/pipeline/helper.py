@@ -414,8 +414,6 @@ def list_files(folder):
 
 
 # === Post process functions ===
-
-
 def remove_wrap(code: str) -> str:
     header_pattern = (
         r"@(?:\w+\.)*(?:Test|ParameterizedTest|RepeatedTest|TestFactory|TestTemplate)"
@@ -574,6 +572,27 @@ def post_process_eval(metrics: dict, force=False):
         json.dump(metrics, f, indent=2, sort_keys=True)
 
     logger.info(f"Evaluated metrics and outputed to: {output_file}")
+
+
+def post_process_eval_per_file(per_file: list, force=False):
+    """Write per-file results to a separate JSON next to the summary file."""
+    summary_path = Path(config["EVAL_OUTPUT_FILE_NAME"])
+    output_file = summary_path.parent / (summary_path.stem + "_per_file.json")
+
+    if os.path.exists(output_file):
+        if force:
+            logger.warning(f"Force enabled, overwriting file: {output_file}")
+        else:
+            raise FileExistsError(
+                f"{output_file} already exists and force was not enabled"
+            )
+    else:
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
+
+    with output_file.open("w", encoding="utf-8") as f:
+        json.dump(per_file, f, indent=2, sort_keys=True)
+
+    logger.info(f"Per-file results saved to: {output_file}")
 
 
 if __name__ == "__main__":

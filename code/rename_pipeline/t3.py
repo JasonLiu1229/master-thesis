@@ -30,6 +30,7 @@ from pipeline.eval import (
 from pipeline.helper import (
     extract_tests_from_file,
     post_process_eval,
+    post_process_eval_per_file,
     post_process_file,
 )
 from pipeline.renamer import rename, rename_eval
@@ -290,6 +291,7 @@ def process_folder(
         logger.info(f"Wrote {len(jsonl_files)} indices to {indices_file}")
 
         failed_count = 0
+        per_file_results: List[dict] = []
         total_pair_metrics: List[PairMetrics] = []
         total_f1_metrics: List[F1Metrics] = []
         total_llm_obf_metrics: List[LLMMetrics] = []
@@ -333,6 +335,74 @@ def process_folder(
                 total_llm_oracle_metrics.extend(llm_oracle_metrics)
                 failed_count += count
                 failed_files_all.extend(failed_files)
+
+                # Collect per-file entry
+                n_f1 = len(f1_metrics)
+                n_pair = len(pair_metrics)
+                n_llm = len(llm_renamed_metrics)
+                n_oracle = len(llm_oracle_metrics)
+                per_file_results.append(
+                    {
+                        "filename": file.name,
+                        "failed": count > 0,
+                        # F1 / pair metrics (averaged over items in this file)
+                        "precision": sum(
+                            m.precision for m in (f1_metrics or pair_metrics)
+                        )
+                        / max(n_f1 or n_pair, 1),
+                        "recall": sum(m.recall for m in (f1_metrics or pair_metrics))
+                        / max(n_f1 or n_pair, 1),
+                        "f1": sum(m.f1 for m in (f1_metrics or pair_metrics))
+                        / max(n_f1 or n_pair, 1),
+                        "correct_ordered": sum(
+                            m.correct_ordered for m in (f1_metrics or pair_metrics)
+                        )
+                        / max(n_f1 or n_pair, 1),
+                        "correct_unordered": sum(
+                            m.correct_unordered for m in (f1_metrics or pair_metrics)
+                        )
+                        / max(n_f1 or n_pair, 1),
+                        "cer": sum(m.cer for m in (f1_metrics or pair_metrics))
+                        / max(n_f1 or n_pair, 1),
+                        "edit_distance": sum(
+                            m.edit_distance for m in (f1_metrics or pair_metrics)
+                        )
+                        / max(n_f1 or n_pair, 1),
+                        # LLM scores
+                        "llm_renamed_avg": sum(
+                            m.codereader_avg for m in llm_renamed_metrics
+                        )
+                        / n_llm
+                        if n_llm
+                        else None,
+                        "llm_renamed_wavg": sum(
+                            m.codereader_wavg for m in llm_renamed_metrics
+                        )
+                        / n_llm
+                        if n_llm
+                        else None,
+                        "llm_obf_avg": sum(m.codereader_avg for m in llm_obf_metrics)
+                        / len(llm_obf_metrics)
+                        if llm_obf_metrics
+                        else None,
+                        "llm_obf_wavg": sum(m.codereader_wavg for m in llm_obf_metrics)
+                        / len(llm_obf_metrics)
+                        if llm_obf_metrics
+                        else None,
+                        "llm_oracle_avg": sum(
+                            m.codereader_avg for m in llm_oracle_metrics
+                        )
+                        / n_oracle
+                        if n_oracle
+                        else None,
+                        "llm_oracle_wavg": sum(
+                            m.codereader_wavg for m in llm_oracle_metrics
+                        )
+                        / n_oracle
+                        if n_oracle
+                        else None,
+                    }
+                )
 
         # Build final metrics from the right source depending on mode
         if cohen:
@@ -384,6 +454,7 @@ def process_folder(
                 )
 
         post_process_eval(final_metric, force)
+        post_process_eval_per_file(per_file_results, force)
 
         plots_dir = out / "plots"
 
