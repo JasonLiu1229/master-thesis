@@ -50,6 +50,33 @@ LLM_MODEL = os.getenv(key="LLM_MODEL")
 client = LLMClient(API_KEY, API_URL)
 
 
+def _parse_llm_json(raw: str) -> dict:
+    try:
+        result = json.loads(raw)
+        if isinstance(result, dict):
+            return result
+        if isinstance(result, list):
+            merged = {}
+            for item in result:
+                if isinstance(item, dict):
+                    merged.update(item)
+            return merged
+        raise json.JSONDecodeError("Expected a JSON object", raw, 0)
+    except json.JSONDecodeError:
+        pass
+
+    wrapped = f"[{raw}]"
+    result = json.loads(wrapped)
+    if not isinstance(result, list):
+        raise json.JSONDecodeError("Could not recover JSON object", raw, 0)
+
+    merged = {}
+    for item in result:
+        if isinstance(item, dict):
+            merged.update(item)
+    return merged
+
+
 def make_messages(user_message: str, sys_instruction: str = SYSTEM_INSTRUCTION):
     return [
         {
@@ -136,7 +163,7 @@ def _rename_process(
         raw = strip_markdown_fences(raw).strip()
 
         try:
-            mapping = json.loads(raw)
+            mapping = _parse_llm_json(raw)
         except json.JSONDecodeError as e:
             error_reason = f"Response was not valid JSON: {e}"
             logger.error(

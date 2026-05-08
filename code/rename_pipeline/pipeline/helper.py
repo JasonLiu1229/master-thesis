@@ -23,6 +23,25 @@ METHOD_SIG_RE = re.compile(
     r"\(",
 )
 
+_SKIP_IDENTIFIERS = frozenset(
+    {
+        # Conventional single-letter catch/loop vars
+        "e",
+        "ex",
+        "err",
+        "exc",
+        "exception",
+        "i",
+        "j",
+        "k",
+        "n",
+        "m",
+        "it",
+        "sb",
+        "io",
+    }
+)
+
 init(autoreset=True)
 
 config = {}
@@ -340,6 +359,7 @@ def extract_identifier_candidates(wrapped_test_case: str) -> list[str]:
                 name != _WRAPPER_CLASS_NAME
                 and not name[0].isupper()
                 and not _is_constant_like(name)
+                and name not in _SKIP_IDENTIFIERS
                 and prev is not None
                 and _is_type_token(prev)
             ):

@@ -3,11 +3,20 @@ Fixing docker pipeline to make it work on the cloud.
 Also looked at the evaluation schemes of the other thesis:
   - biagiola paper
     - 9 LLMs tested: mix of industrial (GPT-4o, Claude, Gemini) and open-source (Llama, Mistral, etc.)
-    - The multi-step prompt design is fully described but no open source package
+    - The multi-step prompt design is fully described but no open source package (mention that the artifacts are not available)
     - evaluated based on real devs 
+    - maybe mail 
   - Mastropaolo
     - They measure correctness and partial correctness
       - The model's suggestion exactly matches the name the developer chose
       - At least one subtoken in the suggestion matches the reference name — so getUserName partially matches getUsername
+      - Try to adapt it
 
+Added oracle grading to the pipeline
 
+Submission deadline:
+  - Submit by june - and 10th july last date
+    - Submit in first two weeks - first come fist served
+
+First drafts to Mutlu than Serge:
+  - Based on serge, serge will give feedback to give chance a better grades
