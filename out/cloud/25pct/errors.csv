@@ -1,13 +1,1 @@
 timestamp,file_path,attempt,error_type,error_message,raw_response
-2026-05-07T21:53:49,in/test/TestClass77787.java.jsonl,1,UnvalidJson,Response was not valid JSON: Extra data: line 1 column 41 (char 40),"{""func_1"": ""testToString"", ""var_1"": ""p""}, {""func_1"": ""testToString"", ""var_1"": ""p""}, {""func_1"": ""testToString"", ""var_1"": ""p""}"
-2026-05-07T21:53:55,in/test/TestClass77787.java.jsonl,2,UnvalidJson,Response was not valid JSON: Extra data: line 1 column 41 (char 40),"{""func_1"": ""testToString"", ""var_1"": ""p""}, {""func_1"": ""testToString"", ""var_1"": ""p""}, {""func_1"": ""testToString"", ""var_1"": ""p""}"
-2026-05-07T21:54:01,in/test/TestClass77787.java.jsonl,3,UnvalidJson,Response was not valid JSON: Extra data: line 1 column 41 (char 40),"{""func_1"": ""testToString"", ""var_1"": ""p""}, {""func_1"": ""testToString"", ""var_1"": ""p""}, {""func_1"": ""testToString"", ""var_1"": ""p""}"
-2026-05-07T21:54:01,in/test/TestClass77787.java.jsonl,3,FailedRename,All 3 attempts failed to produce a usable mapping for func_1; keeping original test.,
-2026-05-07T22:43:06,in/test/TestClass25299.java.jsonl,1,UnvalidJson,Response was not valid JSON: Extra data: line 1 column 63 (char 62),"{""func_1"": ""getIncidentLocationList"", ""var_1"": ""locationList""}, {""func_1"": ""getIncidentLocationList"", ""var_1"": ""locationList""}"
-2026-05-07T22:43:13,in/test/TestClass25299.java.jsonl,2,UnvalidJson,Response was not valid JSON: Extra data: line 1 column 63 (char 62),"{""func_1"": ""getIncidentLocationList"", ""var_1"": ""locationList""}, {""func_1"": ""getIncidentLocationList"", ""var_1"": ""locationList""}"
-2026-05-07T22:43:17,in/test/TestClass25299.java.jsonl,3,UnvalidJson,Response was not valid JSON: Extra data: line 1 column 63 (char 62),"{""func_1"": ""getIncidentLocationList"", ""var_1"": ""locationList""}, {""func_1"": ""getIncidentLocationList"", ""var_1"": ""locationList""}"
-2026-05-07T22:43:17,in/test/TestClass25299.java.jsonl,3,FailedRename,All 3 attempts failed to produce a usable mapping for func_1; keeping original test.,
-2026-05-07T22:47:57,in/test/TestClass47507.java.jsonl,1,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['any'],
-2026-05-07T22:48:03,in/test/TestClass47507.java.jsonl,2,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['any'],
-2026-05-07T22:48:09,in/test/TestClass47507.java.jsonl,3,MissingKeysError,The mapping did not contain all required identifiers. Missing: ['any'],
-2026-05-07T22:48:09,in/test/TestClass47507.java.jsonl,3,FailedRename,All 3 attempts failed to produce a usable mapping for func_1; keeping original test.,
