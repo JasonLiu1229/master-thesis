@@ -19,567 +19,567 @@
     "dist_predicted_lengths": {
       "1": 246,
       "2": 29,
-      "3": 2,
       "5": 1,
-      "4": 1
+      "4": 1,
+      "3": 2
     },
     "dist_expected_lengths": {
       "2": 272,
       "1": 7
     },
-    "llm_score_avg": 63.98333333333333,
-    "llm_score_wavg": 66.44886363636363
+    "llm_score_avg": 63.9363636363636,
+    "llm_score_wavg": 66.1672459893048
   },
   "per_file": [
     {
       "filename": "TestClass1148.java",
-      "codereader_avg": 65.66666666666667,
-      "codereader_wavg": 69.64705882352942
+      "codereader_avg": 69.33333333333333,
+      "codereader_wavg": 70.27941176470588
     },
     {
       "filename": "TestClass11487.java",
-      "codereader_avg": 79.33333333333333,
-      "codereader_wavg": 79.91176470588235
+      "codereader_avg": 74.33333333333333,
+      "codereader_wavg": 78.0
     },
     {
       "filename": "TestClass11989.java",
-      "codereader_avg": 64.33333333333333,
-      "codereader_wavg": 67.83823529411764
+      "codereader_avg": 65.33333333333333,
+      "codereader_wavg": 69.5
     },
     {
       "filename": "TestClass12231.java",
-      "codereader_avg": 53.5,
-      "codereader_wavg": 55.625
+      "codereader_avg": 63.0,
+      "codereader_wavg": 64.88235294117646
     },
     {
       "filename": "TestClass12981.java",
-      "codereader_avg": 69.33333333333333,
-      "codereader_wavg": 71.08823529411765
+      "codereader_avg": 69.66666666666667,
+      "codereader_wavg": 70.89705882352942
     },
     {
       "filename": "TestClass14014.java",
-      "codereader_avg": 74.66666666666667,
-      "codereader_wavg": 77.61764705882352
+      "codereader_avg": 59.666666666666664,
+      "codereader_wavg": 61.529411764705884
     },
     {
       "filename": "TestClass16654.java",
-      "codereader_avg": 75.0,
-      "codereader_wavg": 77.55882352941177
-    },
-    {
-      "filename": "TestClass16949.java",
-      "codereader_avg": 65.0,
-      "codereader_wavg": 68.1764705882353
-    },
-    {
-      "filename": "TestClass18143.java",
-      "codereader_avg": 62.666666666666664,
-      "codereader_wavg": 65.94117647058823
-    },
-    {
-      "filename": "TestClass19667.java",
-      "codereader_avg": 69.0,
-      "codereader_wavg": 73.97058823529412
-    },
-    {
-      "filename": "TestClass20354.java",
-      "codereader_avg": 64.0,
-      "codereader_wavg": 67.07352941176471
-    },
-    {
-      "filename": "TestClass21318.java",
-      "codereader_avg": 65.33333333333333,
-      "codereader_wavg": 65.33823529411764
-    },
-    {
-      "filename": "TestClass218.java",
-      "codereader_avg": 71.66666666666667,
-      "codereader_wavg": 74.3529411764706
-    },
-    {
-      "filename": "TestClass21857.java",
-      "codereader_avg": 58.666666666666664,
-      "codereader_wavg": 63.35294117647058
-    },
-    {
-      "filename": "TestClass22056.java",
-      "codereader_avg": 76.33333333333333,
-      "codereader_wavg": 78.04411764705883
-    },
-    {
-      "filename": "TestClass22068.java",
-      "codereader_avg": 60.0,
-      "codereader_wavg": 63.73529411764706
-    },
-    {
-      "filename": "TestClass22185.java",
-      "codereader_avg": 67.0,
-      "codereader_wavg": 68.86764705882352
-    },
-    {
-      "filename": "TestClass22251.java",
-      "codereader_avg": 60.333333333333336,
-      "codereader_wavg": 63.029411764705884
-    },
-    {
-      "filename": "TestClass22308.java",
-      "codereader_avg": 71.66666666666667,
-      "codereader_wavg": 74.5735294117647
-    },
-    {
-      "filename": "TestClass23035.java",
-      "codereader_avg": 77.66666666666667,
-      "codereader_wavg": 78.29411764705883
-    },
-    {
-      "filename": "TestClass25299.java",
-      "codereader_avg": 76.66666666666667,
-      "codereader_wavg": 78.3235294117647
-    },
-    {
-      "filename": "TestClass25330.java",
-      "codereader_avg": 72.66666666666667,
-      "codereader_wavg": 73.55882352941177
-    },
-    {
-      "filename": "TestClass25669.java",
-      "codereader_avg": 61.333333333333336,
-      "codereader_wavg": 62.26470588235294
-    },
-    {
-      "filename": "TestClass25954.java",
-      "codereader_avg": 61.0,
-      "codereader_wavg": 65.79411764705883
-    },
-    {
-      "filename": "TestClass26086.java",
-      "codereader_avg": 64.66666666666667,
-      "codereader_wavg": 69.83823529411765
-    },
-    {
-      "filename": "TestClass27706.java",
-      "codereader_avg": 81.0,
-      "codereader_wavg": 80.36764705882354
-    },
-    {
-      "filename": "TestClass27770.java",
-      "codereader_avg": 63.0,
-      "codereader_wavg": 64.5
-    },
-    {
-      "filename": "TestClass28202.java",
-      "codereader_avg": 55.0,
-      "codereader_wavg": 58.44117647058823
-    },
-    {
-      "filename": "TestClass28322.java",
-      "codereader_avg": 50.0,
-      "codereader_wavg": 53.66176470588235
-    },
-    {
-      "filename": "TestClass28581.java",
-      "codereader_avg": 56.0,
-      "codereader_wavg": 55.64705882352941
-    },
-    {
-      "filename": "TestClass28751.java",
-      "codereader_avg": 64.33333333333333,
-      "codereader_wavg": 68.51470588235294
-    },
-    {
-      "filename": "TestClass28891.java",
-      "codereader_avg": 78.33333333333333,
-      "codereader_wavg": 79.29411764705883
-    },
-    {
-      "filename": "TestClass29390.java",
-      "codereader_avg": 57.666666666666664,
-      "codereader_wavg": 60.64705882352941
-    },
-    {
-      "filename": "TestClass30128.java",
-      "codereader_avg": 78.66666666666667,
-      "codereader_wavg": 81.0
-    },
-    {
-      "filename": "TestClass30375.java",
-      "codereader_avg": 68.33333333333333,
-      "codereader_wavg": 71.67647058823529
-    },
-    {
-      "filename": "TestClass30831.java",
-      "codereader_avg": 50.0,
-      "codereader_wavg": 48.0
-    },
-    {
-      "filename": "TestClass31682.java",
-      "codereader_avg": 66.66666666666667,
-      "codereader_wavg": 69.27941176470588
-    },
-    {
-      "filename": "TestClass32425.java",
-      "codereader_avg": 74.66666666666667,
-      "codereader_wavg": 75.89705882352942
-    },
-    {
-      "filename": "TestClass32696.java",
-      "codereader_avg": 78.0,
-      "codereader_wavg": 79.66176470588236
-    },
-    {
-      "filename": "TestClass32733.java",
-      "codereader_avg": 67.33333333333333,
-      "codereader_wavg": 72.22058823529412
-    },
-    {
-      "filename": "TestClass33509.java",
-      "codereader_avg": 63.333333333333336,
-      "codereader_wavg": 69.41176470588235
-    },
-    {
-      "filename": "TestClass33605.java",
-      "codereader_avg": 56.0,
-      "codereader_wavg": 55.294117647058826
-    },
-    {
-      "filename": "TestClass34331.java",
-      "codereader_avg": 59.0,
-      "codereader_wavg": 61.69117647058824
-    },
-    {
-      "filename": "TestClass34775.java",
-      "codereader_avg": 69.66666666666667,
-      "codereader_wavg": 73.32352941176471
-    },
-    {
-      "filename": "TestClass35914.java",
-      "codereader_avg": 52.5,
-      "codereader_wavg": 54.375
-    },
-    {
-      "filename": "TestClass36051.java",
-      "codereader_avg": 53.0,
-      "codereader_wavg": 53.11764705882353
-    },
-    {
-      "filename": "TestClass36208.java",
-      "codereader_avg": 68.33333333333333,
-      "codereader_wavg": 72.94117647058823
-    },
-    {
-      "filename": "TestClass37706.java",
-      "codereader_avg": 50.0,
-      "codereader_wavg": 50.88235294117647
-    },
-    {
-      "filename": "TestClass38522.java",
-      "codereader_avg": 65.66666666666667,
-      "codereader_wavg": 70.73529411764706
-    },
-    {
-      "filename": "TestClass38736.java",
-      "codereader_avg": 62.666666666666664,
-      "codereader_wavg": 63.955882352941174
-    },
-    {
-      "filename": "TestClass39292.java",
       "codereader_avg": 61.666666666666664,
-      "codereader_wavg": 62.85294117647059
-    },
-    {
-      "filename": "TestClass40865.java",
-      "codereader_avg": 64.0,
-      "codereader_wavg": 65.8235294117647
-    },
-    {
-      "filename": "TestClass42289.java",
-      "codereader_avg": 77.33333333333333,
-      "codereader_wavg": 78.83823529411765
-    },
-    {
-      "filename": "TestClass4250.java",
-      "codereader_avg": 58.666666666666664,
-      "codereader_wavg": 60.79411764705882
-    },
-    {
-      "filename": "TestClass44813.java",
-      "codereader_avg": 55.333333333333336,
-      "codereader_wavg": 59.54411764705882
-    },
-    {
-      "filename": "TestClass46099.java",
-      "codereader_avg": 63.333333333333336,
-      "codereader_wavg": 65.29411764705883
-    },
-    {
-      "filename": "TestClass47507.java",
-      "codereader_avg": 65.0,
-      "codereader_wavg": 68.30882352941177
-    },
-    {
-      "filename": "TestClass47511.java",
-      "codereader_avg": 68.0,
-      "codereader_wavg": 69.54411764705883
-    },
-    {
-      "filename": "TestClass48477.java",
-      "codereader_avg": 61.666666666666664,
-      "codereader_wavg": 65.54411764705883
-    },
-    {
-      "filename": "TestClass51012.java",
-      "codereader_avg": 55.0,
-      "codereader_wavg": 59.26470588235294
-    },
-    {
-      "filename": "TestClass51167.java",
-      "codereader_avg": 51.0,
-      "codereader_wavg": 54.54411764705882
-    },
-    {
-      "filename": "TestClass51404.java",
-      "codereader_avg": 57.333333333333336,
-      "codereader_wavg": 60.235294117647065
-    },
-    {
-      "filename": "TestClass5270.java",
-      "codereader_avg": 70.0,
-      "codereader_wavg": 73.22058823529412
-    },
-    {
-      "filename": "TestClass52826.java",
-      "codereader_avg": 65.66666666666667,
-      "codereader_wavg": 66.70588235294119
-    },
-    {
-      "filename": "TestClass53059.java",
-      "codereader_avg": 73.33333333333333,
-      "codereader_wavg": 74.98529411764706
-    },
-    {
-      "filename": "TestClass53251.java",
-      "codereader_avg": 62.666666666666664,
-      "codereader_wavg": 64.26470588235294
-    },
-    {
-      "filename": "TestClass5353.java",
-      "codereader_avg": 62.333333333333336,
-      "codereader_wavg": 67.75
-    },
-    {
-      "filename": "TestClass53992.java",
-      "codereader_avg": 54.0,
-      "codereader_wavg": 54.352941176470594
-    },
-    {
-      "filename": "TestClass54056.java",
-      "codereader_avg": 64.66666666666667,
-      "codereader_wavg": 64.95588235294117
-    },
-    {
-      "filename": "TestClass57157.java",
-      "codereader_avg": 59.0,
-      "codereader_wavg": 62.4264705882353
-    },
-    {
-      "filename": "TestClass57197.java",
-      "codereader_avg": 67.0,
-      "codereader_wavg": 66.57352941176471
-    },
-    {
-      "filename": "TestClass5792.java",
-      "codereader_avg": 55.333333333333336,
-      "codereader_wavg": 58.85294117647059
-    },
-    {
-      "filename": "TestClass58360.java",
-      "codereader_avg": 62.333333333333336,
-      "codereader_wavg": 65.01470588235294
-    },
-    {
-      "filename": "TestClass58375.java",
-      "codereader_avg": 67.66666666666667,
-      "codereader_wavg": 70.33823529411764
-    },
-    {
-      "filename": "TestClass58530.java",
-      "codereader_avg": 75.0,
-      "codereader_wavg": 77.86764705882354
-    },
-    {
-      "filename": "TestClass60128.java",
-      "codereader_avg": 61.666666666666664,
-      "codereader_wavg": 65.79411764705883
-    },
-    {
-      "filename": "TestClass60166.java",
-      "codereader_avg": 55.0,
-      "codereader_wavg": 58.75
-    },
-    {
-      "filename": "TestClass60352.java",
-      "codereader_avg": 68.0,
-      "codereader_wavg": 71.79411764705883
-    },
-    {
-      "filename": "TestClass6206.java",
-      "codereader_avg": 71.66666666666667,
-      "codereader_wavg": 76.61764705882354
-    },
-    {
-      "filename": "TestClass62322.java",
-      "codereader_avg": 63.0,
       "codereader_wavg": 63.63235294117647
     },
     {
-      "filename": "TestClass62847.java",
-      "codereader_avg": 70.66666666666667,
-      "codereader_wavg": 72.95588235294119
+      "filename": "TestClass16949.java",
+      "codereader_avg": 69.66666666666667,
+      "codereader_wavg": 70.25
     },
     {
-      "filename": "TestClass62976.java",
-      "codereader_avg": 66.33333333333333,
-      "codereader_wavg": 70.98529411764706
-    },
-    {
-      "filename": "TestClass63111.java",
+      "filename": "TestClass18143.java",
       "codereader_avg": 69.0,
-      "codereader_wavg": 70.38235294117648
+      "codereader_wavg": 71.11764705882354
     },
     {
-      "filename": "TestClass63221.java",
-      "codereader_avg": 63.666666666666664,
-      "codereader_wavg": 64.45588235294117
+      "filename": "TestClass19667.java",
+      "codereader_avg": 57.666666666666664,
+      "codereader_wavg": 62.55882352941176
     },
     {
-      "filename": "TestClass63895.java",
-      "codereader_avg": 71.66666666666667,
-      "codereader_wavg": 72.11764705882352
+      "filename": "TestClass20354.java",
+      "codereader_avg": 56.0,
+      "codereader_wavg": 58.36764705882353
     },
     {
-      "filename": "TestClass64027.java",
-      "codereader_avg": 58.333333333333336,
-      "codereader_wavg": 61.470588235294116
+      "filename": "TestClass21318.java",
+      "codereader_avg": 63.5,
+      "codereader_wavg": 64.375
     },
     {
-      "filename": "TestClass64049.java",
-      "codereader_avg": 70.66666666666667,
-      "codereader_wavg": 71.48529411764706
+      "filename": "TestClass218.java",
+      "codereader_avg": 61.333333333333336,
+      "codereader_wavg": 65.47058823529412
     },
     {
-      "filename": "TestClass64221.java",
-      "codereader_avg": 32.5,
-      "codereader_wavg": 29.375
-    },
-    {
-      "filename": "TestClass65646.java",
-      "codereader_avg": 69.33333333333333,
-      "codereader_wavg": 73.22058823529412
-    },
-    {
-      "filename": "TestClass65705.java",
-      "codereader_avg": 61.0,
-      "codereader_wavg": 60.64705882352941
-    },
-    {
-      "filename": "TestClass66179.java",
-      "codereader_avg": 68.33333333333333,
-      "codereader_wavg": 72.72058823529412
-    },
-    {
-      "filename": "TestClass66854.java",
-      "codereader_avg": 64.66666666666667,
-      "codereader_wavg": 68.19117647058823
-    },
-    {
-      "filename": "TestClass66882.java",
-      "codereader_avg": 68.33333333333333,
-      "codereader_wavg": 72.20588235294117
-    },
-    {
-      "filename": "TestClass66923.java",
-      "codereader_avg": 61.0,
-      "codereader_wavg": 62.85294117647059
-    },
-    {
-      "filename": "TestClass67276.java",
-      "codereader_avg": 55.333333333333336,
-      "codereader_wavg": 58.161764705882355
-    },
-    {
-      "filename": "TestClass67391.java",
-      "codereader_avg": 53.333333333333336,
-      "codereader_wavg": 56.25
-    },
-    {
-      "filename": "TestClass683.java",
-      "codereader_avg": 49.333333333333336,
-      "codereader_wavg": 53.44117647058823
-    },
-    {
-      "filename": "TestClass69380.java",
-      "codereader_avg": 54.333333333333336,
-      "codereader_wavg": 57.41176470588235
-    },
-    {
-      "filename": "TestClass71157.java",
-      "codereader_avg": 62.666666666666664,
-      "codereader_wavg": 68.29411764705883
-    },
-    {
-      "filename": "TestClass71832.java",
-      "codereader_avg": 51.333333333333336,
-      "codereader_wavg": 54.70588235294118
-    },
-    {
-      "filename": "TestClass73162.java",
-      "codereader_avg": 57.0,
-      "codereader_wavg": 60.04411764705882
-    },
-    {
-      "filename": "TestClass73470.java",
-      "codereader_avg": 70.0,
-      "codereader_wavg": 71.25
-    },
-    {
-      "filename": "TestClass75545.java",
-      "codereader_avg": 71.0,
-      "codereader_wavg": 71.76470588235294
-    },
-    {
-      "filename": "TestClass77787.java",
-      "codereader_avg": 61.666666666666664,
-      "codereader_wavg": 67.05882352941177
-    },
-    {
-      "filename": "TestClass7920.java",
-      "codereader_avg": 50.333333333333336,
-      "codereader_wavg": 53.55882352941176
-    },
-    {
-      "filename": "TestClass824.java",
+      "filename": "TestClass21857.java",
       "codereader_avg": 73.33333333333333,
-      "codereader_wavg": 76.57352941176471
+      "codereader_wavg": 75.5
     },
     {
-      "filename": "TestClass8579.java",
+      "filename": "TestClass22056.java",
+      "codereader_avg": 71.33333333333333,
+      "codereader_wavg": 73.91176470588235
+    },
+    {
+      "filename": "TestClass22068.java",
+      "codereader_avg": 53.333333333333336,
+      "codereader_wavg": 58.029411764705884
+    },
+    {
+      "filename": "TestClass22185.java",
+      "codereader_avg": 75.66666666666667,
+      "codereader_wavg": 76.77941176470588
+    },
+    {
+      "filename": "TestClass22251.java",
+      "codereader_avg": 54.333333333333336,
+      "codereader_wavg": 57.88235294117648
+    },
+    {
+      "filename": "TestClass22308.java",
+      "codereader_avg": 79.33333333333333,
+      "codereader_wavg": 81.86764705882354
+    },
+    {
+      "filename": "TestClass23035.java",
+      "codereader_avg": 75.66666666666667,
+      "codereader_wavg": 76.26470588235294
+    },
+    {
+      "filename": "TestClass25299.java",
+      "codereader_avg": 69.66666666666667,
+      "codereader_wavg": 75.1029411764706
+    },
+    {
+      "filename": "TestClass25330.java",
+      "codereader_avg": 61.5,
+      "codereader_wavg": 62.375
+    },
+    {
+      "filename": "TestClass25669.java",
+      "codereader_avg": 60.666666666666664,
+      "codereader_wavg": 62.735294117647065
+    },
+    {
+      "filename": "TestClass25954.java",
+      "codereader_avg": 65.0,
+      "codereader_wavg": 69.77941176470588
+    },
+    {
+      "filename": "TestClass26086.java",
+      "codereader_avg": 68.33333333333333,
+      "codereader_wavg": 72.05882352941177
+    },
+    {
+      "filename": "TestClass27706.java",
+      "codereader_avg": 71.0,
+      "codereader_wavg": 71.45588235294117
+    },
+    {
+      "filename": "TestClass27770.java",
+      "codereader_avg": 67.66666666666667,
+      "codereader_wavg": 67.26470588235294
+    },
+    {
+      "filename": "TestClass28202.java",
+      "codereader_avg": 70.0,
+      "codereader_wavg": 72.57352941176471
+    },
+    {
+      "filename": "TestClass28322.java",
+      "codereader_avg": 56.333333333333336,
+      "codereader_wavg": 60.08823529411765
+    },
+    {
+      "filename": "TestClass28581.java",
       "codereader_avg": 74.0,
       "codereader_wavg": 76.11764705882352
     },
     {
+      "filename": "TestClass28751.java",
+      "codereader_avg": 58.666666666666664,
+      "codereader_wavg": 59.91176470588235
+    },
+    {
+      "filename": "TestClass28891.java",
+      "codereader_avg": 74.0,
+      "codereader_wavg": 75.16176470588236
+    },
+    {
+      "filename": "TestClass29390.java",
+      "codereader_avg": 65.66666666666667,
+      "codereader_wavg": 66.57352941176471
+    },
+    {
+      "filename": "TestClass30128.java",
+      "codereader_avg": 71.0,
+      "codereader_wavg": 73.1470588235294
+    },
+    {
+      "filename": "TestClass30375.java",
+      "codereader_avg": 67.5,
+      "codereader_wavg": 66.875
+    },
+    {
+      "filename": "TestClass30831.java",
+      "codereader_avg": 64.0,
+      "codereader_wavg": 67.80882352941177
+    },
+    {
+      "filename": "TestClass31682.java",
+      "codereader_avg": 56.0,
+      "codereader_wavg": 58.588235294117645
+    },
+    {
+      "filename": "TestClass32425.java",
+      "codereader_avg": 61.666666666666664,
+      "codereader_wavg": 64.32352941176471
+    },
+    {
+      "filename": "TestClass32696.java",
+      "codereader_avg": 51.666666666666664,
+      "codereader_wavg": 53.80882352941176
+    },
+    {
+      "filename": "TestClass32733.java",
+      "codereader_avg": 68.33333333333333,
+      "codereader_wavg": 69.91176470588235
+    },
+    {
+      "filename": "TestClass33509.java",
+      "codereader_avg": 61.0,
+      "codereader_wavg": 64.11764705882354
+    },
+    {
+      "filename": "TestClass33605.java",
+      "codereader_avg": 60.0,
+      "codereader_wavg": 62.95588235294118
+    },
+    {
+      "filename": "TestClass34331.java",
+      "codereader_avg": 66.33333333333333,
+      "codereader_wavg": 70.47058823529412
+    },
+    {
+      "filename": "TestClass34775.java",
+      "codereader_avg": 54.666666666666664,
+      "codereader_wavg": 58.029411764705884
+    },
+    {
+      "filename": "TestClass35914.java",
+      "codereader_avg": 47.666666666666664,
+      "codereader_wavg": 49.39705882352941
+    },
+    {
+      "filename": "TestClass36051.java",
+      "codereader_avg": 49.0,
+      "codereader_wavg": 52.00000000000001
+    },
+    {
+      "filename": "TestClass36208.java",
+      "codereader_avg": 63.333333333333336,
+      "codereader_wavg": 67.42647058823529
+    },
+    {
+      "filename": "TestClass37706.java",
+      "codereader_avg": 61.666666666666664,
+      "codereader_wavg": 62.94117647058824
+    },
+    {
+      "filename": "TestClass38522.java",
+      "codereader_avg": 60.0,
+      "codereader_wavg": 61.55882352941177
+    },
+    {
+      "filename": "TestClass38736.java",
+      "codereader_avg": 60.0,
+      "codereader_wavg": 62.57352941176471
+    },
+    {
+      "filename": "TestClass39292.java",
+      "codereader_avg": 66.0,
+      "codereader_wavg": 67.41176470588235
+    },
+    {
+      "filename": "TestClass40865.java",
+      "codereader_avg": 74.0,
+      "codereader_wavg": 78.27941176470588
+    },
+    {
+      "filename": "TestClass42289.java",
+      "codereader_avg": 74.33333333333333,
+      "codereader_wavg": 76.08823529411765
+    },
+    {
+      "filename": "TestClass4250.java",
+      "codereader_avg": 62.0,
+      "codereader_wavg": 63.35294117647058
+    },
+    {
+      "filename": "TestClass44813.java",
+      "codereader_avg": 63.333333333333336,
+      "codereader_wavg": 64.26470588235294
+    },
+    {
+      "filename": "TestClass46099.java",
+      "codereader_avg": 74.66666666666667,
+      "codereader_wavg": 77.58823529411764
+    },
+    {
+      "filename": "TestClass47507.java",
+      "codereader_avg": 69.33333333333333,
+      "codereader_wavg": 70.92647058823529
+    },
+    {
+      "filename": "TestClass47511.java",
+      "codereader_avg": 65.66666666666667,
+      "codereader_wavg": 68.73529411764706
+    },
+    {
+      "filename": "TestClass48477.java",
+      "codereader_avg": 66.0,
+      "codereader_wavg": 66.8970588235294
+    },
+    {
+      "filename": "TestClass51012.java",
+      "codereader_avg": 57.333333333333336,
+      "codereader_wavg": 61.32352941176471
+    },
+    {
+      "filename": "TestClass51167.java",
+      "codereader_avg": 61.0,
+      "codereader_wavg": 60.94117647058823
+    },
+    {
+      "filename": "TestClass51404.java",
+      "codereader_avg": 64.0,
+      "codereader_wavg": 68.8529411764706
+    },
+    {
+      "filename": "TestClass5270.java",
+      "codereader_avg": 62.333333333333336,
+      "codereader_wavg": 63.544117647058826
+    },
+    {
+      "filename": "TestClass52826.java",
+      "codereader_avg": 57.666666666666664,
+      "codereader_wavg": 60.64705882352941
+    },
+    {
+      "filename": "TestClass53059.java",
+      "codereader_avg": 61.333333333333336,
+      "codereader_wavg": 63.79411764705882
+    },
+    {
+      "filename": "TestClass53251.java",
+      "codereader_avg": 59.0,
+      "codereader_wavg": 61.55882352941177
+    },
+    {
+      "filename": "TestClass5353.java",
+      "codereader_avg": 71.0,
+      "codereader_wavg": 73.58823529411765
+    },
+    {
+      "filename": "TestClass53992.java",
+      "codereader_avg": 67.33333333333333,
+      "codereader_wavg": 67.80882352941177
+    },
+    {
+      "filename": "TestClass54056.java",
+      "codereader_avg": 67.0,
+      "codereader_wavg": 70.6470588235294
+    },
+    {
+      "filename": "TestClass57157.java",
+      "codereader_avg": 61.333333333333336,
+      "codereader_wavg": 59.838235294117645
+    },
+    {
+      "filename": "TestClass57197.java",
+      "codereader_avg": 67.0,
+      "codereader_wavg": 70.29411764705883
+    },
+    {
+      "filename": "TestClass5792.java",
+      "codereader_avg": 47.333333333333336,
+      "codereader_wavg": 49.94117647058824
+    },
+    {
+      "filename": "TestClass58360.java",
+      "codereader_avg": 46.0,
+      "codereader_wavg": 44.5
+    },
+    {
+      "filename": "TestClass58375.java",
+      "codereader_avg": 80.66666666666667,
+      "codereader_wavg": 81.99999999999999
+    },
+    {
+      "filename": "TestClass58530.java",
+      "codereader_avg": 68.33333333333333,
+      "codereader_wavg": 70.51470588235294
+    },
+    {
+      "filename": "TestClass60128.java",
+      "codereader_avg": 61.0,
+      "codereader_wavg": 64.32352941176471
+    },
+    {
+      "filename": "TestClass60166.java",
+      "codereader_avg": 64.0,
+      "codereader_wavg": 65.73529411764706
+    },
+    {
+      "filename": "TestClass60352.java",
+      "codereader_avg": 58.333333333333336,
+      "codereader_wavg": 63.161764705882355
+    },
+    {
+      "filename": "TestClass6206.java",
+      "codereader_avg": 64.33333333333333,
+      "codereader_wavg": 69.17647058823529
+    },
+    {
+      "filename": "TestClass62322.java",
+      "codereader_avg": 58.333333333333336,
+      "codereader_wavg": 59.352941176470594
+    },
+    {
+      "filename": "TestClass62847.java",
+      "codereader_avg": 72.5,
+      "codereader_wavg": 71.875
+    },
+    {
+      "filename": "TestClass62976.java",
+      "codereader_avg": 53.5,
+      "codereader_wavg": 55.625
+    },
+    {
+      "filename": "TestClass63111.java",
+      "codereader_avg": 61.0,
+      "codereader_wavg": 62.5
+    },
+    {
+      "filename": "TestClass63221.java",
+      "codereader_avg": 66.66666666666667,
+      "codereader_wavg": 69.92647058823529
+    },
+    {
+      "filename": "TestClass63895.java",
+      "codereader_avg": 68.33333333333333,
+      "codereader_wavg": 69.55882352941177
+    },
+    {
+      "filename": "TestClass64027.java",
+      "codereader_avg": 53.333333333333336,
+      "codereader_wavg": 57.20588235294118
+    },
+    {
+      "filename": "TestClass64049.java",
+      "codereader_avg": 65.33333333333333,
+      "codereader_wavg": 65.77941176470588
+    },
+    {
+      "filename": "TestClass64221.java",
+      "codereader_avg": 63.0,
+      "codereader_wavg": 65.05882352941177
+    },
+    {
+      "filename": "TestClass65646.java",
+      "codereader_avg": 69.33333333333333,
+      "codereader_wavg": 71.30882352941177
+    },
+    {
+      "filename": "TestClass65705.java",
+      "codereader_avg": 71.33333333333333,
+      "codereader_wavg": 71.57352941176471
+    },
+    {
+      "filename": "TestClass66179.java",
+      "codereader_avg": 70.33333333333333,
+      "codereader_wavg": 73.11764705882354
+    },
+    {
+      "filename": "TestClass66854.java",
+      "codereader_avg": 71.33333333333333,
+      "codereader_wavg": 72.95588235294119
+    },
+    {
+      "filename": "TestClass66882.java",
+      "codereader_avg": 61.666666666666664,
+      "codereader_wavg": 67.01470588235294
+    },
+    {
+      "filename": "TestClass66923.java",
+      "codereader_avg": 54.333333333333336,
+      "codereader_wavg": 58.44117647058823
+    },
+    {
+      "filename": "TestClass67276.java",
+      "codereader_avg": 68.0,
+      "codereader_wavg": 71.3529411764706
+    },
+    {
+      "filename": "TestClass67391.java",
+      "codereader_avg": 70.66666666666667,
+      "codereader_wavg": 71.26470588235294
+    },
+    {
+      "filename": "TestClass683.java",
+      "codereader_avg": 44.333333333333336,
+      "codereader_wavg": 48.955882352941174
+    },
+    {
+      "filename": "TestClass69380.java",
+      "codereader_avg": 61.666666666666664,
+      "codereader_wavg": 69.17647058823529
+    },
+    {
+      "filename": "TestClass71157.java",
+      "codereader_avg": 68.66666666666667,
+      "codereader_wavg": 69.23529411764706
+    },
+    {
+      "filename": "TestClass71832.java",
+      "codereader_avg": 47.0,
+      "codereader_wavg": 48.5735294117647
+    },
+    {
+      "filename": "TestClass73162.java",
+      "codereader_avg": 57.0,
+      "codereader_wavg": 57.75
+    },
+    {
+      "filename": "TestClass73470.java",
+      "codereader_avg": 78.0,
+      "codereader_wavg": 80.48529411764706
+    },
+    {
+      "filename": "TestClass75545.java",
+      "codereader_avg": 79.33333333333333,
+      "codereader_wavg": 81.55882352941175
+    },
+    {
+      "filename": "TestClass77787.java",
+      "codereader_avg": 67.33333333333333,
+      "codereader_wavg": 70.97058823529412
+    },
+    {
+      "filename": "TestClass7920.java",
+      "codereader_avg": 25.0,
+      "codereader_wavg": 21.25
+    },
+    {
+      "filename": "TestClass824.java",
+      "codereader_avg": 67.5,
+      "codereader_wavg": 66.875
+    },
+    {
+      "filename": "TestClass8579.java",
+      "codereader_avg": 64.33333333333333,
+      "codereader_wavg": 66.1029411764706
+    },
+    {
       "filename": "TestClass9034.java",
-      "codereader_avg": 55.0,
-      "codereader_wavg": 56.25
+      "codereader_avg": 70.66666666666667,
+      "codereader_wavg": 74.55882352941177
     },
     {
       "filename": "TestClass9406.java",
-      "codereader_avg": 65.0,
-      "codereader_wavg": 67.0
+      "codereader_avg": 73.33333333333333,
+      "codereader_wavg": 74.04411764705883
     },
     {
       "filename": "TestClass9438.java",
-      "codereader_avg": 65.66666666666667,
-      "codereader_wavg": 65.58823529411765
+      "codereader_avg": 58.666666666666664,
+      "codereader_wavg": 60.98529411764706
     }
   ]
 }
