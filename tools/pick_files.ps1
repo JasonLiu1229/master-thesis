@@ -24,7 +24,7 @@ Get-Content $IndicesFile | ForEach-Object {
     # Skip blank lines or comments
     if ($idx -eq "" -or $idx.StartsWith("#")) { return }
 
-    $filename = "TestClass${idx}_java.jsonl"
+    $filename = "TestClass${idx}.java.jsonl"
     $src = Join-Path $SourceDir $filename
 
     if (Test-Path $src) {

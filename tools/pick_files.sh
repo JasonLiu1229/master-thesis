@@ -21,7 +21,7 @@ while IFS= read -r idx || [[ -n "$idx" ]]; do
   # Skip blank lines or comments
   [[ -z "$idx" || "$idx" == \#* ]] && continue
 
-  filename="TestClass${idx}_java.jsonl"
+  filename="TestClass${idx}.java.jsonl"
   src="$SOURCE_DIR/$filename"
 
   if [[ -f "$src" ]]; then
