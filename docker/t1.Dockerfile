@@ -82,7 +82,7 @@ COPY ../rep_package_previous/code/Techniques/T1 /app/code/Techniques/T1
 COPY ../rep_package_previous/code/Techniques/__init__.py /app/code/Techniques
 COPY ../rep_package_previous/code/Utils /app/code/Utils
 COPY ../rep_package_previous/code/run_t1.py /app/code/run_t1.py
-COPY ../rep_package_previous/code/indices.txt /app/code/
+COPY ../out/indices.txt /app/code/
 
 COPY ../code/benchmarking/t1_executioner.py /app/code/t1_executioner.py
 COPY ../code/benchmarking/t1_parser.py /app/code/t1_parser.py 

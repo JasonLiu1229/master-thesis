@@ -1,4 +1,5 @@
 temp/
-benchmark/renamed*
+benchmark/*/renamed*
+benchmark/renamed/*
 benchmark/temp*
 indices.txt

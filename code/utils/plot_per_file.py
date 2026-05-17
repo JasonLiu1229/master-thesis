@@ -93,8 +93,8 @@ make_per_file_plot(
     color=BLUE,
     xlim=(0, 1.05),
     extra_lines=[
-        (0.018411967779056387, ORANGE, "GGNN baseline (0.018)"),
-        (0.3064888583638583, GREEN, "RefBERT baseline (0.306)"),
+        (0.019, ORANGE, "GGNN baseline (0.019)"),
+        (0.308, GREEN, "RefBERT baseline (0.308)"),
     ],
 )
 

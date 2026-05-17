@@ -1,3 +1,5 @@
+# Generated using Claude opus-4.6
+
 import math
 import logging
 from dataclasses import dataclass
