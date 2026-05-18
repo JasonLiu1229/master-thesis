@@ -8,3 +8,11 @@
 *.zip binary
 
 *.csv text eol=lf
+
+*.pdf binary linguist-generated
+
+*.yml text eol=lf
+*.yaml text eol=lf
+
+*.py text diff=python eol=lf 
+*.java text diff=java eol=lf
