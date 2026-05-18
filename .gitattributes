@@ -16,3 +16,6 @@
 
 *.py text diff=python eol=lf 
 *.java text diff=java eol=lf
+
+*.json text eol=lf
+*.jsonl text eol=lf
