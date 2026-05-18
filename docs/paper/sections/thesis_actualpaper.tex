@@ -1,0 +1,1146 @@
+% thesis_actualpaper.tex
+% This is the camera-ready paper in IEEE double-column format.
+% Compile this SEPARATELY to produce thesis_actualpaper.pdf,
+% then the main thesis file will embed it via \includepdf.
+%
+% Compile with: pdflatex thesis_actualpaper.tex
+%
+\documentclass[conference]{IEEEtran}
+
+% ── Packages ─────────────────────────────────────────────────────────────────
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{cite}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{listings}
+
+% Define YAML language for listings
+\lstdefinelanguage{yaml}{
+  keywords={true,false,null},
+  keywordstyle=\color{blue},
+  basicstyle=\ttfamily\footnotesize,
+  comment=[l]{\#},
+  commentstyle=\color{gray},
+  stringstyle=\color{orange},
+  morestring=[b]',
+  morestring=[b]"
+}
+
+% Define JSON language for listings
+\lstdefinelanguage{json}{
+  keywords={true,false,null},
+  keywordstyle=\color{blue},
+  basicstyle=\ttfamily\footnotesize,
+  string=[s]{"}{"},
+  stringstyle=\color{orange},
+  comment=[l]{//},
+  commentstyle=\color{gray}
+}
+
+\usepackage[hypertexnames=false]{hyperref}
+\usepackage{microtype}
+\usepackage{url}
+\usepackage{float}
+
+% ── Listings style ────────────────────────────────────────────────────────────
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  captionpos=b,
+}
+
+% ── Custom: prompt / listing float ───────────────────────────────────────────
+\newfloat{prompt}{tbp}{lop}[section]
+\floatname{prompt}{Prompt}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\begin{document}
+
+\title{Enhancing Readability of Automatically Generated Unit Tests:\\
+Leveraging LLMs for Meaningful Identifier Naming}
+
+\author{%
+  \IEEEauthorblockN{Jason Liu}
+  \IEEEauthorblockA{%
+    Master Student Software Engineering\\
+    University of Antwerp\\
+    Antwerp, Belgium\\
+    jason.liu@student.uantwerpen.be
+  }
+}
+
+\maketitle
+
+% ── Abstract ─────────────────────────────────────────────────────────────────
+\begin{abstract}
+% TODO: fill in your abstract following the 4-line rule:
+% WHO has a problem / WHAT is the problem / Startling sentence / IMPLICATION
+\end{abstract}
+
+\begin{IEEEkeywords}
+Large Language Models, Testing, Readability, Identifiers, Code refactor,
+Unit tests, Automated test generation, Java, Variables, Method names
+\end{IEEEkeywords}
+
+% =============================================================================
+\section{Introduction}
+% =============================================================================
+
+Unit tests play a central role in modern software development.
+They verify that individual units of code behave as intended, serve as a safety
+net against regressions, and act as executable documentation for engineers
+studying an unfamiliar system~\cite{daka2017generating,demeyer2009oop}.
+Beyond correctness, tests must also be \emph{readable}: a test that cannot be
+understood quickly cannot be trusted, debugged, or
+extended~\cite{roy2020deeptcenhancer}.
+Readable tests reduce the cognitive load of fault localisation and help
+developers understand the intended behavior of the system under test without
+consulting production code~\cite{biagiola2025improving}.
+
+Writing such tests by hand is labor-intensive, which has driven wide adoption
+of automated test generation tools such as
+EvoSuite~\cite{fraser2011evosuite} and
+Randoop~\cite{randoop2024tool,pacheco2007feedback}.
+EvoSuite applies genetic algorithms to maximise a coverage criterion such as
+branch coverage~\cite{mcminn2011search}; Randoop uses feedback-directed random
+testing to generate and filter sequences of method
+calls~\cite{pacheco2007feedback}.
+Both tools operate purely on structural and execution properties and have no
+awareness of semantic meaning, so the tests they produce are populated with
+generic identifiers such as \texttt{var0}, \texttt{int0}, and
+\texttt{test1}~\cite{fraser2013evosuite,wang2025automated}.
+
+This readability deficit has measurable consequences.
+Butler et al.\ showed that poor identifier naming degrades code comprehension
+and maintainability~\cite{butler2010exploring}, and Lin et al.\ found that
+identifier quality in test code is substantially lower than in production code,
+with only 61.6\% of test identifiers rated acceptable compared with 92.5\% in
+production code~\cite{lin2019quality}.
+Winkler et al.'s systematic mapping study confirmed that uninformative
+identifiers are one of the primary factors impeding comprehension of
+automatically generated tests, and that no single metric adequately captures
+all dimensions of test readability~\cite{winkler2024investigating}.
+
+Prior work has approached the problem from several angles.
+DeepTC-Enhancer~\cite{roy2020deeptcenhancer} combined template-based and deep
+learning methods to improve test readability, though 48\% of suggested variable
+names only \emph{somewhat} conveyed the intended meaning, and the evaluation
+relied on a small human study that cannot scale to large test suites.
+De Keersmaeker~\cite{dekeersmaeker2024enhancing} evaluated GGNN and RefBERT
+adapted for generated tests and found that neither achieved consistent, concise
+naming across full test files.
+Most recently, Biagiola et al.~\cite{biagiola2025improving} used LLMs to
+rename identifiers in EvoSuite-generated tests and reported readability on par
+with developer-written tests in a study with ten professional developers, a
+promising result, but one that relies on closed proprietary models and does not
+evaluate fine-tuned open-source alternatives.
+
+A complementary challenge is \emph{evaluation}: measuring whether a renaming
+actually improves readability.
+Reference-based metrics such as BLEU~\cite{papineni2002bleu} are unsuitable
+because multiple valid names can exist for the same variable, so a correct
+rename may score near zero against a single
+reference~\cite{evtikhiev2023bleu,mastropaolo2023renaming}.
+The LLM-as-a-Judge paradigm addresses this by using language models as
+evaluators that assess semantic quality against explicit rubrics, achieving over
+80\% agreement with human preferences on code-related
+tasks~\cite{zheng2023judging,zhuo2024ice}.
+Single-judge evaluation is, however, susceptible to model-specific biases such
+as verbosity preference and position sensitivity~\cite{zheng2023judging};
+aggregating scores across an ensemble of diverse judge models has been shown to
+reduce this bias and improve alignment with human
+judgment~\cite{verga2024poll,chan2024chateval}.
+
+These results suggest that LLMs are a promising vehicle for identifier renaming
+and for evaluating renamed output at scale, yet key questions remain open.
+Existing work does not compare fine-tuned open-source models against untuned
+baselines in this setting, does not provide a configurable and reproducible
+readability grading framework, and does not examine whether LLM-based
+readability scores are consistent with quantitative naming metrics such as F1,
+a tension that must be understood before either metric can be trusted as a
+ground truth.
+
+This paper addresses the following research questions:
+
+\begin{itemize}
+  \item \textbf{RQ1:} Does an LLM-based renaming pipeline outperform the
+    non-LLM baselines (GGNN and RefBERT) on identifier naming quality in
+    automatically generated Java tests?
+  \item \textbf{RQ2:} How does the amount of fine-tuning affect naming quality
+    across checkpoints (15\%, 25\%, 50\%, 75\%, 100\%)?
+  \item \textbf{RQ3:} Does token-level improvement (F1) correlate with
+    perceived readability as measured by the LLM readability score?
+\end{itemize}
+
+% =============================================================================
+\section{Background}
+% =============================================================================
+
+\subsection{Automated Test Generation}
+
+EvoSuite~\cite{fraser2011evosuite} evolves a population of test cases using a
+genetic algorithm that maximises a coverage criterion such as branch coverage.
+Randoop~\cite{randoop2024tool,pacheco2007feedback} generates sequences of
+method calls incrementally, using execution feedback to discard failing
+sequences and retain those that extend coverage.
+Both tools operate purely on structural and execution properties, with no
+awareness of semantic meaning, so the identifiers they emit are generic and
+uninformative: local variables receive names such as \texttt{double0} or
+\texttt{calculator0}, and test methods receive names such as \texttt{test0} or
+\texttt{test42}~\cite{fraser2013evosuite,wang2025automated}.
+Examples are shown in Listings~\ref{lst:evosuite} and~\ref{lst:randoop}.
+
+\subsection{Identifier Quality and Test Readability}
+
+A high-quality identifier satisfies three
+criteria~\cite{dekeersmaeker2024enhancing}: \emph{consistency} (no synonyms or
+homonyms across the codebase), \emph{correctness} (the name corresponds to the
+concept it represents), and \emph{conciseness} (the name is no more general
+than the concept warrants).
+Butler et al.\ demonstrated empirically that poor identifier naming degrades a
+developer's ability to understand and maintain
+code~\cite{butler2010exploring}, and Lin et al.\ found that test code
+identifiers are substantially lower quality than production code identifiers,
+with only 61.6\% rated acceptable compared to 92.5\% for production
+code~\cite{lin2019quality}.
+Test method names carry an additional communicative burden: the established
+JUnit convention encodes the scenario and expected outcome directly in the name
+using a pattern such as
+\texttt{methodName\_stateUnderTest\_expectedBehavior}~\cite{daka2017generating}.
+When generated tests use names like \texttt{test42}, neither purpose is served.
+
+Of the three criteria, \emph{consistency} deserves particular attention in the
+context of automatically generated tests.
+A name that is individually readable but inconsistent with the surrounding
+codebase's naming conventions may be harder to work with than a generic name
+that follows a predictable pattern, because developers rely on naming
+regularity to navigate and reason about code
+quickly~\cite{lin2017consistency,butler2010exploring}.
+Winkler et al.'s systematic mapping study confirmed that identifier consistency
+is among the primary factors influencing comprehension of test code, and that
+no single metric adequately captures all dimensions of test
+readability~\cite{winkler2024investigating}.
+
+\subsection{Large Language Models for Code}
+
+LLMs are transformer-based models pre-trained on large corpora of code and
+natural language~\cite{brown2020gpt3}.
+This pre-training gives them an implicit understanding of naming conventions
+and the relationship between code structure and semantic intent, which
+task-specific models had to be explicitly engineered to
+capture~\cite{allamanis2018learning,fan2023llmse}.
+Code-specialised models push this further: DeepSeek-Coder is trained on 2
+trillion tokens of which 87\% is source code~\cite{guo2024deepseekcoder},
+while Qwen2.5-Coder is pre-trained on over 5.5 trillion tokens spanning 92
+programming languages and achieves state-of-the-art performance across more
+than 10 code benchmarks~\cite{hui2024qwen25coder}.
+Both models have been shown to perform rename refactorings successfully,
+demonstrating that they have internalised sufficient naming knowledge from
+their training data~\cite{cordeiro2024refactoring}.
+LLM performance on code tasks is significantly affected by the completeness of
+contextual information available during inference~\cite{wang2024naming}, which
+motivates providing the full function body alongside the identifier list.
+Few-shot prompting improves output reliability~\cite{brown2020gpt3}, and when a
+response is malformed the Reflexion retry strategy feeds the failed response
+back to the model with a concrete error description, substantially increasing
+the probability of a valid response on the next
+attempt~\cite{shinn2023reflexion,ravi2025llmloop}.
+
+\subsection{Fine-Tuning LLMs}
+
+Pre-trained LLMs can be adapted to a specific task by continuing training on a
+small, task-relevant dataset, a process known as fine-tuning~\cite{hosna2022transfer,church2021finetuning}.
+Fine-tuning allows the model to specialize its learned representations for the
+target domain while retaining the broad knowledge acquired during pre-training.
+In the context of identifier renaming for generated tests, fine-tuning on
+human-written test code that has been obfuscated to simulate generated output
+exposes the model to the specific structural patterns and naming conventions of
+the target domain, potentially improving both accuracy and consistency of
+suggestions compared to an untuned baseline.
+The extent to which fine-tuning improves naming quality, measured both by
+token-level metrics and by LLM-based readability scoring, is one of the central
+empirical questions of this work.
+
+\subsection{LLM-as-a-Judge Evaluation}
+
+Reference-based metrics such as BLEU are unsuitable for evaluating identifier
+naming because multiple valid names may exist for the same variable, so a
+correct rename can score near zero against a single
+reference~\cite{papineni2002bleu,evtikhiev2023bleu,mastropaolo2023renaming}.
+The LLM-as-a-Judge paradigm addresses this by using LLMs as evaluators that
+assess semantic quality directly against explicit rubrics, achieving over 80\%
+agreement with human preferences~\cite{zheng2023judging}.
+Structured rubrics with fine-grained, independently assessable criteria produce
+more stable scores than vague numeric scales~\cite{liu2023geval}, and
+aggregating across an ensemble of diverse judge models further reduces
+individual model bias~\cite{verga2024poll}.
+
+% =============================================================================
+\section{Related Work}
+% =============================================================================
+
+\subsection{Identifier Renaming Without LLMs}
+
+Early approaches to automated identifier renaming treated source code as a
+sequence of tokens and applied statistical language models.
+Mastropaolo et al.\ conducted a large-scale empirical study comparing an
+n-gram model, a T5 model, and a BERT-based model (CugLM) for variable renaming
+in production code, finding that CugLM achieved 63.5\% complete match but that
+all approaches struggled when multiple valid names existed for the same
+variable~\cite{mastropaolo2023renaming}.
+Context2Name~\cite{bavishi2018context2name} used a sequence autoencoder over
+local token windows to infer variable names from minified JavaScript, achieving
+47.5\% exact match, but its dependence on surrounding tokens makes it
+unsuitable for the fully obfuscated identifiers in generated tests.
+
+Structure-aware approaches address this by operating on graph representations
+of code rather than raw token sequences.
+Allamanis et al.\ applied Gated Graph Neural Networks (GGNNs) to Abstract
+Syntax Trees augmented with dataflow edges, achieving 32.9\% subtoken-level
+precision on production Java code~\cite{allamanis2018learning}.
+De Keersmaeker adapted both GGNN and RefBERT for automatically generated
+tests~\cite{dekeersmaeker2024enhancing}: RefBERT outperformed GGNN in
+token-level accuracy, but neither approach produced consistent or concise names
+across full test files, and both tended to oversimplify concepts and ignore the
+test scenario in the suggested name.
+These results of De Keersmaeker serve as the direct baselines for our work.
+
+\subsection{LLM-Based Test Improvement}
+
+DeepTC-Enhancer~\cite{roy2020deeptcenhancer} was the first work to directly
+target readability of automatically generated tests, combining template-based
+test summarization with deep learning to suggest variable names.
+A user study reported that 48\% of suggestions fully conveyed the intended
+meaning and 35\% somewhat conveyed it, leaving substantial room for improvement.
+Daka et al.\ showed that even rule-based synthesis of test method names from
+coverage criteria can achieve 53\% developer agreement, establishing that method
+naming is a tractable sub-problem~\cite{daka2017generating}.
+
+Biagiola et al.\ proposed the most closely related prior work: they use LLMs to
+rename identifiers and test method names in EvoSuite-generated tests while
+explicitly preserving coverage semantics~\cite{biagiola2025improving}.
+Their evaluation across nine industrial and open-source LLMs showed that the
+readability improvements are semantically stable across repetitions, and a
+human study with ten professional developers found LLM-improved tests as
+readable as developer-written ones.
+Our work differs in several important ways.
+First, Biagiola et al.\ evaluate a mix of proprietary and open-source models
+primarily through external APIs; our pipeline targets locally served open-source
+models loaded via Hugging Face Transformers, which are stateless and process
+each function in a single, self-contained prompt.
+Second, because our pipeline communicates through a model-agnostic API layer,
+it is not tied to any specific model or provider.
+Third, we evaluate fine-tuned open-source models alongside untuned ones, a
+comparison Biagiola et al.\ do not include.
+Fourth, our pipeline operates on identifiers extracted from any well-formed Java
+test method regardless of which generator produced it.
+Finally, we contribute a configurable, reproducible readability grading
+framework that Biagiola et al.\ do not provide.
+
+\subsection{Readability Evaluation of Test Code}
+
+Scalabrino et al.\ proposed a comprehensive readability model for source code
+that combines structural features such as line length and nesting depth with
+textual features such as identifier quality and comment
+density~\cite{scalabrino2018readability}.
+Their findings show that automatically generated tests are doubly penalised:
+they lack comments entirely, and their identifiers are of poor quality, making
+structural metrics alone insufficient to capture their readability.
+Takebayashi et al.\ studied the role of assertion messages and found that
+expressive assertions are an important but often overlooked readability factor
+in test code~\cite{takebayashi2023assertions}.
+Winkler et al.'s systematic mapping study confirmed that no single metric
+captures all dimensions of test readability, and that human studies remain the
+gold standard but are not scalable~\cite{winkler2024investigating}.
+
+These limitations motivate the LLM-as-a-Judge evaluation design of our grading
+tool: it directly assesses semantic quality along multiple independently weighted
+criteria, avoiding the ceiling imposed by reference-based metrics while remaining
+fully automated and reproducible.
+
+% =============================================================================
+\section{Approach}
+% =============================================================================
+
+We discuss both the renaming pipeline and the readability grading tool.
+
+\subsection{Pipeline}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{assets/Pipeline.png}
+  \caption{Renaming pipeline workflow.}
+  \label{fig:pipeline}
+\end{figure}
+
+The renaming pipeline, illustrated in Figure~\ref{fig:pipeline}, consists of
+two stages: identifier extraction and LLM-based renaming.
+In the extraction stage, each test method is isolated from its enclosing class
+and all identifiers, both variable names and method names, are collected along
+with their kind.
+In the renaming stage, the complete obfuscated method body and the extracted
+identifier list are passed together to the LLM as a single prompt, so that the
+model has full syntactic context when suggesting new
+names~\cite{allamanis2018learning,wang2024naming}.
+The pipeline processes test methods one by one~\cite{dekeersmaeker2024enhancing},
+keeping each call self-contained and stateless.
+
+Since LLM outputs can be malformed or structurally invalid, the pipeline
+supports a configurable retry mechanism: when a response fails schema
+validation, the failed output and the specific error reason are fed back to the
+model in a follow-up
+prompt~\cite{shinn2023reflexion,ravi2025llmloop,jiang2026reflexicoder}.
+Upon a successful response, each suggested name is mapped back to its original
+location in the function body and the renamed method is reconstructed.
+
+\subsubsection{Prompt Design}
+
+The pipeline communicates with the LLM through three prompt templates: a system
+instruction, a user prompt, and a retry prompt.
+
+The user prompt provides the complete obfuscated test method as context
+alongside the identifier list. This is motivated by the established finding
+that identifier meaning is inseparable from its surrounding code
+structure~\cite{allamanis2018learning}.
+Prior work has further shown that LLM performance on code tasks is significantly
+affected by the quality and completeness of contextual information available
+during inference~\cite{wang2024naming}, making full function body provision
+essential for semantically accurate renaming suggestions.
+
+Each identifier is tagged with its kind: \texttt{(method)} or
+\texttt{(variable)}.
+Test method names and variable names follow distinct conventions --- method
+names should describe the test scenario in camelCase starting with
+\texttt{test}~\cite{daka2017generating}, while variable names should use
+concise nouns reflecting the value's role.
+The kind tag encodes this distinction directly in the prompt, operationalizing
+the consistency and conciseness criteria for identifier
+quality~\cite{dekeersmaeker2024enhancing}.
+
+The prompt constrains the model to respond with a single JSON object mapping
+original names to new names, including a one-shot example of the expected
+format~\cite{brown2020gpt3}.
+This structured output constraint enables deterministic schema validation, which
+in turn drives the retry mechanism~\cite{shinn2023reflexion,ravi2025llmloop,jiang2026reflexicoder}.
+The maximum number of retries is configurable.
+The full prompt templates are provided in Appendix~\ref{app:prompts}.
+
+\subsubsection{Tuned Models}
+
+To investigate whether specialization on test code improves renaming quality,
+we fine-tune a pre-trained LLM on a dataset of obfuscated Java test methods
+paired with their original identifier names.
+Fine-tuning is preferred over training from scratch because it allows the model
+to retain the broad syntactic and semantic knowledge of code acquired during
+pre-training while specializing its representations for the structural patterns
+of automatically generated tests~\cite{hosna2022transfer,church2021finetuning}.
+
+Full fine-tuning of a modern LLM is prohibitively expensive on a single GPU: a
+7B parameter model requires roughly 84 GB in 16-bit
+precision~\cite{dettmers2023qlora}.
+We therefore apply QLoRA~\cite{dettmers2023qlora}, which keeps the base model
+weights frozen and quantized to 4-bit NormalFloat (NF4) precision while
+injecting trainable low-rank adapter matrices into each Transformer layer.
+The adapter parameterization follows LoRA~\cite{hu2022lora}: for a weight
+matrix $W \in \mathbb{R}^{d \times k}$, the update is decomposed as
+$\Delta W = BA$ where $B \in \mathbb{R}^{d \times r}$ and
+$A \in \mathbb{R}^{r \times k}$ with rank $r \ll \min(d,k)$, reducing
+trainable parameters by up to four orders of magnitude compared to full
+fine-tuning.
+Adapters are injected into all seven projection matrices of each Transformer
+block (\texttt{q\_proj}, \texttt{k\_proj}, \texttt{v\_proj}, \texttt{o\_proj},
+\texttt{gate\_proj}, \texttt{up\_proj}, \texttt{down\_proj}), which has been
+shown to improve downstream performance over targeting attention projections
+alone~\cite{hu2022lora}.
+Optimization uses paged AdamW in 8-bit precision with a cosine learning rate
+schedule and a 3\% linear warmup.
+
+The model is trained as a causal language model on sequences composed of the
+prompt followed by the completion, where the completion is the JSON mapping of
+obfuscated names to original names.
+Prompt tokens are masked with the ignore index in the labels tensor so that the
+cross-entropy loss is computed exclusively over the predicted identifier names,
+ensuring the model learns the renaming task rather than reproducing its own input.
+Samples whose total token length exceeds the maximum context window are discarded
+rather than truncated, to avoid training on partial completions that would
+provide a misleading learning signal.
+
+To reduce overfitting on the fine-tuning dataset, we apply
+NEFTune~\cite{jain2024neftune}, which adds uniform random noise to the embedding
+vectors during each forward pass.
+The training run saves adapter snapshots at 15\%, 25\%, 50\%, 75\%, and 100\%
+of total training steps, enabling analysis of how naming quality evolves with
+the amount of fine-tuning.
+
+\subsection{Readability Grading Tool}
+
+To evaluate the quality of renamed test code, we developed CodeReader, an
+open-source LLM-based readability grading tool available on
+PyPI~\cite{liu2025codereader}.
+The tool implements the LLM-as-a-Judge
+paradigm~\cite{zheng2023judging}, in which one or more LLMs act as evaluators,
+assessing the readability of a given test method against a configurable set of
+domain-specific rules.
+
+The choice of LLM-based evaluation over reference-based metrics such as BLEU
+is motivated by a fundamental limitation: lexical similarity metrics cannot
+capture whether an identifier name is semantically appropriate for its
+context~\cite{callisonburch2006bleu,papineni2002bleu,evtikhiev2023bleu}.
+LLM judges address this by evaluating semantic quality directly, and have been
+shown to align with human preferences at over 80\%
+agreement~\cite{zheng2023judging}.
+
+CodeReader is configured through a YAML file that defines a set of named
+evaluation rules.
+In our configuration, these rules cover: clarity of variable and method names,
+behavioral specificity of the test scenario, consistency with JUnit naming
+conventions, alignment between identifier names and actual test logic,
+assertion quality, and the presence of unexplained magic numbers.
+Each rule is expressed as a concrete, actionable criterion rather than a vague
+dimension, which directly follows the G-Eval
+recommendation~\cite{liu2023geval}.
+
+To mitigate the variance inherent in single-model evaluation, CodeReader
+supports running multiple LLM judges simultaneously with configurable per-model
+weights.
+The final score is a weighted aggregation across all active models.
+In our configuration, three models are used: DeepSeek-Coder 6.7B (weight 1.4),
+Qwen3.5 9B (weight 1.25), and Phi-3 Medium (weight 0.75), all served locally
+via Ollama.
+The use of an ensemble of judges reduces the impact of individual model bias
+and improves scoring stability~\cite{verga2024poll}.
+Full configuration details are provided in Appendix~\ref{app:config}.
+
+% =============================================================================
+\section{Experimental Setup}
+% =============================================================================
+
+\subsection{Dataset}
+
+The selected dataset for this study is methods2test~\cite{tufano2022methods2test},
+which is the largest publicly available dataset of its kind, containing
+approximately 780,000 instances.
+Each entry consists of a mapping between a focal method and its corresponding
+unit test case, along with metadata such as the class name, package, and source
+repository.
+
+A minor reduction of the dataset was necessary prior to use: several entries
+were found to be incomplete or malformed (unclosed braces, truncated functions).
+The test cases were manually obfuscated such that each function name was renamed
+to \texttt{func\_n} and each variable name to \texttt{var\_n}, as illustrated
+in Listing~\ref{lst:obf-example}.
+Each obfuscated test case was paired with its original version and stored as a
+JSONL object, as shown in Listing~\ref{lst:dataset-example}.
+
+The evaluation subset consists of 100 randomly sampled test methods drawn with
+a fixed seed from the held-out test split of
+methods2test~\cite{tufano2022methods2test}.
+This sample size is grounded in a prospective power analysis using the Wilcoxon
+matched-pairs effect-size $r$~\cite{cohen1988statistical,arcuri2011practical}.
+Full statistical details are provided in Appendix~\ref{app:samplesize}.
+
+\subsection{Models Evaluated}
+
+We evaluate two models: Qwen2.5-Coder 7B as the fine-tuned open-source model,
+and GPT-5 mini as a zero-shot closed-source reference baseline.
+
+Qwen2.5-Coder 7B~\cite{hui2024qwen25coder} is a code-specialized open-source
+model pre-trained on 5.5 trillion tokens across 92 programming languages.
+Its code specialization and permissive licence make it a practical base for
+fine-tuning on our obfuscated test-code dataset using QLoRA~\cite{dettmers2023qlora}.
+Adapter snapshots are saved at 15\%, 25\%, 50\%, 75\%, and 100\% of training
+steps, yielding five fine-tuned variants alongside the untuned base model.
+
+GPT-5 mini~\cite{openai2025gpt5} is a cost-efficient model from OpenAI's GPT-5
+family with a 400K-token context window and native structured-output support.
+It is evaluated zero-shot as a proprietary upper-bound baseline.
+
+\begin{table}[t]
+  \centering
+  \caption{Summary of evaluated model variants.}
+  \label{tab:models}
+  \begin{tabular}{lccc}
+    \toprule
+    \textbf{Model} & \textbf{Params} & \textbf{Fine-tuned} & \textbf{Ckpt} \\
+    \midrule
+    Qwen2.5-Coder (base) & 7B  & No  & --- \\
+    Qwen2.5-Coder (15\%) & 7B  & Yes & 15\% \\
+    Qwen2.5-Coder (25\%) & 7B  & Yes & 25\% \\
+    Qwen2.5-Coder (50\%) & 7B  & Yes & 50\% \\
+    Qwen2.5-Coder (75\%) & 7B  & Yes & 75\% \\
+    Qwen2.5-Coder (100\%)& 7B  & Yes & 100\% \\
+    GPT-5 mini           & n/a & No  & --- \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Baselines}
+
+We compare against the GGNN~\cite{allamanis2018learning} and
+RefBERT~\cite{liu2023refbert} techniques as adapted for generated test code by
+De Keersmaeker~\cite{dekeersmaeker2024enhancing}.
+Both are re-evaluated on our subset to ensure a fair comparison under identical
+data conditions.
+
+\subsection{Metrics}
+
+\subsubsection{Token-level Metrics}
+
+To enable comparison with the GGNN and RefBERT baselines, we adopt the
+sub-token-level evaluation protocol established by Allamanis et
+al.~\cite{allamanis2018learning} and widely used in code identifier naming
+research~\cite{alon2019code2seq,liu2023refbert}.
+Since identifiers are composed of sub-tokens (e.g., \texttt{getUserList} splits
+into \{get, user, list\}), precision measures how many predicted sub-tokens are
+correct, recall measures how many expected sub-tokens were produced, and F1 is
+their harmonic mean.
+
+Beyond sub-token overlap, exact match measures whether all sub-tokens of a
+predicted identifier are fully correct.
+We report both the ordered variant, where sub-token order must match, and the
+unordered variant, which treats sub-tokens as a set~\cite{liu2023refbert}.
+Character Error Rate (CER) captures the relative number of character-level edit
+operations needed to transform a prediction into the
+reference~\cite{allamanis2018learning}.
+
+\subsubsection{LLM Readability Score}
+
+Token-level metrics evaluate each identifier in isolation against a fixed
+reference label.
+This is insufficient for our setting: multiple valid names can describe the
+same concept, and the collective readability of all renamed identifiers in a
+test method matters more than individual sub-token
+overlap~\cite{scalabrino2018readability}.
+
+We adopt an LLM-as-judge approach~\cite{zheng2023judging}, which has been shown
+to correlate with human preference at over 80\% agreement.
+Applied to code evaluation specifically,
+ICE-Score~\cite{zhuo2024ice} demonstrated that instructing LLMs to score
+generated code achieves superior correlation with human judgement compared to
+token-matching metrics such as BLEU.
+Recent work has further shown that LLMs can serve as scalable and
+human-aligned readability evaluators for both functional code and unit tests
+specifically~\cite{ouedraogo2025coreval}.
+
+The judge scores each test method on a scale of 0 to 100 based on four
+weighted criteria: identifier naming clarity and consistency (weight 0.75),
+behavioral specificity of the test method name (0.15), and assertion quality
+(0.10).
+The score is averaged across all test methods in the benchmark
+(\texttt{llm\_score\_avg}).
+A weighted average (\texttt{llm\_score\_wavg}) is also computed, weighting each
+test by the number of identifiers it contains to give more weight to complex
+tests.
+
+% =============================================================================
+\section{Results \& Discussion}
+\label{sec:results}
+% =============================================================================
+
+\subsection{RQ1: LLM Pipeline vs.\ Non-LLM Baselines}
+
+Table~\ref{tab:rq1} reports the token-level metrics for both non-LLM baselines
+and all Qwen2.5-Coder checkpoints evaluated on the same subset.
+T1 (GGNN) performs poorly on our subset, achieving an F1 of 0.019 and a CER of
+143.9\%, indicating that the model almost entirely fails to produce correct
+subtokens.
+This result is consistent with De Keersmaeker's observation that GGNN struggles
+with obfuscated test code due to the absence of the method under test in the
+graph representation~\cite{dekeersmaeker2024enhancing}.
+T2 (RefBERT) performs considerably better at F1 = 0.308, though its CER of
+92.6\% still indicates substantial character-level divergence.
+
+The untuned Qwen2.5-Coder baseline (0\%) already far surpasses both baselines,
+achieving F1 = 0.760, precision = 0.714, and recall = 0.817, with a CER of
+32.0\%.
+All fine-tuned checkpoints improve further, reaching F1 scores between 0.834
+and 0.839.
+These results confirm that the LLM-based pipeline provides a large and
+consistent improvement over both non-LLM baselines, directly answering RQ1
+affirmatively.
+
+\begin{table}[t]
+  \centering
+  \caption{RQ1: Token-level metrics for baselines and Qwen2.5-Coder checkpoints.}
+  \label{tab:rq1}
+  \begin{tabular}{lcccc}
+    \toprule
+    \textbf{Model} & \textbf{P} & \textbf{R} & \textbf{F1} & \textbf{CER (\%)} \\
+    \midrule
+    T1: GGNN              & 0.026 & 0.015 & 0.019 & 143.9 \\
+    T2: RefBERT           & 0.320 & 0.306 & 0.308 &  92.6 \\
+    \midrule
+    Qwen (0\% --- untuned)& 0.714 & 0.817 & 0.760 &  32.0 \\
+    Qwen (15\%)           & 0.848 & 0.825 & 0.834 &  17.5 \\
+    Qwen (25\%)           & 0.853 & 0.831 & 0.839 &  16.9 \\
+    Qwen (50\%)           & 0.849 & 0.828 & 0.836 &  17.5 \\
+    Qwen (75\%)           & 0.853 & 0.824 & 0.836 &  17.2 \\
+    Qwen (100\%)          & 0.849 & 0.826 & 0.835 &  17.3 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{RQ2: Effect of Fine-Tuning Amount}
+
+The results in Table~\ref{tab:results-qwen} reveal a clear and immediate effect
+of fine-tuning on token-level metrics: F1 increases sharply from 0.760 at the
+untuned baseline (0\%) to 0.834 at the first checkpoint (15\%), after which it
+plateaus and remains stable across all subsequent checkpoints.
+This suggests that the majority of the fine-tuning benefit is captured very
+early in training, and that additional training steps beyond 15\% yield
+diminishing returns on token-level naming accuracy.
+
+A secondary finding concerns schema compliance.
+The untuned baseline produced 7 \texttt{ExtraKeyError} responses across 100
+files.
+All fine-tuned checkpoints from 15\% onward produced zero schema errors,
+indicating that fine-tuning substantially improves instruction following.
+
+\begin{table}[t]
+  \centering
+  \caption{Qwen2.5-Coder results per checkpoint. The 0\% row is the untuned base model.}
+  \label{tab:results-qwen}
+  \begin{tabular}{lccccc}
+    \toprule
+    \textbf{Ckpt} & \textbf{P} & \textbf{R} & \textbf{F1} &
+    \textbf{LLM} & \textbf{LLM (w)} \\
+    \midrule
+    0\%   & 0.714 & 0.817 & 0.760 & 69.96 & 71.97 \\
+    15\%  & 0.848 & 0.825 & 0.834 & 65.11 & 67.47 \\
+    25\%  & 0.853 & 0.831 & 0.839 & 64.76 & 67.12 \\
+    50\%  & 0.849 & 0.828 & 0.836 & 65.83 & 68.47 \\
+    75\%  & 0.853 & 0.824 & 0.836 & 63.60 & 66.07 \\
+    100\% & 0.849 & 0.826 & 0.835 & 65.60 & 68.19 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{RQ3: F1 vs.\ LLM Scoring}
+
+Looking at Table~\ref{tab:results-qwen}, the LLM readability score tells a
+different story.
+The untuned baseline (0\%) achieves the highest readability score of all
+variants (avg: 69.96), which then drops at 15\% (65.11) and remains
+consistently lower across all fine-tuned checkpoints.
+A plausible explanation is that the reference labels in the methods2test dataset
+reflect the naming conventions of real-world Java codebases, which do not always
+align with the explicit readability criteria defined in the CodeReader rubric.
+Fine-tuning causes the model to converge towards dataset-specific naming
+patterns, which may be consistent with the codebase from which each test
+originates but do not necessarily satisfy general readability principles such as
+behavioral specificity or semantic alignment with test
+logic~\cite{scalabrino2018readability,lin2019quality}.
+The untuned model, unconstrained by dataset patterns, produces more varied and
+sometimes more descriptive names that the judge rewards more highly, even at the
+cost of lower token-level overlap with the reference.
+
+This tension points to a fundamental limitation of reference-based evaluation
+for identifier naming: a model can score well on F1 by learning dataset-specific
+naming conventions without producing names that are inherently more readable, a
+concern previously raised by Mastropaolo et al.~\cite{mastropaolo2023renaming}
+and Evtikhiev et al.~\cite{evtikhiev2023bleu}.
+
+\subsection{Discussion}
+
+The three research questions together reveal a nuanced picture of LLM-based
+identifier renaming.
+RQ1 establishes that even an untuned LLM substantially outperforms dedicated
+non-LLM approaches, suggesting that the broad code understanding acquired during
+pre-training is sufficient to transfer meaningfully to the renaming task without
+task-specific adaptation.
+RQ2 shows that fine-tuning provides an immediate and significant token-level
+gain but saturates rapidly, with 15\% of training steps capturing most of the
+benefit, a practically important finding given the computational cost of
+fine-tuning.
+The most consequential finding emerges from RQ3: fine-tuning improves F1 while
+simultaneously reducing the LLM readability score.
+This divergence suggests that token-level accuracy and holistic readability are
+measuring fundamentally different properties.
+This has direct implications for how future work should evaluate identifier
+renaming tools: neither F1 alone nor an LLM readability score alone is a
+sufficient ground truth, and the two metrics should be reported together.
+
+% =============================================================================
+\section{Threats to Validity}
+% =============================================================================
+
+This section discusses the potential threats to the validity of the study
+following the categorization of Wohlin et al.~\cite{wohlin2012experimentation},
+considering construct, internal, external, and conclusion validity.
+
+\subsection{Construct Validity}
+
+The primary construct validity threat concerns the LLM readability score.
+While the scoring criteria are grounded in established identifier quality
+research~\cite{scalabrino2018readability,lin2019quality}, the score is produced
+by an ensemble of smaller open-source judge models rather than human evaluators,
+and may not fully capture what developers consider readable in practice.
+Three interrelated limitations compound this threat.
+First, the judge models are generative and therefore non-deterministic.
+Second, the choice of judge models may itself introduce bias.
+Third, different judge model selections may produce different relative rankings.
+
+\subsection{Internal Validity}
+
+The dataset is constructed by obfuscating human-written tests rather than using
+genuinely auto-generated tests.
+While this simulates the naming patterns of tools like
+EvoSuite~\cite{fraser2011evosuite}, the structural characteristics may differ.
+Additionally, the methods2test dataset~\cite{tufano2022methods2test} contains
+known identifier quality issues~\cite{lin2019quality}, meaning the oracle is
+not a perfect upper bound.
+
+\subsection{External Validity}
+
+The evaluation is limited to 100 randomly sampled Java test methods from
+methods2test~\cite{tufano2022methods2test}.
+Results may not generalize to other programming languages, other test
+generators, or test methods from different domains.
+
+\subsection{Conclusion Validity}
+
+The 100-sample subset is statistically adequate for all primary large-effect
+comparisons as demonstrated in Appendix~\ref{app:samplesize}, but the renamed
+vs.\ oracle comparison remains underpowered for some checkpoints.
+Conclusions about the absolute quality gap between renamed and human-written
+output should therefore be treated as indicative rather than definitive.
+
+% =============================================================================
+\section{Conclusion}
+% =============================================================================
+
+% TODO: Summarize contributions and answer RQs. Add future work paragraph.
+
+% =============================================================================
+% REFERENCES
+% =============================================================================
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+% =============================================================================
+% APPENDICES
+% =============================================================================
+\appendix
+
+\section{Prompt Templates}
+\label{app:prompts}
+
+The pipeline uses three prompt templates.
+Prompt~1 is sent as the system instruction.
+Prompt~2 is the user-facing prompt.
+Prompt~3 is the retry prompt, invoked when a response fails schema validation
+following the Reflexion framework~\cite{shinn2023reflexion}.
+
+\begin{lstlisting}[caption={System Instruction Prompt},label={lst:prompt-system},language={}]
+You are a Java test code refactoring expert.
+You will be given:
+- A Java test method (wrapped in a dummy class), and
+- A list of identifiers to rename, each tagged with
+  its kind: (method) or (variable).
+
+Your job is to propose meaningful names for ALL of
+the listed identifiers.
+
+Naming conventions to follow:
+- Methods (func_*): use camelCase starting with 'test',
+  e.g. testShouldReturnNullWhenInputIsEmpty.
+- Variables used in assertions (var_*): prefer
+  'expected' / 'actual' where applicable.
+- Other variables (var_*): use concise camelCase nouns
+  that describe the value, e.g. userCount, resultList.
+
+Rules:
+- You MUST include every identifier from the list as
+  a key -- no omissions.
+- Use ONLY the listed identifiers as keys -- no extras.
+- You MUST ONLY respond with a valid JSON object
+  mapping originalName -> newName.
+- Do NOT output code, comments, markdown, or any text
+  outside the JSON object.
+\end{lstlisting}
+
+\begin{lstlisting}[caption={User Prompt Template},label={lst:prompt-user},language={}]
+Here is the obfuscated Java test method wrapped in a
+dummy class:
+
+```java
+{test_case}
+```
+
+Here are ALL the identifiers that must be renamed:
+{identifiers}
+
+Rename ALL of the identifiers above. You MUST include
+every one of them as a key.
+Return a single JSON object mapping originalName -> newName.
+
+Example (for a method + two variables):
+{"func_1": "testShould...",
+ "var_1": "actualResult",
+ "var_2": "expectedSize"}
+
+Rules:
+- ALL listed identifiers must appear as keys.
+- Use ONLY the listed identifiers as keys.
+- Do NOT output anything except the JSON object.
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Retry Prompt Template},label={lst:prompt-retry},language={}]
+Here is the original obfuscated Java test method
+wrapped in a dummy class:
+
+```java
+{test_case}
+```
+
+Here are ALL the identifiers that must be renamed:
+{identifiers}
+
+Your previous response was rejected for this reason:
+{error_reason}
+
+Your previous (rejected) response was:
+{failed_response}
+
+Please try again. Make sure your new response:
+- Includes EVERY identifier from the list as a key.
+- Uses ONLY the listed identifiers as keys.
+- Is a valid JSON object only -- no backticks, no
+  explanation.
+\end{lstlisting}
+
+\section{Grading Tool Configuration}
+\label{app:config}
+
+The CodeReader configuration YAML defines the scoring rubric and model ensemble.
+
+\begin{lstlisting}[caption={CodeReader Configuration (Part 1 -- Scoring \& Rules)},
+                   label={lst:config1},language=yaml]
+language: java
+
+settings:
+  timeout_seconds: 320
+  health_timeout_seconds: 900
+  max_concurrency: 1
+  fail_on_no_active_models: true
+  log_path: out/temp/readability_results.txt
+  debug_jsonl_path: responses.jsonl
+
+scoring:
+  scale: 0-100
+  focus: identifier_naming
+  weights:
+    identifier_naming: 0.75
+    assertion_quality: 0.10
+    test_independence: 0
+    behavioral_specificity: 0.15
+
+rules:
+  - Clarity of variable and method names: assess
+    whether identifier names clearly convey intent
+    without needing to read the full test body.
+    Penalise generic names like var1, obj, result0,
+    func_1 or single letters unless used as counters.
+  - Renamed vs. generic baseline: explicitly penalise
+    identifiers that appear to still be auto-generated
+    (e.g. var0, obj1, int0, string1, list0).
+    These represent failures of the renaming step.
+  - Cross-identifier consistency within a single test.
+  - Alignment with actual test logic.
+  - Test method naming and behavioral specificity.
+  - Assertion quality and magic numbers.
+  - Test independence (weight 0 in this config).
+  - Ignore enclosing class name.
+\end{lstlisting}
+
+\begin{lstlisting}[caption={CodeReader Configuration (Part 2 -- Model Ensemble)},
+                   label={lst:config2},language=yaml]
+models:
+  - name: deepseek-coder:6.7b
+    weight: 1.4
+    provider: ollama
+  - name: qwen3.5:9b
+    weight: 1.25
+    provider: ollama
+  - name: phi3:medium
+    weight: 0.75
+    provider: ollama
+\end{lstlisting}
+
+\section{Java Test Examples}
+\label{app:javaexamples}
+
+\begin{lstlisting}[caption={Example EvoSuite-generated test before renaming},
+                   label={lst:evosuite},language=Java]
+@Test(timeout = 4000)
+public void test42() throws Throwable {
+    Calculator calculator0 = new Calculator();
+    double double0 = calculator0.modulo(
+        1.0, 1408.0511499512309);
+    assertEquals(1, calculator0.getOperationCount());
+    assertEquals(1.0, double0, 0.01);
+}
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Example Randoop-generated test before renaming},
+                   label={lst:randoop},language=Java]
+@Test
+public void test011() throws Throwable {
+    if (debug)
+        System.out.format("%n%s%n",
+            "RegressionTest0.test011");
+    Calculator calculator0 = new Calculator();
+    calculator0.reset();
+    java.lang.String str3 =
+        calculator0.classify((double)(byte)10);
+    calculator0.memoryStore(0.0d);
+    calculator0.memoryClear();
+    double double9 = calculator0.max(
+        (double)10.0f, (-1.0d));
+    java.lang.Class<?> wildcardClass10 =
+        calculator0.getClass();
+    org.junit.Assert.assertEquals(str3, "medium");
+    org.junit.Assert.assertTrue(double9 == 10.0d);
+    org.junit.Assert.assertNotNull(wildcardClass10);
+}
+\end{lstlisting}
+
+\section{Dataset}
+\label{app:dataset}
+
+The dataset is constructed by obfuscating human-written test code to simulate
+the generic identifier naming produced by automated test generation tools.
+
+\begin{lstlisting}[caption={Example obfuscated test case},
+                   label={lst:obf-example},language=Java]
+public class TestClass10000 {
+  @Test public void func_1() {
+    Map<Integer, String> var_1 =
+      new HashMap<Integer, String>();
+    var_1.put(1, "one");
+    var_1.put(2, "two");
+    var_1.put(3, "three");
+    var_1.put(4, "four");
+    Assert.assertEquals(
+      "{ 1 -> one , 2 -> two , 3 -> three , 4 -> four }",
+      MapUtils.toString(var_1));
+  }
+}
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Example JSONL dataset sample},
+                   label={lst:dataset-example},language=json]
+{
+  "prompt": "public class TestClass10000 {\n
+    @Test public void func_1() { ... } }",
+  "response": "public class TestClass10000 {\n
+    @Test public void shouldPrettyPrintMap() {
+      Map<Integer, String> map = ... } }"
+}
+\end{lstlisting}
+
+\section{Sample Size Justification}
+\label{app:samplesize}
+
+Effect sizes are computed using the Wilcoxon signed-rank test on paired
+observations, following the non-parametric approach recommended for software
+engineering experiments with non-normal
+distributions~\cite{arcuri2011practical}.
+The effect-size statistic is $r = Z/\sqrt{N}$, interpreted as small
+($|r|\geq 0.10$), medium ($|r|\geq 0.30$), or large ($|r|\geq 0.50$) following
+Cohen~\cite{cohen1988statistical}.
+To correct for small-sample inflation, $r$ is bias-adjusted using the
+Olkin--Pratt estimator~\cite{olkin1958unbiased}.
+The 95\% confidence interval on $r$ is obtained via the Fisher
+$Z$-transformation~\cite{fisher1915frequency}.
+The recommended sample size $n$ is derived from the conservative lower bound of
+this confidence interval at $\alpha = 0.05$, power $= 0.80$, with a 25\%
+non-normality correction.
+
+For all primary comparisons (obfuscated vs.\ renamed and obfuscated vs.\
+oracle), the recommended $n$ never exceeds 10 across all checkpoints.
+The most demanding comparison, renamed vs.\ oracle at the 0\% checkpoint,
+requires up to 2\,085 samples; however, this reflects a small, marginally
+significant effect ($r=-0.23$, $p=0.048$) whose weighted-average variant is not
+significant ($p=0.20$), indicating inconsistent rather than systematically poor
+output.
+At the observed throughput of 3--6 hours per 100 samples, scaling to the
+maximum recommended $n$ is infeasible within the hardware and time constraints
+of this work.
+
+\begin{table}[t]
+  \centering
+  \caption{Recommended $n$ for primary comparisons. All large-effect
+           comparisons are within the 100-sample budget.}
+  \label{tab:effect-primary}
+  \begin{tabular}{lcccccc}
+    \toprule
+    \textbf{Comparison} & \textbf{0\%} & \textbf{15\%} & \textbf{25\%} &
+    \textbf{50\%} & \textbf{75\%} & \textbf{100\%} \\
+    \midrule
+    F1 vs zero baseline       & 2 & 2 & 2 & 2 &  2 & 2 \\
+    LLM avg: obf vs renamed   & 2 & 4 & 4 & 3 &  7 & 3 \\
+    LLM wavg: obf vs renamed  & 3 & 5 & 5 & 4 & 10 & 3 \\
+    LLM avg: obf vs oracle    & 2 & 3 & 2 & 3 &  3 & 2 \\
+    LLM wavg: obf vs oracle   & 3 & 3 & 3 & 4 &  4 & 3 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[t]
+  \centering
+  \caption{Full benchmark metrics per checkpoint.
+           EM-ord = ordered exact match,
+           EM-unord = unordered exact match,
+           CER = Character Error Rate.}
+  \label{tab:results-full}
+  \begin{tabular}{lcccccccc}
+    \toprule
+    \textbf{Ckpt} & \textbf{P} & \textbf{R} & \textbf{F1} &
+    \textbf{EM-ord} & \textbf{EM-unord} & \textbf{CER} &
+    \textbf{Oracle} & \textbf{Oracle (w)} \\
+    \midrule
+    0\%   & 0.714 & 0.817 & 0.760 & 0.753 & 0.730 & 32.03 & 68.13 & 71.11 \\
+    15\%  & 0.848 & 0.825 & 0.834 & 0.785 & 0.792 & 17.53 & 67.89 & 70.68 \\
+    25\%  & 0.853 & 0.831 & 0.839 & 0.793 & 0.804 & 16.94 & 68.21 & 71.15 \\
+    50\%  & 0.849 & 0.828 & 0.836 & 0.785 & 0.801 & 17.54 & 68.13 & 70.45 \\
+    75\%  & 0.853 & 0.824 & 0.836 & 0.785 & 0.798 & 17.18 & 67.31 & 70.09 \\
+    100\% & 0.849 & 0.826 & 0.835 & 0.785 & 0.793 & 17.27 & 68.43 & 70.90 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\section{Compute Environment}
+\label{app:compute}
+
+All fine-tuning and inference experiments for Qwen2.5-Coder were conducted on
+cloud computing infrastructure via VastAI~\cite{vastai2024} on an NVIDIA 5090
+GPU with 32 GB of GPU memory.
+The CodeReader judge ensemble was served together on the cloud via Ollama during
+evaluation.
+
+\begin{table}[t]
+  \centering
+  \caption{Token usage and latency statistics per checkpoint.}
+  \label{tab:usage}
+  \begin{tabular}{lccccc}
+    \toprule
+    \textbf{Ckpt} & \textbf{Prompt} & \textbf{Completion} &
+    \textbf{Total} & \textbf{Latency (ms)} & \textbf{Success} \\
+    \midrule
+    0\%   & 53,053 & 4,779 & 57,832 & 2,940 & 100/100 \\
+    15\%  & 53,053 & 4,333 & 57,386 & 7,582 & 100/100 \\
+    25\%  & 53,053 & 4,589 & 57,642 & 8,274 & 100/100 \\
+    50\%  & 53,053 & 4,387 & 57,440 & 7,044 & 100/100 \\
+    75\%  & 53,053 & 4,488 & 57,541 & 9,943 & 100/100 \\
+    100\% & 53,053 & 4,542 & 57,595 & 4,779 & 100/100 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\end{document}

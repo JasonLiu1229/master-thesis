@@ -67,4 +67,6 @@ Thumbs.db
 *.gz
 *.toc
 *.brf
-
+*.fls
+*.blg
+*.fdb_latexmk

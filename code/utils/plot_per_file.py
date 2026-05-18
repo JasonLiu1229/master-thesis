@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-DATA = json.load(open("out/cloud/100pct/t3_benchmark_results_per_file.json"))
+DATA = json.load(open("out/cloud/gpt/t3_benchmark_results_per_file.json"))
 # Sort by filename for consistent ordering
 DATA = sorted(DATA, key=lambda x: x["filename"])
 
-OUT = "out/cloud/100pct/"
+OUT = "out/cloud/gpt/"
 os.makedirs(OUT, exist_ok=True)
 
 # Short labels: strip "TestClass" and ".java.jsonl"

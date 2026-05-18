@@ -6,14 +6,33 @@
 More detailed work distribution, mainly between the student and the daily supervisor.
 Should make clear that the student was the driving force.
 
-\paragraph{}
-Explain steps like
- \begin{itemize}
-	\item Conceptualization
-	\item Data curation
-	\item Investigation
-	\item Methodology
-	\item Software
-	\item Writing --- original draft
-	\item Writing --- review \& editing
+\paragraph{Jason Liu (student)} was responsible for:
+\begin{itemize}
+  \item \textbf{Conceptualization:} formulating the research questions and the overall
+        experimental design.
+  \item \textbf{Data curation:} constructing the obfuscated dataset from methods2test,
+        filtering malformed entries, and producing the JSONL training/evaluation splits.
+  \item \textbf{Investigation:} running fine-tuning experiments across six checkpoints
+        (0\%, 15\%, 25\%, 50\%, 75\%, 100\%), running the baseline models (GGNN, RefBERT),
+        and executing all benchmark evaluations.
+  \item \textbf{Methodology:} designing the QLoRA fine-tuning setup, the prompt templates,
+        the retry mechanism, and the CodeReader judge ensemble configuration.
+  \item \textbf{Software:} implementing the renaming pipeline, the CodeReader grading tool
+        (published on PyPI), and all evaluation scripts.
+  \item \textbf{Writing -- original draft:} writing all sections of the paper and thesis.
+  \item \textbf{Writing -- review \& editing:} incorporating feedback from supervisors.
+\end{itemize}
+
+\paragraph{Mutlu Beyazit} contributed:
+\begin{itemize}
+  \item \textbf{Conceptualization / Methodology:} providing guidance on research direction
+        and experimental design.
+  \item \textbf{Supervision:} regular feedback sessions.
+  \item \textbf{Writing -- review \& editing:} reviewing drafts and providing written feedback.
+\end{itemize}
+
+\paragraph{Prof.\ Serge Demeyer (promotor)} contributed:
+\begin{itemize}
+  \item \textbf{Supervision:} high-level oversight and approval of the research direction.
+  \item \textbf{Writing -- review \& editing:} reviewing the alfa-draft prior to submission.
 \end{itemize}

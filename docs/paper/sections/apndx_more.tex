@@ -3,15 +3,76 @@
 \chapter{Rebuttal}
 \label{ch:rebuttal}
 
-If applicable, a rebuttal, listing the reviewer comments and how they are addressed (or why they have not been addressed)
+% If the paper reviews are already in, include them here together with your
+% point-by-point rebuttal. If reviews are not yet available, leave this as:
+% "Reviews are expected by @@Date@@. This appendix will be updated upon receipt."
+
+Reviews are expected by \emph{@@Date@@}.
+This appendix will be updated upon receipt.
+
+
 \chapter{Tool Architecture}
 \label{ch:tool_architecture}
 
-If applicable, a more detailed description of the tooling (architecture diagram, reference to git repository, \ldots).
+This appendix provides a more detailed description of the tooling built as part of this thesis.
+
+\section*{Renaming Pipeline}
+
+The renaming pipeline is available at:
+\url{https://github.com/JasonLiu1229/master-thesis}
+
+The pipeline is structured as follows:
+\begin{itemize}
+  \item \textbf{Identifier extractor:} parses Java test methods and collects all variable
+        and method identifiers.
+  \item \textbf{LLM client:} model-agnostic layer that communicates with any
+        OpenAI-compatible endpoint (supports Hugging Face Transformers served via a local
+        server, as well as closed APIs such as OpenAI).
+  \item \textbf{Schema validator:} validates the JSON response and triggers the retry
+        mechanism on failure.
+  \item \textbf{Reconstructor:} maps suggested names back to their original positions and
+        rewrites the method.
+\end{itemize}
+
+\section*{CodeReader Grading Tool}
+
+CodeReader is available on PyPI:
+\url{https://pypi.org/project/codereader/}
+
+It is configured via a YAML file (the configuration appendix in the paper) and supports
+multiple locally-served Ollama models as judge evaluators.
 
 
-\chapter{Data Sets}
+\chapter{Datasets}
 \label{ch:data-sets}
 
-If applicable, a more detailed description of the creation/curation of the dataset (ref to replication package?)
-Perhaps also, a description of the data-processing (which machines did you use, the trial \& error process, \ldots)
+\section*{Source Dataset}
+
+The base dataset is methods2test~\cite{tufano2022methods2test}, available at:
+\url{https://github.com/microsoft/methods2test}
+
+\section*{Obfuscation Process}
+
+Each test method in the dataset was obfuscated using a rule-based script:
+\begin{enumerate}
+  \item All method names annotated with \texttt{@Test} were renamed to \texttt{func\_n}.
+  \item All local variable names were renamed to \texttt{var\_n}.
+  \item The obfuscated method was paired with the original and serialized to JSONL.
+\end{enumerate}
+Malformed entries (unclosed braces, truncated functions) were removed prior to use.
+
+\section*{Compute Resources}
+
+Fine-tuning and inference were conducted on VastAI cloud infrastructure
+(NVIDIA 5090, 32 GB GPU memory).
+Local development and prototyping used \emph{NVIDIA 3060, 12 GB GPU memory, 64 GB RAM, AMD 7}.
+
+% \section*{Trial and Error}
+%
+% Here are some major trial and errors I faced during the making of this thesis:
+% \begin{enumerate}
+%   \item Computing architecture limitations: this made me try multiple architectures, from supercomputers to cloud systems.
+%   \item Dataset fine graining: the dataset was not well processed and this made me reprocess the dataset several times and recompute the values a couple of times.
+%   \item Finetuning settings: different architectures results in different finetuning settings, so I had to play with some parameters to efficiently use the architecture.
+% \end{enumerate}
+
