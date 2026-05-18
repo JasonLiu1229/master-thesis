@@ -58,3 +58,13 @@ Thumbs.db
 *_Thesis.synctex.gz
 *_Thesis.toc
 *_Thesis.brf
+
+*.aux
+*.bbl
+*.lof
+*.lot
+*.out
+*.gz
+*.toc
+*.brf
+
