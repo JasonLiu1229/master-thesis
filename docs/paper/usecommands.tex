@@ -1,0 +1,51 @@
+% !TEX root = NameStudentYear_Thesis.tex
+
+%-- LaTeX template for a master thesis within AnSyMo
+%-- Version 1.0 -- Adapted for 2022 University House Style
+%-- Clone from https://sdemeyer@bitbucket.org/sdemeyer/
+
+\newcommand{\hypobox}[1]{
+	\begin{center}%
+        \noindent\thicklines\setlength{\fboxsep}{2pt}%
+        \cornersize{0.1}
+        \ovalbox{\begin{minipage}{8.4cm}%
+		#1
+		\end{minipage}}
+	\end{center}}
+	
+
+\newenvironment{BoxedSubsection}%
+	{\begin{Sbox}%
+	\begin{minipage}{\textwidth}}
+	{\end{minipage}\end{Sbox}
+	\begin{center}
+	\fcolorbox{black}{white}{\TheSbox}
+	\end{center}}
+
+
+
+\newcommand{\secref}[1]{Section~\ref{#1}\xspace}
+\newcommand{\figref}[1]{Figure~\ref{#1}\xspace} 
+\newcommand{\tabref}[1]{Table~\ref{#1}\xspace}
+\newcommand{\chapterref}[1]{Chapter~\ref{#1}\xspace}
+\newcommand{\chapterrefpage}[1]{Chapter~\ref{#1} (p.~\pageref{#1})\xspace}
+
+
+\ifthenelse{\boolean{includecomments}} {
+    \newcommand{\nb}[3]{
+    	{\colorbox{#2}{\bfseries\sffamily\scriptsize\textcolor{white}{#1}}}
+    	{\textcolor{#2}{\sf\small$\blacktriangleright$\textit{#3}$\blacktriangleleft$}}}
+} {
+    \newcommand{\nb}[3]{}
+}
+
+
+%Available colours
+% From xcolor: white, black, red, green, blue, cyan, magenta, yellow
+% From xcolor: red,   green, blue, darkgray, purple, cyan,   magenta, yellow,   black,   gray,   white, lightgray, brown, lime,   olive,   orange,   pink, teal, violoet
+\newcommand{\comment} [1] {\nb{TOFIX}{orange}{#1}}
+\newcommand{\TOFIX} [1] {\nb{TOFIX}{orange}{#1}}
+\newcommand{\OneAuthor}[1]{\nb{OneAuthor}{red}{#1}}
+\newcommand{\SecondAuthor}[1]{\nb{SecondAuthor}{magenta}{#1}}
+\newcommand{\ThirdAuthor}[1]{\nb{ThirdAuthor}{olive}{#1}}
+\newcommand{\Serge}[1]{\nb{Serge}{blue}{#1}}

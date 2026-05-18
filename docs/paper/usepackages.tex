@@ -1,0 +1,48 @@
+% !TEX root = NameStudentYear_Thesis.tex
+
+%-- Latex template for switching between IEEE / ACM and double-blind / non-double blind submissions
+%-- LaTeX template for a master thesis within AnSyMo
+%-- Version 1.0 -- Adapted for 2022 University House Style
+%-- Clone from https://sdemeyer@bitbucket.org/sdemeyer/
+
+%------------------------------------------------------
+%-- Must have packages
+\usepackage[utf8]{inputenc}
+\usepackage{carlito} %%%The carlito font package creates a font which is close to Callibri; the default Microsoft Font. It is now the default sans serif family
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{geometry} %% use package geometry to explicitly control the page-width
+\usepackage{graphicx} %float sub figures
+\usepackage{hyperref} %have explict URLs in the pdf
+\usepackage{amssymb} %adds special symbol names used for \TOFIX commands etc
+\usepackage{xspace}%to cope with special spacing after figure and table references
+\usepackage{color}% To use colors for \TOFIX commands;  \definecolor command for defining your own colors
+\usepackage{xcolor}% Add more colours
+\usepackage{fancybox}%Provides variants of \fbox
+\usepackage{fancyhdr}%construct and control page headers and footers
+\usepackage{ifthen} % Conditional commands in LATEX documents
+\usepackage{paralist} %adds commands like compactitem etc
+\usepackage{lastpage} %defines LastPage to allow for \pageref{LastPage}
+\usepackage{pdfpages} % allows to include a PDF as part of the LATEX
+
+
+
+%------------------------------------------------------
+%-- Likely to need packages
+%\usepackage[T1]{fontenc}%T1 fonts give slightly better output for accented characters
+%\usepackage{courier}%needed for code listings
+%\usepackage{listings} % for source code listings
+%\usepackage{multirow}% Create tabular cells spanning multiple rows
+%\usepackage{hhline}% Adds command \hh?line; better horizontal lines in tabulars and arrays
+
+
+%------------------------------------------------------
+%-- Sometimes needed have packages
+%\usepackage{amsmath} % For conditional equation
+%\usepackage{microtype} % LATEX in?ter?face to the mi?cro-ty?po?graphic ex?ten?sions that were in?tro?duced by pdfTEX
+%\usepackage{arydshln} % For table alternative of lines -> \hdadhline, cdashline
+%\usepackage[caption=false]{subfig} %float sub figures
+%\usepackage{balance} % Balance last page columns
+%\usepackage[normalem]{ulem} % pro?vides an \ul (un?der?line) com?mand which will break over line ends
+%\usepackage{fixltx2e} % for \textsubscript
+%\usepackage[utf8]{inputenc} %Accept different input encodings
+%\usepackage{tcolorbox}% en?vi?ron?ment for coloured and framed text boxes

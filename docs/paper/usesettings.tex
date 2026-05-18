@@ -1,0 +1,49 @@
+% !TEX root = NameStudentYear_Thesis.tex
+
+%-- Latex template for switching between IEEE / ACM and double-blind / non-double blind submissions
+%-- LaTeX template for a master thesis within AnSyMo
+%-- Version 1.0 -- Adapted for 2022 University House Style
+%-- Clone from https://sdemeyer@bitbucket.org/sdemeyer/
+
+{{\ttfamily \hyphenchar\the\font=`\-}% \texttt (Overfull \hbox)
+
+%% Faculteit Wetenschappen
+\definecolor{uawemain}{RGB}{0,108,169}
+\definecolor{uaweside}{RGB}{151,192,223}
+
+\geometry{a4paper, total={160mm,250mm},left=25mm, top=25mm} % = Normal setings
+
+\clubpenalty = 10000
+\widowpenalty = 10000
+\displaywidowpenalty = 10000
+
+\hypersetup{
+    colorlinks,%
+    citecolor=black,%
+    filecolor=black,%
+    linkcolor=black,%
+    urlcolor=gray,
+    linktocpage=true,
+    bookmarks=true,
+    bookmarksopen=true,
+    pdfpagemode=UseOutlines,
+%
+    pdftitle={\thesisTitle},    % title
+    pdfauthor={\studentName},     % author
+    pdfsubject={Master Thesis Universiteit Antwerpen},   % subject of the document
+    pdfcreator={PDF LaTex},   % creator of the document
+}
+
+\setlength{\textfloatsep}{2mm} % Reduce space between text and floats (tables)
+
+\pagestyle{fancy}
+\fancyhead{} % clear all header fields
+\fancyhead[LE,RO]{\textsl{\rightmark}}
+\fancyhead[LO,RE]{\textsl{\leftmark}}
+\fancyfoot{} % clear all footer fields
+\addtolength{\headheight}{\baselineskip}
+\setlength{\footskip}{27pt} %% increase the size of the footer space to accommodate for the logo in the footer
+\fancyfoot[R]{\thepage~/~\pageref{LastPage}}
+\fancyfoot[L]{\includegraphics[width=3cm]{\ualogo}}
+\renewcommand{\headrulewidth}{0pt} %% set the thickness of the decorative line below the header
+\renewcommand{\footrulewidth}{0pt} %% set the thickness of the decorative line above the footer

@@ -1,0 +1,86 @@
+% !TEX root = ../NameStudentYear_Thesis.tex
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\thispagestyle{empty}
+\sffamily %%% Switch to the sans serif font family for the title page. 
+
+
+\begin{flushright}
+\ifthenelse{\boolean{englishDocument}} {
+	\textbf{Academic Year} \\
+}{
+	\textbf{Academisch Jaar} \\
+}
+2022-2023
+\end{flushright}
+
+\vspace{5cm}
+
+\begin{flushleft}
+\textcolor{white}{\colorbox{uawemain}
+	{\Huge \emph{\thesisTitle}}}
+
+\vspace{2cm}
+
+{\Large \textbf{\studentName}}
+
+
+\vspace{5cm}
+\ifthenelse{\boolean{englishDocument}} {
+	Master's thesis \\ \textbf{Master of Science in computer science: software engineering}
+% Master of Science in computer science: computer networks
+% Master of Science in computer science: data science and artificial intelligence
+% Master of Science in computer science: software engineering
+
+}{
+	Masterproef \\ \textbf{Master of Science in de informatica: software engineering}
+% Master of Science in de informatica: computernetwerken
+% Master of Science in de informatica: data science en artifici\"{e}le intelligentie
+% Master of Science in de informatica: software engineering
+}
+
+\vspace{3cm}
+Supervisor \\ \textbf{prof. Prof. Serge Demeyer, AnSyMo, UAntwerpen}
+
+Supervising assistant \\ \textbf{ing. P. Pienter, AnSyMo, UAntwerpen}
+
+\end{flushleft}
+
+
+\begin{figure}[b]
+\includegraphics[width=0.5\textwidth]{\ualogo}
+\end{figure}
+      
+
+\newpage
+\rmfamily %%% Switch to the roman font family (with serif) for the remaining text. 
+~
+\vfill %vfill ensures that empty lines are added so that the remaining text comes at the bottom 
+
+\begin{flushleft}
+\small
+\ifthenelse{\boolean{englishDocument}} {
+Disclaimer Master's thesis
+
+This document is an examination document that has not been corrected for any errors identified.
+Without prior written permission of both the supervisor(s) and the author(s), any copying, copying, using or realizing this publication or parts thereof is prohibited.
+For requests for information regarding the copying and/or use and/or realisation of parts of this publication, please contact to the university at which the author is registered.
+
+Prior written permission from the supervisor(s) is also required for the use for industrial or commercial utility of the (original) methods, products, circuits and programs described in this thesis,  and for the submission of this publication for participation in scientific prizes or competitions.
+
+This document is in accordance with the master thesis regulations and the Code of Conduct.
+It has been reviewed by the supervisor and the attendant.
+}{
+Disclaimer Masterproef
+
+Dit document is een examendocument dat niet werd gecorrigeerd voor eventueel vastgestelde fouten.
+Zonder voorafgaande schriftelijke toestemming van zowel de promotor(en) als de auteur(s) is overnemen, kopi\"{e}ren, gebruiken of realiseren van deze uitgave of gedeelten ervan verboden.
+Voor aanvragen tot of informatie i.v.m. het overnemen en/of gebruik en/of realisatie van gedeelten uit deze publicatie, wendt u tot de universiteit waaraan de auteur is ingeschreven.
+
+
+Voorafgaande schriftelijke toestemming van de promotor(en) is eveneens vereist voor het aanwenden van de in dit afstudeerwerk beschreven (originele) methoden, producten, schakelingen en programma's voor industrieel of commercieel nut en voor de inzending van deze publicatie ter deelname aan wetenschappelijke prijzen of wedstrijden.
+
+Dit document is in overeenstemming met het masterproefreglement en de gedragscode en nagekeken door promotor en begeleider.
+}
+ \end{flushleft}
+

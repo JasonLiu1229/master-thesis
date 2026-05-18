@@ -1,0 +1,19 @@
+% !TEX root = NameStudentYear_Thesis.tex
+
+%-- Latex template for switching between IEEE / ACM and double-blind / non-double blind submissions
+%-- LaTeX template for a master thesis within AnSyMo
+%-- Version 1.0 -- Adapted for 2022 University House Style
+%-- Clone from https://sdemeyer@bitbucket.org/sdemeyer/
+
+%%%% -- Conditional compilation settings
+\newboolean{includecomments}
+\setboolean{includecomments}{true}
+\newboolean{englishDocument}
+\setboolean{englishDocument}{true}
+
+\ifthenelse{\boolean{englishDocument}} {
+	\newcommand{\ualogo}{images/ua_logo_we_EN}
+}{
+	\newcommand{\ualogo}{images/ua_logo_we_NL}
+}
+%%%% --- End of conditional compilation settings

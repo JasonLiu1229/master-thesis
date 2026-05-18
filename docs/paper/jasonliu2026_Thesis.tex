@@ -1,0 +1,64 @@
+\documentclass[a4paper,11pt,final,oneside,openright]{report}
+
+\newcommand{\thesisTitle}{Enhancing Readability of Automatically Generated Unit Tests: Leveraging LLMs for Meaningful Identifier Naming}
+\newcommand{\studentName}{Jason Liu}
+
+\input{usepackages}
+\input{useconditional}
+\input{usesettings}
+\input{usecommands}
+
+\title{\thesisTitle}
+\author{\studentName}
+\date{\today}
+
+\begin{document}
+
+\input{sections/titlepage}
+
+\newpage
+\input{sections/abstract_english}
+
+\ifthenelse{\boolean{englishDocument}} {
+  %% For the english master one does not need to include a dutch summary
+}{
+  \newpage
+  \input{sections/abstract_dutch}
+}
+
+\newpage
+\input{sections/acknowledgments}
+
+\newpage
+\input{sections/thesis_context}
+
+\clearpage
+%include the PDF version of the camera ready as submitted.
+%Put the PDF somewhere and include as below
+\includepdf[
+  pages={-},
+  fitpaper=true,
+  pagecommand={
+    \thispagestyle{empty}
+    \AddToShipoutPictureFG*{%
+      \AtPageLowerLeft{%
+        \raisebox{12mm}{%
+          \hspace{0.5\paperwidth}\makebox[0pt]{\thepage}%
+        }%
+      }%
+    }
+  }
+]{sections/thesis_actualpaper}
+
+\newpage
+\bibliographystyle{unsrt}
+\bibliography{references}
+\addcontentsline{toc}{chapter}{References}
+
+\appendix
+\newpage
+\input{sections/apndx_overlap.tex}
+\input{sections/apndx_workdistribution.tex}
+\input{sections/apndx_more.tex}
+
+\end{document}
