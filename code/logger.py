@@ -3,7 +3,7 @@ import os
 import sys
 
 
-def setup_logging(name: str = "log", log_level = logging.INFO):
+def setup_logging(name: str = "log", log_level=logging.INFO):
     os.makedirs("out/logs", exist_ok=True)
 
     if not os.path.exists(f"out/logs/{name}.log"):
