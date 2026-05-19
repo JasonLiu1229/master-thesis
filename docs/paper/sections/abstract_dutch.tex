@@ -3,5 +3,23 @@
 \section*{Nederlandstalige Samenvatting}
 \addcontentsline{toc}{section}{Nederlandstalige Samenvatting}
 
-Automatisch gegenereerde unit tests lijden onder niet-informatieve identificatornamen zoals \texttt{var0} en \texttt{test42}, wat het begrip bemoeilijkt en de praktische waarde van de gegenereerde uitvoer vermindert. Dit artikel presenteert een op LLM gebaseerde hernoemingspipeline die zowel lokale variabelen als testmethodenamen hernoemt in gegenereerde Java-tests door een lokaal geserveerd open-source model te voorzien van gestructureerde context uit de testmethode. We evalueren de pipeline met Qwen2.5-Coder 7B over zes fine-tuningcontrolepunten en GPT-5 mini als zero-shot gesloten referentiebasislijn, vergeleken met de niet-LLM-basislijnen GGNN en RefBERT op een deelverzameling van 100 steekproeven uit de \texttt{methods2test}-dataset. We introduceren ook CodeReader, een configureerbaar open-source leesbaarheidsbeoordelingstool dat hernoemde uitvoer beoordeelt met behulp van een gewogen ensemble van LLM-judges op basis van een expliciete rubriek, wat reproduceerbare evaluatie mogelijk maakt zonder een menselijke studie. Beide LLM-modellen overtreffen de niet-LLM-basislijnen ruimschoots (F1\,=\,0,760 en 0,756 vs.\ 0,019 en 0,308). Fine-tuning verbetert F1 verder tot 0,839 terwijl het verzadigt na slechts 15\% van de trainingsstappen. Er komt een tegenstrijdige bevinding naar voren: fine-tuning verhoogt de nauwkeurigheid op tokenniveau, maar verlaagt de LLM-leesbaarheidscore, terwijl GPT-5 mini de hoogste leesbaarheidscore van alle varianten behaalt ondanks vergelijkbare F1, wat suggereert dat nauwkeurigheid op tokenniveau en holistische leesbaarheid fundamenteel verschillende eigenschappen meten. Deze resultaten benadrukken de noodzaak om beide statistieken te rapporteren bij het evalueren van identificatorhernoemingstools.
-
+Geautomatiseerde testgeneratie\-tools zoals EvoSuite en Randoop produceren
+unit tests met niet-informatieve identifiers zoals \texttt{var0} en
+\texttt{test42}, die het begrip belemmeren en de praktische waarde van de
+gegenereerde uitvoer voor de ontwikkelaars die deze moeten onderhouden
+verminderen. Het hernoemen van deze identifiers naar betekenisvolle namen
+is een noodzakelijke nabewerkingsstap, maar bestaande niet-LLM-benaderingen
+behalen hoogstens $F_1 = 0.308$ en er bestaat geen schaalbaar raamwerk
+voor leesbaarheids\-evaluatie. Token-niveau nauwkeurigheid en holistische
+leesbaarheid zijn niet hetzelfde: fine-tuning verbetert $F_1$ tot $0.839$
+maar verlaagt tegelijkertijd de LLM-leesbaarheids\-score, terwijl een
+zero-shot proprietair model de hoogste leesbaarheid van alle varianten
+behaalt ondanks een vergelijkbare $F_1$, wat aantoont dat een model kan
+leren om referentielabels te reproduceren zonder namen te produceren die
+leesbaarder zijn voor een ontwikkelaar. Geen van beide metrieken is daarom
+op zichzelf voldoende als grondwaarheid, en beide zouden samen gerapporteerd
+moeten worden bij de evaluatie van identifier-hernoem\-tools; ter
+ondersteuning hiervan dragen wij \textsc{CodeReader} bij, een
+configureerbaar open-source leesbaarheids\-beoordelings\-tool, en tonen
+wij aan dat zelfs minimale fine-tuning van 15\% van de trainingsstappen
+het grootste deel van het token-niveau voordeel oplevert.
