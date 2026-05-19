@@ -1,7 +1,6 @@
 \documentclass[a4paper,11pt,final,oneside,openright]{report}
 
-\newcommand{\thesisTitle}{Enhancing Readability of Automatically Generated Unit Tests:\newline
-Leveraging LLMs for Meaningful Identifier Naming}
+\newcommand{\thesisTitle}{Beyond F1: LLM-Based Identifier Renaming and Readability Evaluation for Generated Tests}
 \newcommand{\studentName}{Jason Liu}
 
 \input{usepackages}
@@ -20,12 +19,15 @@ Leveraging LLMs for Meaningful Identifier Naming}
 \newpage
 \input{sections/abstract_english}
 
-\ifthenelse{\boolean{englishDocument}} {
-  %% For the english master one does not need to include a dutch summary
-}{
-  \newpage
-  \input{sections/abstract_dutch}
-}
+% \ifthenelse{\boolean{englishDocument}} {
+%   %% For the english master one does not need to include a dutch summary
+% }{
+% \newpage
+% \input{sections/abstract_dutch}
+% }
+
+\newpage
+\input{sections/abstract_dutch}
 
 \newpage
 \input{sections/acknowledgments}
