@@ -87,7 +87,7 @@ class LLM_Model:
         self,
         prompt,
         max_new_tokens=256,
-        temperature=0.25,
+        temperature=0,
         top_p=0.85,
         top_k=5,
         do_sample=False,

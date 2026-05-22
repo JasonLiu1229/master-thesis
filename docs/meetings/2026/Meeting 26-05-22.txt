@@ -1,0 +1,15 @@
+Feedback paper:
+  - Explain temperature for generation and evaluation different
+  - mention use default of ollama
+  - Add cost table for fine tuning
+  - double check arno work of how precision and recall work
+  - maybe add remaining metrics to main paper
+  - add proper motivation for weights
+  - small motivation why i chose models in paper
+  - extract each decision and try to motivate them
+  - add 4.1 mini 
+
+
+Publishing venue:
+  - search based on conferences key words
+    - workshop
