@@ -64,7 +64,11 @@ class LLMClient:
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}",
         }
-        data = {"model": model, "messages": messages}
+
+        if model == "gpt-5-mini":
+            data = {"model": model, "messages": messages}
+        else:
+            data = {"model": model, "messages": messages, "temperature": 0}
 
         t0 = time.perf_counter()
         response = session.post(self.base_url, headers=headers, json=data)
