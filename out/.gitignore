@@ -3,3 +3,7 @@ benchmark/*/renamed*
 benchmark/renamed/*
 benchmark/temp*
 indices.txt
+benchmark/
+cloud/
+java/
+stats/

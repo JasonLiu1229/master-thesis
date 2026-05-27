@@ -1,5 +1,5 @@
 # Configuration for LLM model
 MODEL_ID: "Qwen/Qwen2.5-Coder-7B-Instruct"
 
-USE_LOCAL_LLM: false
-ADAPTER_DIR: "out/adapter/120426/adapter_15pct/"
+USE_LOCAL_LLM: true
+ADAPTER_DIR: "out/adapter/120426/adapter_25pct/"

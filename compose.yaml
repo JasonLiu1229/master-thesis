@@ -48,7 +48,7 @@ services:
   t3:
     container_name: t3
     build:
-      dockerfile: docker/pipeline.Dockerfile   
+      dockerfile: docker/t3.Dockerfile   
     volumes:
       - ./out:/app/out/
     env_file:
@@ -57,6 +57,18 @@ services:
     depends_on:
       api:
         condition: service_healthy
+    networks:
+      - pipeline
+
+  t3_openai:
+    container_name: t3_openai
+    build:
+      dockerfile: docker/t3.Dockerfile   
+    volumes:
+      - ./out:/app/out/
+    env_file:
+      - .env
+    profiles: ["t3_openai"]
     networks:
       - pipeline
 
@@ -130,7 +142,7 @@ services:
       dockerfile: docker/t3_eval_oracle.Dockerfile
     volumes:
       - ./out:/app/out/
-      - ./tools/java-dataset-converter-llm/dataset/test/jsonl/:/app/in/test:ro
+      - ./out/dataset/fixed/:/app/in/test:ro
     env_file:
       - .env
     profiles: ["t3_eval_oracle"]

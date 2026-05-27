@@ -1,5 +1,0 @@
-timestamp,file_path,attempt,error_type,error_message,raw_response
-2026-04-27T13:02:06,in/test/TestClass73575.java.jsonl,1,UnvalidJson,Response was not valid JSON: Extra data: line 1 column 60 (char 59),"{""func_1"": ""testInvalidPolicyEntry"", ""var_1"": ""jsonObject""}, {""func_1"": ""testInvalidPolicyEntry"", ""var_1"": ""jsonObject""}"
-2026-04-27T13:02:11,in/test/TestClass73575.java.jsonl,2,UnvalidJson,Response was not valid JSON: Extra data: line 1 column 60 (char 59),"{""func_1"": ""testInvalidPolicyEntry"", ""var_1"": ""jsonObject""}, {""func_1"": ""testInvalidPolicyEntry"", ""var_1"": ""jsonObject""}"
-2026-04-27T13:02:16,in/test/TestClass73575.java.jsonl,3,UnvalidJson,Response was not valid JSON: Extra data: line 1 column 60 (char 59),"{""func_1"": ""testInvalidPolicyEntry"", ""var_1"": ""jsonObject""}, {""func_1"": ""testInvalidPolicyEntry"", ""var_1"": ""jsonObject""}"
-2026-04-27T13:02:16,in/test/TestClass73575.java.jsonl,3,FailedRename,All 3 attempts failed to produce a usable mapping for func_1; keeping original test.,

@@ -1,8 +1,0 @@
-timestamp,file_path,attempt,error_type,error_message,raw_response
-2026-05-08T23:09:04,in/test/TestClass8235.java.jsonl,1,ExtraKeyError,"Mapping for func_1 contains unexpected keys {'var_5', 'var_4', 'var_3', 'var_2'}; they will be ignored.",
-2026-05-09T01:14:05,in/test/TestClass18794.java.jsonl,1,ExtraKeyError,Mapping for func_1 contains unexpected keys {'func_2'}; they will be ignored.,
-2026-05-09T02:15:28,in/test/TestClass2032.java.jsonl,1,ExtraKeyError,Mapping for func_1 contains unexpected keys {'func_2'}; they will be ignored.,
-2026-05-09T02:57:21,in/test/TestClass14053.java.jsonl,1,ExtraKeyError,Mapping for func_1 contains unexpected keys {'func_2'}; they will be ignored.,
-2026-05-09T04:35:25,in/test/TestClass18539.java.jsonl,1,ExtraKeyError,Mapping for func_1 contains unexpected keys {'var_1'}; they will be ignored.,
-2026-05-09T04:48:12,in/test/TestClass71651.java.jsonl,1,ExtraKeyError,Mapping for func_1 contains unexpected keys {'var_1'}; they will be ignored.,
-2026-05-09T05:10:31,in/test/TestClass11441.java.jsonl,1,ExtraKeyError,Mapping for func_1 contains unexpected keys {'func_2'}; they will be ignored.,
