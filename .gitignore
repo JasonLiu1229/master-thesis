@@ -31,3 +31,5 @@ tools/randoop-*
 out/adapter/
 out/data_preprocessed/
 out/*.zip
+
+run_checkpoints.py

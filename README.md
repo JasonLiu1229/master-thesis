@@ -35,13 +35,20 @@ T2 is based on RefBERT, a transformer model inspired by BERT. It processes code 
 
 ### T3
 
-#### Open source model, not fine tuned
+T3 uses a Large Language Model (LLM) to rename obfuscated identifiers in automatically generated Java unit tests. Given a test method with obfuscated names (e.g. `func_1`, `var_1`), the pipeline extracts rename candidates, constructs a structured prompt, and asks the LLM to return a JSON mapping of `originalName -> newName`. The renamed code is produced by applying this mapping at the token level, ensuring only identifiers are touched and the structure of the code is preserved.
 
-#### Open source model, fine tuned
+T3 supports three modes:
 
-#### Paid model, not fine tuned
+- **single**: rename identifiers in a single `.java` file.
+- **dir**: rename identifiers across an entire directory of `.java` files.
+- **eval**: evaluate renaming quality against oracle (ground-truth) outputs using `.jsonl` files. Produces F1 (subtoken precision/recall), CER, edit distance, and optionally LLM-based readability scores via the `codereader` service. With `--cohen`, Wilcoxon signed-rank effect sizes (rank-biserial _r_) are computed. With `--oracle`, a three-way readability comparison is produced: obfuscated → renamed → oracle.
+  T3 is model-agnostic: it works with any OpenAI-compatible API endpoint (OpenAI, Mistral, Together AI, vLLM, LM Studio, Ollama) by configuring `API_KEY`, `API_URL`, and `LLM_MODEL` in your `.env` file. For local inference, the `Qwen` model is supported directly via the `model.py` singleton, which applies a threading lock to avoid concurrency issues on a single GPU.
+
+Key configuration lives in `pipeline/config.yml`, including the number of retry attempts, worker count, evaluation sample limit, and statistical test parameters (α, power).
 
 ## Setup
+
+In this section the basic things that would be needed to run the package is listed.
 
 ### Prerequirements
 
@@ -100,14 +107,6 @@ The tuning is done using [QLoRA](https://medium.com/@dillipprasad60/qlora-explai
 
 Overall you can just run `docker compose --profile tune up` to run the preprocess and tuning simaltainiously. Note in this repo the dataset is already preprocessed for you, so if you want to use a different one, add `--force` in the Dockerfile that can be found in `docker/tuner.Dockerfile`.
 
-## Optional
-
-Here are some additional optional things I added to the code base. These are things like helper code for analysis work, or optimizations or other things.
-
-### Utils
-
-<!-- TODO: write this out -->
-
 ## References
 
 ```bibtex
@@ -125,7 +124,7 @@ Here are some additional optional things I added to the code base. These are thi
       year={2024}
 }
 @article{qwen2,
-      title={Qwen2 Technical Report}, 
+      title={Qwen2 Technical Report},
       author={An Yang and Baosong Yang and Binyuan Hui and Bo Zheng and Bowen Yu and Chang Zhou and Chengpeng Li and Chengyuan Li and Dayiheng Liu and Fei Huang and Guanting Dong and Haoran Wei and Huan Lin and Jialong Tang and Jialin Wang and Jian Yang and Jianhong Tu and Jianwei Zhang and Jianxin Ma and Jin Xu and Jingren Zhou and Jinze Bai and Jinzheng He and Junyang Lin and Kai Dang and Keming Lu and Keqin Chen and Kexin Yang and Mei Li and Mingfeng Xue and Na Ni and Pei Zhang and Peng Wang and Ru Peng and Rui Men and Ruize Gao and Runji Lin and Shijie Wang and Shuai Bai and Sinan Tan and Tianhang Zhu and Tianhao Li and Tianyu Liu and Wenbin Ge and Xiaodong Deng and Xiaohuan Zhou and Xingzhang Ren and Xinyu Zhang and Xipin Wei and Xuancheng Ren and Yang Fan and Yang Yao and Yichang Zhang and Yu Wan and Yunfei Chu and Yuqiong Liu and Zeyu Cui and Zhenru Zhang and Zhihao Fan},
       journal={arXiv preprint arXiv:2407.10671},
       year={2024}
