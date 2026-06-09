@@ -89,4 +89,4 @@ COPY ../code/benchmarking/t1_parser.py /app/code/t1_parser.py
 
 WORKDIR /app/code
 
-CMD ["python3.7", "t1_executioner.py", "--run-args", "dataset"]
+CMD ["python3.7", "t1_executioner.py", "--run-args", "test"]

@@ -15,8 +15,8 @@ COPY ../code/logger.py       /app/
 COPY ../code/prompts.py      /app/
 
 ENV TOKENIZERS_PARALLELISM=false
-ENV OUTPUT_DIR=out/java/output/gpt/
+ENV OUTPUT_DIR=out/java/output/
 
 WORKDIR /app
 
-CMD python3 t3.py --mode dir --dir out/dataset/test/fixed/ --force --output $OUTPUT_DIR
+CMD python3 t3.py --mode dir --dir out/dataset/temp/ --force --output $OUTPUT_DIR

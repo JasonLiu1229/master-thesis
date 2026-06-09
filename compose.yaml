@@ -6,6 +6,7 @@ services:
     volumes:
       - ./out:/app/code/out/
       - ./out/dataset/fixed/:/app/code/in/test:ro
+      - ./out/dataset/test/fixed_proto/:/app/code/Dataset/T1/test:ro
     working_dir: /app/code
     deploy:
       resources:
@@ -15,9 +16,9 @@ services:
               capabilities: [gpu] 
     environment:
       CODEREADER_URL: http://codereader:8080
-    depends_on:
-      codereader:
-        condition: service_healthy
+    # depends_on:
+    #   codereader:
+    #     condition: service_healthy
     profiles: ["t1", "arno", "test", "t1_eval"]
     networks:
       - codereader
@@ -44,6 +45,21 @@ services:
     profiles: ["t2", "arno", "test", "t2_eval"]
     networks:
       - codereader
+
+  t2_run:
+    container_name: t2_run
+    build:
+      dockerfile: docker/t2_run.Dockerfile
+    volumes:
+      - ./out/temp/:/app/code/in:ro 
+      - ./out/java/output/renamed_t2/:/app/code/out       
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+    profiles: ["t2_run"]
 
   t3:
     container_name: t3

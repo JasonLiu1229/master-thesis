@@ -3,23 +3,19 @@
 \section*{Nederlandstalige Samenvatting}
 \addcontentsline{toc}{section}{Nederlandstalige Samenvatting}
 
-Geautomatiseerde testgeneratie\-tools zoals EvoSuite en Randoop produceren
-unit tests met niet-informatieve identifiers zoals \texttt{var0} en
-\texttt{test42}, die het begrip belemmeren en de praktische waarde van de
-gegenereerde uitvoer voor de ontwikkelaars die deze moeten onderhouden
-verminderen. Het hernoemen van deze identifiers naar betekenisvolle namen
-is een noodzakelijke nabewerkingsstap, maar bestaande niet-LLM-benaderingen
-behalen hoogstens $F_1 = 0.308$ en er bestaat geen schaalbaar raamwerk
-voor leesbaarheids\-evaluatie. Token-niveau nauwkeurigheid en holistische
-leesbaarheid zijn niet hetzelfde: fine-tuning verbetert $F_1$ tot $0.839$
-maar verlaagt tegelijkertijd de LLM-leesbaarheids\-score, terwijl een
-zero-shot proprietair model de hoogste leesbaarheid van alle varianten
-behaalt ondanks een vergelijkbare $F_1$, wat aantoont dat een model kan
-leren om referentielabels te reproduceren zonder namen te produceren die
-leesbaarder zijn voor een ontwikkelaar. Geen van beide metrieken is daarom
-op zichzelf voldoende als grondwaarheid, en beide zouden samen gerapporteerd
-moeten worden bij de evaluatie van identifier-hernoem\-tools; ter
-ondersteuning hiervan dragen wij \textsc{CodeReader} bij, een
-configureerbaar open-source leesbaarheids\-beoordelings\-tool, en tonen
-wij aan dat zelfs minimale fine-tuning van 15\% van de trainingsstappen
-het grootste deel van het token-niveau voordeel oplevert.
+Geautomatiseerde testgeneratie-tools zoals EvoSuite en Randoop produceren
+unit-tests met weinig zeggende identifiers zoals \texttt{var0} en
+\texttt{test42}, die ontwikkelaars moeten hernoemen voordat de tests praktisch
+onderhoudbaar zijn. Bestaande niet-LLM-benaderingen halen maximaal
+$F_1 = 0{,}308$, en er bestaat geen gevestigd evaluatiekader dat meet of
+hernoemde tests daadwerkelijk leesbaarder zijn. We stellen vast dat het
+fine-tunen van een LLM de nauwkeurigheid van naamgeving op tokenniveau
+aanzienlijk verbetert ($F_1 = 0{,}839$), maar tegelijkertijd de holistische
+leesbaarheid \emph{vermindert}, terwijl een zero-shot proprietair model het
+tegenovergestelde bereikt~--- lagere $F_1$ maar hogere leesbaarheid~--- wat
+aantoont dat deze twee eigenschappen fundamenteel ongecorreleerd zijn en dat
+geen van beide metrieken alleen volstaat om identifier-hernoeming te evalueren.
+Deze divergentie betekent dat hernoemingstools op beide dimensies beoordeeld
+moeten worden, en we dragen \textsc{CodeReader} bij, een configureerbare
+open-source op LLM-gebaseerde leesbaarheidsbeoordelingstool, om deze dubbele
+evaluatie reproduceerbaar op schaal mogelijk te maken.

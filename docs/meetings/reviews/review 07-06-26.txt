@@ -1,0 +1,52 @@
+Here is more actionable feedback on your thesis. It is written as an action plan with steps and so on.
+You are free to deviate from my suggestions; it's your thesis not mine.
+
+And yes, it will probably go over the 10-page paper format. Don't worry about this now; condensing is for later. First is to make it understandable for the reader.
+
+I really believe that this can be done in a few days of intense writing. Your english is good and you seem to write fast.
+
+To be discussed on Monday morning.
+
+
+
+(0) Think who you are writing this for.
+The rule for a master thesis is that it should be understandable by your peers, so picture yourself an average master student.
+How much does he or she know about LLMS? Test Identifiers
+        Terms like obfuscation (or at least your interpretation of the term), token-level accuracy, subtoken level precision, checkpoints, focal method, power analysis, ... will he or she understand what you mean? Understand the ramifications?
+        The whole prompt engineering as well will only be known be a few: hugging face transformers, one shot prompting, reflexion retry, schema validation, causal language model, tensor, ...
+        I really didn't know what these checkpoints were about. It is mentioned as some kind of percentage but I don't have a clue
+        Avoid acronyms especially for your criteria (CER)
+
+
+(1) Think what your message to the reader is. Currently you pitch it as a tool (CodeReader, a configurable open-source LLM-based readability grading tool). This would imply a feasibility study. However, given your research questions and the results in Table I and Table II it feels more like a comparative study
+
+
+(2) add a section 2, with a concrete example. (This is entitled the "motivating example")
+
+Show a piece of test code with names for the method under test and some variables. First use test 1, v1, v2 .... Then show the improved version with actual test names. Explain how variations may occur so that a single oracle is not enough.
+
+
+(3) add a section 3, the background targeted at your intended audience (see step 0)
+Explain all the concepts you need to understand how to do the "obfuscation" (I am not convinced that "obfuscation" is the proper name).
+Explain the token-level accuracy with an actual oracle of names.
+Explain the alternative, LLM as a judge.
+Probably explain check-points s well?
+
+(4) rewrite the related work from a "standing on the shoulders of giants" perspective
+Given the example in section 2 what is it that we currently know about identifier renaming in test code.
+But also what is it that we do *not* yet know which your comparative study will address.
+Then deduce the research agenda which should correspond more or less to your research questions.
+But you will need to rework the research questions to give them more intuitive appeal to the intended audience
+
+
+(5) Rewrite the "approach" section starting with the message to the reader (= feasibility of comparative) and deduce the research questions which should be moved out of the intro and into the start of the research method. Then explain all the prompt engineering and evaluation criteria etc that you will use.
+This part of the paper is too technical and uses way too many terms. You make things way more complicated then they should be.
+Perhaps just take an existing paper about prompting for software engineering taks and explain how you followed the same basic steps with small changes
+
+
+(6) Then it is time to refine the abstract, intro and conclusion.
+Here's a reference to the 4-line abstract rule with the "startling sentence" as the main thing to focus on
+        https://eur01.safelinks.protection.outlook.com/?url=https%3A%2F%2Fplg.uwaterloo.ca%2F~migod%2Fresearch%2FbeckOOPSLA.html&data=05%7C02%7CJason.Liu%40student.uantwerpen.be%7C233a427865094951202b08dec4cd7c17%7C792e08fb2d544a8eaf72202548136ef6%7C0%7C0%7C639164583979199812%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=d1S99GkkIMg781gZKx2SbWcIGWoTm13x1LplKm%2BrG5o%3D&reserved=0
+You should have a startling sentence which should be close to message you want the reader to remember. The conclusion should be expressed in terms of example in section 2
+
+(7) Then rework the results and discussion sections making sure that they are aligned with the abstract, introduction, conclusion and approach. You don't need to show all you did, only the things that are relevant for the research questions and the motivating example.
