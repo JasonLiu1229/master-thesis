@@ -3,19 +3,17 @@
 \section*{Nederlandstalige Samenvatting}
 \addcontentsline{toc}{section}{Nederlandstalige Samenvatting}
 
-Geautomatiseerde testgeneratie-tools zoals EvoSuite en Randoop produceren
-unit-tests met weinig zeggende identifiers zoals \texttt{var0} en
-\texttt{test42}, die ontwikkelaars moeten hernoemen voordat de tests praktisch
-onderhoudbaar zijn. Bestaande niet-LLM-benaderingen halen maximaal
-$F_1 = 0{,}308$, en er bestaat geen gevestigd evaluatiekader dat meet of
-hernoemde tests daadwerkelijk leesbaarder zijn. We stellen vast dat het
-fine-tunen van een LLM de nauwkeurigheid van naamgeving op tokenniveau
-aanzienlijk verbetert ($F_1 = 0{,}839$), maar tegelijkertijd de holistische
-leesbaarheid \emph{vermindert}, terwijl een zero-shot proprietair model het
-tegenovergestelde bereikt~--- lagere $F_1$ maar hogere leesbaarheid~--- wat
-aantoont dat deze twee eigenschappen fundamenteel ongecorreleerd zijn en dat
-geen van beide metrieken alleen volstaat om identifier-hernoeming te evalueren.
-Deze divergentie betekent dat hernoemingstools op beide dimensies beoordeeld
-moeten worden, en we dragen \textsc{CodeReader} bij, een configureerbare
-open-source op LLM-gebaseerde leesbaarheidsbeoordelingstool, om deze dubbele
-evaluatie reproduceerbaar op schaal mogelijk te maken.
+Geautomatiseerde testgeneratieprogramma's zoals EvoSuite en Randoop produceren tests
+die functioneel correct zijn maar nauwelijks leesbaar — methodenamen zoals
+\texttt{func\_1} en variabelen zoals \texttt{var\_1} dwingen ontwikkelaars om het
+volledige testlichaam door te nemen voordat ze kunnen begrijpen, vertrouwen of
+onderhouden wat ze voor zich hebben.
+Het hernoemen van deze identifiers is daarom essentieel, maar het is onduidelijk welke
+aanpak dit het beste doet.
+Een model dat specifiek getraind is op hernoemde testcode produceert nauwkeurigere
+namen dan elke andere aanpak die we vergeleken hebben — toch zijn de bijbehorende
+tests consequent minder leesbaar dan die van een model dat de taak nooit eerder heeft
+gezien.
+Naamnauwkeurigheid en leesbaarheid meten fundamenteel verschillende dingen, en het
+evalueren van slechts één geeft een misleidend beeld van welke aanpak een ontwikkelaar
+daadwerkelijk helpt.
