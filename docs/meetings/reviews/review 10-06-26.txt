@@ -1,0 +1,223 @@
+Here is how I would score your master thesis right now. I illustrates some things which can easily be improved.
+
+
+
+
+
+First some other things that I would change.
+
+
+
+1. The abstract
+
+
+
+Here is how I would write it.
+
+
+
+Automated test generation tools such as EvoSuite and Randoop produce tests that are functionally correct but
+
+nearly unreadable — method names like func_1 and variables like var_1 force developers to trace through the entire test body
+
+before they can understand, trust, or maintain what they are looking at.
+
+
+
+Renaming these identifiers is therefore essential, and several non-LLM approaches have been studied in the past with mixed success.
+
+
+
+In this paper we compare two non-LLM baselines (GGNN and RefBERT), three LLMs used without task-specific training (GPT-4.1 mini, GPT-5 mini and Qwen2.5-Coder), and a locally deployed open-source model (Qwen2.5-Coder) fine-tuned at five stages of training. 
+
+
+
+Based on an evaluation against the Method2Test dataset (containing 780,944 test–method pairs drawn from open-source GitHub repositories) we observe that LLM-based approaches perform better than the non-LLM baselines.
+
+
+
+However, when comparing the LLM-based approaches we learned that naming accuracy and readability measure fundamentally different things, and evaluating only one gives a misleading picture of which approach actually helps a developer.
+
+
+
+
+
+
+
+2. Remove the references to the intent of publishing at ICST or any other venue. (In the thesis context and in the appendix with the rebuttal).
+
+This is premature at this stage; we need to discuss this further. And as I see it now there is still some work left to be done before it is ready for submission.
+
+
+
+
+
+
+
+
+
+Assessment form: Comparative Study
+
+
+
+1) Pass [10 .. 13[
+
+1.1 - Is the problem described precisely? 
+
+
+
+Yes, section II Motivating Example paints a convincing story.
+
+
+
+1.2 - Are the techniques (their similarities and differences) clearly described?
+
+
+
+Yes, the non-LLM and LLM approaches are listed. The description is rather short but that is to be expected with a 10-page limit. There is a  github repository with the renaming pipelines.
+
+
+
+1.3 - Are the criteria for comparison clearly described? 
+
+
+
+Yes. That is one of the real contributions of the paper that it illustrates that naming accuracy and readability measure fundamentally different things
+
+
+
+1.4 - Are conclusions drawn? (when should one use which technique?) 
+
+
+
+Yes, quite convincing. comparing non-LLM against LLM and assessing that the evaluation criteria should be refined
+
+
+
+
+
+2) Distinction [13 .. 15[
+
+2.1 - Is the question "why a comparative study" answered convincingly?  (Is it clear that the problem is relevant, different usable techniques exist and the results seem uncertain?)
+
+
+
+Yes. Subsection A, B, C, D gives a nice overview of the state of the art.
+
+--> It would be nice to state that at the time of writing to the best of our knowledge nobody used an "LLM as a judge" approach to evaluate the readability of identifier names in code (perhaps in test code)
+
+
+
+
+
+2.2 - Is an overview of the applicable techniques presented?  (Are the differences and similarities between the different techniques framed in a broader context?)
+
+
+
+Yes. Although rather brief and coarse grained. 
+
+
+
+2.3 - Are the chosen criteria well motivated? (Are the different criteria explained? Is the choice for the given criteria explained with respect to the problem?) 
+
+
+
+Yes. That is one of the real contributions of the paper that it illustrates that naming accuracy and readability measure fundamentally different things.
+
+
+
+
+
+2.4 - Are the criteria and their application reproducible? (Is sufficient detail given, its application by a third-party would lead to the same results?) 
+
+
+
+Yes. Also with a separate PyPi project with the CodeReader Grading tools
+
+
+
+
+
+2.5 - Are the conclusions convincing? (Is the problem presented in a sufficiently abstract way so that the conclusions are also relevant for similar problems?) 
+
+
+
+Yes, quite convincing. comparing non-LLM against LLM and assessing that the evaluation criteria should be refined
+
+
+
+
+
+3) Great distinction [15 .. 17[
+
+3.1 - Is the problem well situated within its context? (Is there a precise explanation of the greater problem the thesis needs to be situated in? Is there a convincing motivation for the choice of the smaller problem that the thesis intends to solve?) 
+
+
+
+Yes. Nice overview of related work. Also the LLM as judge and the wau to evaluate the readability of identifier names is well done.
+
+
+
+3.1 - Is a broad overview of the popular solution techniques given? (Is the overview of the different solution techniques almost complete?) 
+
+
+
+No. Probably because of a lack of space. But I miss a comprehensive overview of what is possible.
+
+You argue that GGNN or RefBERT or the dominant non LLM approaches but this is never justified.
+
+For the LLM based techniques you list a few prompting techniques but there is well it is not clear where the ones you selected fit in the global soace.
+
+
+
+--> This is one thing which you could perhaps address
+
+
+
+3.3 - Is there a repeatable weighting of the pros and cons of the popular techniques? (Can the same kind of weighting of the pros and cons be used for a similar problem, without the solution having to be the same?) 
+
+
+
+Yes. Again That is one of the real contributions of the paper that it illustrates that naming accuracy and readability measure fundamentally different things.
+
+The anecdotal evidence in the paper really helps
+
+
+
+
+
+3.4 - Is the experiment representative? (Is it clear to which degree the experiment's results are applicable for similar problems?)
+
+
+
+Yes, by relying on the Method2Test dataset. However, your threat to external validity that this is not representative for truley generated tests remains important.
+
+
+
+3.5 - Do the conclusions show a deep insight into the greater problem? (Are the conclusions drawn about the smaller problem that the thesis has solved linked back to the greater problem? Is there a realistic prognosis toward the future?
+
+
+
+Yes, quite convincing. Future work also shows clearly that you understand the greater picture
+
+
+
+4) Greatest distinction [17 .. 20]
+
+
+
+4.1 - Does the thesis introduce a novel way of looking at the problem?  (Are there elements in the text that shed inspiring new light on the problem?)
+
+
+
+Illustrating that naming accuracy and readability measure fundamentally different things is a nice contribution. This is worth trying to submit somewhere.
+
+
+
+
+
+4.2 - Do the conclusions provide a significant contribution to the problem domain? (Will the thesis be cited within the problem domain?)
+
+
+
+The paper needs a bit more work to sharpen its contribution. It still suffers from two ideas in a single paper. On the one hand the comparison (non-LLM versus LLM) but also the feasibility of using LLM as a judge to  evaluate identifier readability

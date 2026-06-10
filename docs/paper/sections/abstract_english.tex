@@ -7,14 +7,8 @@
 \section*{Abstract}
 \addcontentsline{toc}{section}{Abstract}
 
-Automated test generation tools such as EvoSuite and Randoop produce tests that are 
-functionally correct but nearly unreadable — method names like \texttt{func\_1} and 
-variables like \texttt{var\_1} force developers to trace through the entire test body 
-before they can understand, trust, or maintain what they are looking at.
-Renaming these identifiers is therefore essential, but it is unclear which approach 
-does it best.
-A model specifically trained on renamed test code produces more accurate names than 
-any other approach we compared — yet its tests are consistently less readable than 
-those produced by a model that has never seen the task before.
-Naming accuracy and readability measure fundamentally different things, and evaluating 
-only one gives a misleading picture of which approach actually helps a developer.
+Automated test generation tools such as EvoSuite and Randoop produce tests that are functionally correct but nearly unreadable --- method names like \texttt{func\_1} and variables like \texttt{var\_1} force developers to trace through the entire test body before they can understand, trust, or maintain what they are looking at.
+Renaming these identifiers is therefore essential, and several non-LLM approaches have been studied in the past with mixed success.
+In this paper we compare two non-LLM baselines (GGNN and RefBERT), three LLMs used without task-specific training (GPT-4.1 mini, GPT-5 mini and Qwen2.5-Coder), and a locally deployed open-source model (Qwen2.5-Coder) fine-tuned at five stages of training.
+Based on an evaluation against the Method2Test dataset (containing 780,944 test--method pairs drawn from open-source GitHub repositories) we observe that LLM-based approaches outperform the non-LLM baselines.
+However, when comparing the LLM-based approaches we find that naming accuracy and readability measure fundamentally different things, and evaluating only one gives a misleading picture of which approach actually helps a developer.

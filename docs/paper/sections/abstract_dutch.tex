@@ -3,17 +3,8 @@
 \section*{Nederlandstalige Samenvatting}
 \addcontentsline{toc}{section}{Nederlandstalige Samenvatting}
 
-Geautomatiseerde testgeneratieprogramma's zoals EvoSuite en Randoop produceren tests
-die functioneel correct zijn maar nauwelijks leesbaar — methodenamen zoals
-\texttt{func\_1} en variabelen zoals \texttt{var\_1} dwingen ontwikkelaars om het
-volledige testlichaam door te nemen voordat ze kunnen begrijpen, vertrouwen of
-onderhouden wat ze voor zich hebben.
-Het hernoemen van deze identifiers is daarom essentieel, maar het is onduidelijk welke
-aanpak dit het beste doet.
-Een model dat specifiek getraind is op hernoemde testcode produceert nauwkeurigere
-namen dan elke andere aanpak die we vergeleken hebben — toch zijn de bijbehorende
-tests consequent minder leesbaar dan die van een model dat de taak nooit eerder heeft
-gezien.
-Naamnauwkeurigheid en leesbaarheid meten fundamenteel verschillende dingen, en het
-evalueren van slechts één geeft een misleidend beeld van welke aanpak een ontwikkelaar
-daadwerkelijk helpt.
+Geautomatiseerde testgeneratietools zoals EvoSuite en Randoop produceren tests die functioneel correct zijn maar nauwelijks leesbaar --- methodenamen zoals \texttt{func\_1} en variabelen zoals \texttt{var\_1} dwingen ontwikkelaars om de volledige testinhoud door te nemen voordat ze kunnen begrijpen, vertrouwen of onderhouden wat er getest wordt.
+Het hernoemen van deze identifiers is daarom essentieel, en verschillende non-LLM-benaderingen zijn in het verleden onderzocht met wisselend succes.
+In dit artikel vergelijken we twee non-LLM baselines (GGNN en RefBERT), drie LLMs gebruikt zonder taakspecifieke training (GPT-4.1 mini, GPT-5 mini en Qwen2.5-Coder), en een lokaal geïmplementeerd open-source model (Qwen2.5-Coder) dat op vijf trainingsstadia fine-tuned werd.
+Op basis van een evaluatie tegen de Method2Test dataset (met 780.944 test--methode paren afkomstig van open-source GitHub repositories) stellen we vast dat LLM-gebaseerde benaderingen beter presteren dan de non-LLM baselines.
+Bij het vergelijken van de LLM-gebaseerde benaderingen stellen we echter vast dat naamgevingsnauwkeurigheid en leesbaarheid fundamenteel verschillende dingen meten, en dat het evalueren van slechts één ervan een vertekend beeld geeft van welke aanpak een ontwikkelaar daadwerkelijk helpt.
