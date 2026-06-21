@@ -172,12 +172,10 @@ def _align_identifier_pairs(
         else:
             pairs = []
             for o_tok, r_tok in zip(obf_toks, oracle_toks):
-                if isinstance(o_tok, jtok.Identifier):
+                if isinstance(o_tok, jtok.Identifier) and o_tok.value in mapping:
                     obf_name = o_tok.value
                     oracle_name = r_tok.value
-                    predicted_name = mapping.get(
-                        obf_name, obf_name
-                    )  # default to obf if not in mapping
+                    predicted_name = mapping[obf_name]
                     pairs.append((oracle_name, predicted_name))
             return pairs
 
